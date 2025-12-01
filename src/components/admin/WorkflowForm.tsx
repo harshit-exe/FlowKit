@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Category, Tag, Workflow } from "@prisma/client"
 import { Button } from "@/components/ui/button"
@@ -39,7 +39,7 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
     setValue,
     watch,
   } = useForm<WorkflowFormValues>({
-    resolver: zodResolver(workflowFormSchema),
+    resolver: zodResolver(workflowFormSchema) as any,
     defaultValues: initialData
       ? {
           name: initialData.name,
@@ -171,7 +171,7 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
   }
 
   // Form submission
-  const onSubmit = async (data: WorkflowFormValues) => {
+  const onSubmit: SubmitHandler<WorkflowFormValues> = async (data) => {
     setIsLoading(true)
 
     try {

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Difficulty } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -24,7 +24,7 @@ async function seedWorkflows() {
       description: 'Automatically send weekly newsletter emails to subscribers from Google Sheets. Includes personalization, tracking, and scheduling.',
       icon: 'mail',
       thumbnail: '/thumbnails/email-newsletter.jpg',
-      difficulty: 'BEGINNER',
+      difficulty: Difficulty.BEGINNER,
       featured: true,
       indiaBadge: true,
       nodeCount: 5,
@@ -83,7 +83,7 @@ async function seedWorkflows() {
       description: 'Send automated WhatsApp notifications for order updates, appointment reminders, and customer alerts using Twilio WhatsApp API.',
       icon: 'message-circle',
       thumbnail: '/thumbnails/whatsapp-notifications.jpg',
-      difficulty: 'INTERMEDIATE',
+      difficulty: Difficulty.INTERMEDIATE,
       featured: true,
       indiaBadge: true,
       nodeCount: 7,
@@ -134,7 +134,7 @@ async function seedWorkflows() {
       description: 'Generate blog posts, social media content, and product descriptions using OpenAI GPT-4. Includes content review and publishing workflow.',
       icon: 'sparkles',
       thumbnail: '/thumbnails/ai-content-generator.jpg',
-      difficulty: 'INTERMEDIATE',
+      difficulty: Difficulty.INTERMEDIATE,
       featured: true,
       indiaBadge: false,
       nodeCount: 8,
@@ -177,7 +177,7 @@ async function seedWorkflows() {
       description: 'Capture leads from multiple sources (website forms, social media, emails) and automatically sync to your CRM with enrichment and scoring.',
       icon: 'users',
       thumbnail: '/thumbnails/lead-management.jpg',
-      difficulty: 'ADVANCED',
+      difficulty: Difficulty.ADVANCED,
       featured: false,
       indiaBadge: true,
       nodeCount: 12,
@@ -229,7 +229,7 @@ async function seedWorkflows() {
       description: 'Automated daily backup of MySQL/PostgreSQL databases to cloud storage with encryption and versioning. Includes restore workflow.',
       icon: 'database',
       thumbnail: '/thumbnails/database-backup.jpg',
-      difficulty: 'ADVANCED',
+      difficulty: Difficulty.ADVANCED,
       featured: false,
       indiaBadge: true,
       nodeCount: 10,
@@ -281,7 +281,7 @@ async function seedWorkflows() {
       description: 'Publish content simultaneously to Twitter, LinkedIn, Facebook, and Instagram from a single source. Includes scheduling and analytics.',
       icon: 'share-2',
       thumbnail: '/thumbnails/social-media-poster.jpg',
-      difficulty: 'INTERMEDIATE',
+      difficulty: Difficulty.INTERMEDIATE,
       featured: true,
       indiaBadge: false,
       nodeCount: 9,

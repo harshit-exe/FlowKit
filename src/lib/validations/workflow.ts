@@ -17,12 +17,10 @@ export const workflowFormSchema = z.object({
   nodes: z.array(z.string()),
   useCases: z.array(z.string()).min(1, "Add at least one use case"),
   setupSteps: z.array(z.string()).min(1, "Add at least one setup step"),
-  workflowJson: z.any().refine(
+  workflowJson: z.string().refine(
     (val) => {
       try {
-        if (typeof val === "string") {
-          JSON.parse(val)
-        }
+        JSON.parse(val)
         return true
       } catch {
         return false
