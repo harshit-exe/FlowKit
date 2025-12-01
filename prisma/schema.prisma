@@ -1,0 +1,136 @@
+// FlowKit - Prisma Schema
+// Database: MySQL (Aiven Cloud)
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma" // For compatibility with serverless databases
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// WORKFLOWS
+model Workflow {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  name                String
+  description         String   @db.Text
+  icon                String?
+  thumbnail           String?
+  videoUrl            String?
+  difficulty          Difficulty @default(BEGINNER)
+  featured            Boolean    @default(false)
+  indiaBadge          Boolean    @default(false)
+  nodeCount           Int        @default(0)
+  views               Int        @default(0)
+  downloads           Int        @default(0)
+  workflowJson        Json       // Stores the complete n8n JSON
+
+  // Arrays stored as JSON
+  useCases            Json       // Array of strings
+  setupSteps          Json       // Array of strings
+  credentialsRequired Json       // Array of strings
+  nodes               Json       // Array of node names
+
+  // Relationships
+  categories          WorkflowCategory[]
+  tags                WorkflowTag[]
+
+  // Metadata
+  published           Boolean    @default(false)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  publishedAt         DateTime?
+
+  @@index([slug])
+  @@index([featured])
+  @@index([difficulty])
+  @@index([published])
+  @@index([createdAt])
+  @@map("workflows")
+}
+
+// CATEGORIES
+model Category {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  icon        String
+  description String?
+  color       String     @default("#667eea")
+  order       Int        @default(0)
+  workflows   WorkflowCategory[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([order])
+  @@map("categories")
+}
+
+// TAGS
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  workflows WorkflowTag[]
+
+  createdAt DateTime   @default(now())
+
+  @@index([slug])
+  @@map("tags")
+}
+
+// JUNCTION TABLES
+model WorkflowCategory {
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId   String
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId   String
+
+  @@id([workflowId, categoryId])
+  @@index([workflowId])
+  @@index([categoryId])
+  @@map("workflow_categories")
+}
+
+model WorkflowTag {
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId   String
+  tag          Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId        String
+
+  @@id([workflowId, tagId])
+  @@index([workflowId])
+  @@index([tagId])
+  @@map("workflow_tags")
+}
+
+// ADMIN USERS (for admin panel)
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String    // Hashed with bcrypt
+  role          Role      @default(ADMIN)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// ENUMS
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
