@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['var(--font-space-mono)', 'monospace'],
+      },
       colors: {
         primary: {
           DEFAULT: '#FF6B35',

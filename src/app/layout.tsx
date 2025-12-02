@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const spaceMono = Space_Mono({
+  weight: ['400', '700'],
+  subsets: ["latin"],
+  variable: '--font-space-mono',
+});
 
 export const metadata: Metadata = {
   title: "FlowKit - n8n Workflow Library",
@@ -24,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${spaceMono.className} ${spaceMono.variable} font-mono`}>
         {children}
         <Toaster position="top-center" richColors />
       </body>
