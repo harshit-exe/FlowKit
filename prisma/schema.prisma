@@ -109,6 +109,28 @@ model WorkflowTag {
   @@map("workflow_tags")
 }
 
+// N8N NODES (official node types for AI builder)
+model N8nNode {
+  id              String    @id @default(cuid())
+  name            String    // Display name (e.g., "HTTP Request")
+  type            String    @unique // Node type identifier (e.g., "n8n-nodes-base.httpRequest")
+  category        String    // Category (e.g., "Core Nodes", "Trigger Nodes")
+  description     String    @db.Text // What the node does
+  icon            String?   // Icon identifier
+  parameters      Json      // Common parameters schema
+  credentials     Json      // Required credentials
+  isPremium       Boolean   @default(false)
+  isDeprecated    Boolean   @default(false)
+  docUrl          String?   // Link to official docs
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@map("n8n_nodes")
+}
+
 // ADMIN USERS (for admin panel)
 model User {
   id            String    @id @default(cuid())

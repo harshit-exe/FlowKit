@@ -20,6 +20,7 @@ import {
   LogOut,
   User,
   Menu,
+  Box,
 } from "lucide-react"
 
 interface AdminNavProps {
@@ -47,6 +48,11 @@ export default function AdminNav({ user }: AdminNavProps) {
       name: "Categories",
       href: "/admin/categories",
       icon: FolderOpen,
+    },
+    {
+      name: "Nodes",
+      href: "/admin/nodes",
+      icon: Box,
     },
     {
       name: "Settings",

@@ -6,6 +6,7 @@ import { Eye, DownloadCloud } from "lucide-react"
 import { Metadata } from "next"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
+import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const workflow = await prisma.workflow.findUnique({
@@ -88,21 +89,32 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         {/* Hero Section */}
         <div className="space-y-4">
           <div className="flex items-start gap-4">
-            {workflow.icon && <span className="text-5xl">{workflow.icon}</span>}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold">{workflow.name}</h1>
-              <p className="text-xl text-gray-600 mt-2">{workflow.description}</p>
+              <h1 className="text-4xl font-bold font-mono uppercase tracking-tight">
+                {workflow.name}
+              </h1>
+              <p className="text-xl text-muted-foreground font-mono mt-2">
+                {workflow.description}
+              </p>
             </div>
           </div>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{workflow.difficulty}</Badge>
-            {workflow.featured && <Badge>Featured</Badge>}
-            {workflow.indiaBadge && <Badge variant="outline">🇮🇳 Made in India</Badge>}
+            <Badge variant="secondary" className="font-mono">
+              {workflow.difficulty}
+            </Badge>
+            {workflow.featured && (
+              <Badge className="font-mono bg-primary">FEATURED</Badge>
+            )}
+            {workflow.indiaBadge && (
+              <Badge variant="outline" className="font-mono border-2">
+                IN • INDIA
+              </Badge>
+            )}
             {workflow.categories.map((cat) => (
-              <Badge key={cat.category.id} variant="outline">
-                {cat.category.icon} {cat.category.name}
+              <Badge key={cat.category.id} variant="outline" className="font-mono border-2">
+                {cat.category.name.toUpperCase()}
               </Badge>
             ))}
           </div>
@@ -119,25 +131,33 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Thumbnail */}
-            {workflow.thumbnail && (
-              <img
-                src={workflow.thumbnail}
-                alt={workflow.name}
-                className="w-full rounded-lg shadow-lg"
-              />
-            )}
+            {/* Workflow Visualizer */}
+            <Card className="border-2 font-mono">
+              <CardHeader>
+                <CardTitle className="font-mono uppercase tracking-wider">
+                  WORKFLOW VISUALIZATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <WorkflowVisualizer
+                  workflowJson={workflow.workflowJson}
+                  className="w-full"
+                />
+              </CardContent>
+            </Card>
 
             {/* Use Cases */}
-            <Card>
+            <Card className="border-2">
               <CardHeader>
-                <CardTitle>Use Cases</CardTitle>
+                <CardTitle className="font-mono uppercase tracking-wider">
+                  USE CASES
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {useCases.map((useCase, index) => (
-                    <li key={index} className="flex gap-2">
-                      <span className="text-primary">•</span>
+                    <li key={index} className="flex gap-2 font-mono">
+                      <span className="text-primary font-bold">•</span>
                       <span>{useCase}</span>
                     </li>
                   ))}
@@ -146,18 +166,20 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
             </Card>
 
             {/* Setup Steps */}
-            <Card>
+            <Card className="border-2">
               <CardHeader>
-                <CardTitle>Setup Steps</CardTitle>
+                <CardTitle className="font-mono uppercase tracking-wider">
+                  SETUP STEPS
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ol className="space-y-4">
                   {setupSteps.map((step, index) => (
                     <li key={index} className="flex gap-4">
-                      <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-semibold">
+                      <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
                         {index + 1}
                       </span>
-                      <span className="pt-1">{step}</span>
+                      <span className="pt-1 font-mono">{step}</span>
                     </li>
                   ))}
                 </ol>
@@ -165,14 +187,18 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
             </Card>
 
             {/* Workflow JSON */}
-            <Card>
+            <Card className="border-2">
               <CardHeader>
-                <CardTitle>Workflow JSON</CardTitle>
+                <CardTitle className="font-mono uppercase tracking-wider">
+                  WORKFLOW JSON
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{JSON.stringify(workflow.workflowJson, null, 2)}</code>
-                </pre>
+                <div className="bg-muted/30 p-4 border-2 border-border overflow-auto max-h-96 text-sm font-mono">
+                  <pre className="whitespace-pre">
+                    <code>{JSON.stringify(workflow.workflowJson, null, 2)}</code>
+                  </pre>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -180,44 +206,50 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Stats */}
-            <Card>
+            <Card className="border-2">
               <CardHeader>
-                <CardTitle>Statistics</CardTitle>
+                <CardTitle className="font-mono uppercase tracking-wider">
+                  STATISTICS
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 font-mono">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Eye className="h-4 w-4" />
-                    <span>Views</span>
+                    <span className="text-xs uppercase">Views</span>
                   </div>
-                  <span className="font-semibold">{workflow.views}</span>
+                  <span className="font-bold">{workflow.views}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <DownloadCloud className="h-4 w-4" />
-                    <span>Downloads</span>
+                    <span className="text-xs uppercase">Downloads</span>
                   </div>
-                  <span className="font-semibold">{workflow.downloads}</span>
+                  <span className="font-bold">{workflow.downloads}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Node Count</span>
-                  <span className="font-semibold">{workflow.nodeCount}</span>
+                  <span className="text-muted-foreground text-xs uppercase">
+                    Nodes
+                  </span>
+                  <span className="font-bold">{workflow.nodeCount}</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Credentials */}
             {credentialsRequired.length > 0 && (
-              <Card>
+              <Card className="border-2">
                 <CardHeader>
-                  <CardTitle>Credentials Required</CardTitle>
+                  <CardTitle className="font-mono uppercase tracking-wider">
+                    CREDENTIALS
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {credentialsRequired.map((cred, index) => (
                       <li key={index} className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-primary rounded-full"></span>
-                        <span className="text-sm">{cred}</span>
+                        <span className="w-2 h-2 bg-primary border border-primary"></span>
+                        <span className="text-sm font-mono">{cred}</span>
                       </li>
                     ))}
                   </ul>
@@ -227,14 +259,20 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
 
             {/* Tags */}
             {workflow.tags.length > 0 && (
-              <Card>
+              <Card className="border-2">
                 <CardHeader>
-                  <CardTitle>Tags</CardTitle>
+                  <CardTitle className="font-mono uppercase tracking-wider">
+                    TAGS
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {workflow.tags.map((tag) => (
-                      <Badge key={tag.tag.id} variant="outline">
+                      <Badge
+                        key={tag.tag.id}
+                        variant="outline"
+                        className="font-mono"
+                      >
                         {tag.tag.name}
                       </Badge>
                     ))}
@@ -248,7 +286,9 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         {/* Related Workflows */}
         {relatedWorkflows.length > 0 && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Related Workflows</h2>
+            <h2 className="text-2xl font-bold font-mono uppercase tracking-wider">
+              RELATED WORKFLOWS
+            </h2>
             <WorkflowGrid workflows={relatedWorkflows} />
           </div>
         )}
