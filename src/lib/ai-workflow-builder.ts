@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, type Tool } from "@google/generative-ai";
 import { prisma } from "@/lib/prisma";
 
 if (!process.env.GEMINI_API_KEY) {
@@ -8,17 +8,18 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Define tools for AI to call
-const tools = [
+const tools: Tool[] = [
   {
     functionDeclarations: [
       {
         name: "get_available_nodes",
         description: "Fetches list of available n8n nodes from the database with their types, descriptions, and parameters",
         parameters: {
-          type: "object",
+          type: SchemaType.OBJECT as const,
           properties: {
             category: {
-              type: "string",
+              type: SchemaType.STRING as const,
+              format: "enum" as const,
               description: "Filter by category: Core, Trigger, Integration, Database, or all",
               enum: ["Core", "Trigger", "Integration", "Database", "all"],
             },
@@ -30,11 +31,12 @@ const tools = [
         name: "validate_workflow",
         description: "Validates if a workflow JSON structure is correct and all node types exist",
         parameters: {
-          type: "object",
+          type: SchemaType.OBJECT as const,
           properties: {
             workflow: {
-              type: "object",
+              type: SchemaType.OBJECT as const,
               description: "The workflow JSON to validate",
+              properties: {},
             },
           },
           required: ["workflow"],
@@ -244,9 +246,9 @@ Now, start by calling get_available_nodes() to see what node types are available
     const maxFunctionCalls = 10;
 
     // Handle function calls in loop
-    while (response.functionCalls() && functionCallCount < maxFunctionCalls) {
+    let functionCalls = response.functionCalls();
+    while (functionCalls && functionCallCount < maxFunctionCalls) {
       functionCallCount++;
-      const functionCalls = response.functionCalls();
 
       // Update progress based on function call
       if (functionCalls[0].name === "get_available_nodes") {
@@ -294,6 +296,7 @@ Now, start by calling get_available_nodes() to see what node types are available
         const nextResult = await chat.sendMessage(functionResponseParts);
         result = nextResult;
         response = result.response;
+        functionCalls = response.functionCalls();
       } catch (error) {
         console.error("[AI] Error sending function response:", error);
         throw error;
