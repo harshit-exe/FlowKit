@@ -28,11 +28,11 @@ export default function AIBuilderPage() {
 
   const initializeSteps = () => {
     setProgressSteps([
-      { id: "planning", label: "Planning Workflow", status: "pending" },
+      { id: "planning", label: "Planning Workflow Structure", status: "pending" },
       { id: "fetching_nodes", label: "Fetching Available Nodes", status: "pending" },
-      { id: "selecting_nodes", label: "Selecting Appropriate Nodes", status: "pending" },
-      { id: "generating", label: "Generating Workflow JSON", status: "pending" },
-      { id: "validating", label: "Validating Workflow", status: "pending" },
+      { id: "building", label: "Building Workflow Nodes", status: "pending" },
+      { id: "finalizing", label: "Finalizing Workflow", status: "pending" },
+      { id: "validating", label: "Validating Structure", status: "pending" },
     ])
   }
 
@@ -90,16 +90,20 @@ export default function AIBuilderPage() {
               updateStepStatus("planning", "completed")
               updateStepStatus("fetching_nodes", "active")
               setCurrentMessage(data.message)
-            } else if (data.step === "selecting_nodes") {
+            } else if (data.step.startsWith("building_node_")) {
               updateStepStatus("fetching_nodes", "completed")
-              updateStepStatus("selecting_nodes", "active")
-              setCurrentMessage(data.message)
-            } else if (data.step === "generating") {
-              updateStepStatus("selecting_nodes", "completed")
-              updateStepStatus("generating", "active")
+              updateStepStatus("building", "active")
+              // Update message with current node progress
+              const nodeProgress = data.currentNode && data.nodeCount
+                ? ` (${data.currentNode}/${data.nodeCount})`
+                : '';
+              setCurrentMessage(data.message || `Building workflow nodes${nodeProgress}...`)
+            } else if (data.step === "finalizing") {
+              updateStepStatus("building", "completed")
+              updateStepStatus("finalizing", "active")
               setCurrentMessage(data.message)
             } else if (data.step === "validating") {
-              updateStepStatus("generating", "completed")
+              updateStepStatus("finalizing", "completed")
               updateStepStatus("validating", "active")
               setCurrentMessage(data.message)
             } else if (data.step === "complete") {
@@ -347,45 +351,45 @@ export default function AIBuilderPage() {
                 <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
                   1
                 </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Describe Automation</h3>
+                <h3 className="font-semibold font-mono uppercase text-sm">Plan Workflow</h3>
                 <p className="text-xs text-muted-foreground font-mono">
-                  Tell us what you want to automate in plain English
+                  AI analyzes your request and creates a step-by-step plan
                 </p>
               </div>
               <div className="space-y-2">
                 <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
                   2
                 </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Fetch Official Nodes</h3>
+                <h3 className="font-semibold font-mono uppercase text-sm">Fetch Nodes</h3>
                 <p className="text-xs text-muted-foreground font-mono">
-                  AI retrieves validated n8n nodes from our database
+                  Retrieves validated n8n nodes from database
                 </p>
               </div>
               <div className="space-y-2">
                 <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
                   3
                 </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Select Nodes</h3>
+                <h3 className="font-semibold font-mono uppercase text-sm">Build Block-by-Block</h3>
                 <p className="text-xs text-muted-foreground font-mono">
-                  AI selects the most appropriate nodes for your use case
+                  Generates each node incrementally with automatic connections
                 </p>
               </div>
               <div className="space-y-2">
                 <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
                   4
                 </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Generate & Validate</h3>
+                <h3 className="font-semibold font-mono uppercase text-sm">Validate</h3>
                 <p className="text-xs text-muted-foreground font-mono">
-                  Creates and validates workflow JSON structure
+                  Validates structure and ensures all connections work
                 </p>
               </div>
               <div className="space-y-2">
                 <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
                   5
                 </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Copy & Deploy</h3>
+                <h3 className="font-semibold font-mono uppercase text-sm">Deploy</h3>
                 <p className="text-xs text-muted-foreground font-mono">
-                  Copy JSON and import directly into n8n instance
+                  Copy JSON and import directly into your n8n instance
                 </p>
               </div>
             </div>

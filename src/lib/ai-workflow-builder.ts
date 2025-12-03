@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, SchemaType, type Tool } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { prisma } from "@/lib/prisma";
 
 if (!process.env.GEMINI_API_KEY) {
@@ -7,46 +7,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Define tools for AI to call
-const tools: Tool[] = [
-  {
-    functionDeclarations: [
-      {
-        name: "get_available_nodes",
-        description: "Fetches list of available n8n nodes from the database with their types, descriptions, and parameters",
-        parameters: {
-          type: SchemaType.OBJECT as const,
-          properties: {
-            category: {
-              type: SchemaType.STRING as const,
-              format: "enum" as const,
-              description: "Filter by category: Core, Trigger, Integration, Database, or all",
-              enum: ["Core", "Trigger", "Integration", "Database", "all"],
-            },
-          },
-          required: [],
-        },
-      },
-      {
-        name: "validate_workflow",
-        description: "Validates if a workflow JSON structure is correct and all node types exist",
-        parameters: {
-          type: SchemaType.OBJECT as const,
-          properties: {
-            workflow: {
-              type: SchemaType.OBJECT as const,
-              description: "The workflow JSON to validate",
-              properties: {},
-            },
-          },
-          required: ["workflow"],
-        },
-      },
-    ],
-  },
-];
-
-// Tool function implementations
+// Helper functions
 async function getAvailableNodes(category: string = "all") {
   const where: any = { isDeprecated: false };
   if (category !== "all") {
@@ -147,27 +108,12 @@ async function validateWorkflow(workflow: any) {
   };
 }
 
-// Function to handle tool calls
-async function handleToolCall(functionCall: any) {
-  const functionName = functionCall.name;
-  const args = functionCall.args;
-
-  console.log(`[AI TOOL CALL] ${functionName}`, args);
-
-  switch (functionName) {
-    case "get_available_nodes":
-      return await getAvailableNodes(args.category);
-    case "validate_workflow":
-      return await validateWorkflow(args.workflow);
-    default:
-      throw new Error(`Unknown function: ${functionName}`);
-  }
-}
-
 export type WorkflowGenerationProgress = {
-  step: "planning" | "fetching_nodes" | "selecting_nodes" | "generating" | "validating" | "complete" | "error";
+  step: "planning" | "fetching_nodes" | "building_node_1" | "building_node_2" | "building_node_3" | "building_node_4" | "building_node_5" | "finalizing" | "validating" | "complete" | "error";
   message: string;
   data?: any;
+  nodeCount?: number;
+  currentNode?: number;
 };
 
 export async function generateWorkflowWithAI(
@@ -176,169 +122,225 @@ export async function generateWorkflowWithAI(
 ): Promise<any> {
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash-exp",
-    tools,
   });
 
   try {
-    // Step 1: Planning
+    // Step 1: Planning - Analyze requirements and create workflow plan
     onProgress?.({
       step: "planning",
       message: "Analyzing your requirements and planning workflow structure...",
     });
 
-    const systemPrompt = `You are an expert n8n workflow builder. Your task is to create a valid, production-ready n8n workflow JSON based on the user's requirements.
+    const planningPrompt = `You are an expert n8n workflow architect. Analyze this automation request and create a detailed plan.
 
-IMPORTANT INSTRUCTIONS:
-1. FIRST, call get_available_nodes() to fetch the complete list of available n8n node types
-2. ONLY use node types that exist in the returned list
-3. Plan the workflow structure with appropriate triggers and actions
-4. Generate valid n8n workflow JSON with this exact structure:
+User Request: "${prompt}"
+
+Respond with a JSON object containing:
 {
-  "name": "Workflow Name",
-  "nodes": [
-    {
-      "parameters": {},
-      "id": "unique-uuid-format-id",
-      "name": "Node Name",
-      "type": "exact-node-type-from-available-list",
-      "typeVersion": 1,
-      "position": [x, y]
-    }
-  ],
-  "connections": {
-    "source-node-name": {
-      "main": [
-        [
-          {
-            "node": "target-node-name",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  }
+  "workflowName": "descriptive workflow name",
+  "description": "what this workflow does",
+  "nodeSequence": [
+    {"step": 1, "nodeType": "trigger", "action": "description of what this node does"},
+    {"step": 2, "nodeType": "data manipulation", "action": "description"},
+    {"step": 3, "nodeType": "integration", "action": "description"}
+  ]
 }
 
-5. After generating, call validate_workflow() to ensure correctness
-6. If validation fails, fix the issues and validate again
-7. Return ONLY the final valid JSON workflow
+The nodeSequence should be a step-by-step breakdown of EXACTLY what nodes are needed in order.
+Keep it simple - typically 3-5 nodes max.`;
 
-User Request: ${prompt}
+    let result = await model.generateContent(planningPrompt);
+    let text = result.response.text().trim();
 
-Now, start by calling get_available_nodes() to see what node types are available.`;
-
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: systemPrompt }],
-        },
-      ],
-    });
-
-    let result = await chat.sendMessage(prompt);
-    let response = result.response;
-    let functionCallCount = 0;
-    const maxFunctionCalls = 10;
-
-    // Handle function calls in loop
-    let functionCalls = response.functionCalls();
-    while (functionCalls && functionCallCount < maxFunctionCalls) {
-      functionCallCount++;
-
-      // Update progress based on function call
-      if (functionCalls[0].name === "get_available_nodes") {
-        onProgress?.({
-          step: "fetching_nodes",
-          message: "Fetching available n8n nodes from database...",
-        });
-      } else if (functionCalls[0].name === "validate_workflow") {
-        onProgress?.({
-          step: "validating",
-          message: "Validating generated workflow structure...",
-        });
-      }
-
-      // Execute function calls and build responses
-      const functionResponseParts = [];
-
-      for (const fc of functionCalls) {
-        const apiResponse = await handleToolCall(fc);
-
-        console.log(`[AI] Function ${fc.name} returned:`, JSON.stringify(apiResponse, null, 2));
-
-        // Create function response in correct format for Gemini
-        functionResponseParts.push({
-          functionResponse: {
-            name: fc.name,
-            response: apiResponse,
-          },
-        });
-      }
-
-      console.log("[AI] Sending function responses:", JSON.stringify(functionResponseParts, null, 2));
-
-      // Update progress after fetching nodes
-      if (functionCalls[0].name === "get_available_nodes") {
-        onProgress?.({
-          step: "selecting_nodes",
-          message: "Selecting appropriate nodes for your workflow...",
-        });
-      }
-
-      // Send function results back to AI
-      // Note: We send as an array of parts
-      try {
-        const nextResult = await chat.sendMessage(functionResponseParts);
-        result = nextResult;
-        response = result.response;
-        functionCalls = response.functionCalls();
-      } catch (error) {
-        console.error("[AI] Error sending function response:", error);
-        throw error;
-      }
+    // Clean markdown
+    if (text.startsWith("```json")) {
+      text = text.replace(/^```json\n/, "").replace(/\n```$/, "");
+    } else if (text.startsWith("```")) {
+      text = text.replace(/^```\n/, "").replace(/\n```$/, "");
     }
 
-    // Step 5: Parse final response
+    const plan = JSON.parse(text);
+    console.log("[AI] Workflow Plan:", plan);
+
+    const nodeCount = plan.nodeSequence?.length || 3;
+
+    // Step 2: Fetch available nodes
     onProgress?.({
-      step: "generating",
-      message: "Finalizing workflow JSON...",
+      step: "fetching_nodes",
+      message: "Fetching available n8n nodes from database...",
     });
 
-    const text = response.text();
-    let jsonText = text.trim();
+    const availableNodes = await getAvailableNodes("all");
+    console.log(`[AI] Fetched ${availableNodes.count} available nodes`);
 
-    // Remove markdown code blocks if present
-    if (jsonText.startsWith("```json")) {
-      jsonText = jsonText.replace(/^```json\n/, "").replace(/\n```$/, "");
-    } else if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```\n/, "").replace(/\n```$/, "");
+    // Step 3: Build workflow incrementally, node by node
+    const workflow: any = {
+      name: plan.workflowName || "AI Generated Workflow",
+      nodes: [],
+      connections: {},
+      settings: {
+        executionOrder: "v1"
+      }
+    };
+
+    // Generate nodes one at a time with connections
+    for (let i = 0; i < nodeCount; i++) {
+      const nodeStep = plan.nodeSequence[i];
+      const stepKey = `building_node_${i + 1}` as any;
+
+      onProgress?.({
+        step: stepKey,
+        message: `Building node ${i + 1}/${nodeCount}: ${nodeStep.action}`,
+        nodeCount,
+        currentNode: i + 1,
+      });
+
+      // Build context of existing nodes for this generation
+      const existingNodesContext = workflow.nodes.length > 0
+        ? `\n\nExisting workflow nodes:\n${JSON.stringify(workflow.nodes, null, 2)}\n\nExisting connections:\n${JSON.stringify(workflow.connections, null, 2)}`
+        : '';
+
+      const nodePrompt = `You are building an n8n workflow node-by-node.
+
+Current Step: ${nodeStep.step} of ${nodeCount}
+Action Required: ${nodeStep.action}
+Node Type: ${nodeStep.nodeType}
+
+User Request: "${prompt}"
+${existingNodesContext}
+
+Available Nodes (sample): ${JSON.stringify(availableNodes.nodes.slice(0, 50), null, 2)}
+
+Generate a SINGLE node JSON object:
+{
+  "parameters": {...},
+  "id": "node-${i + 1}",
+  "name": "Descriptive Name",
+  "type": "n8n-nodes-base.exactType",
+  "typeVersion": 1,
+  "position": [${i * 400}, 0]
+}
+
+CRITICAL RULES:
+${i === 0 ? '1. This is the FIRST node - it MUST be a trigger (webhook, schedule, manual, etc.)' : `1. This node connects to the previous node: "${workflow.nodes[i - 1]?.name}"`}
+2. Use ONLY node types from the available nodes list
+3. Keep parameters minimal and realistic
+4. Use descriptive names
+5. Return ONLY the JSON object, no markdown`;
+
+      result = await model.generateContent(nodePrompt);
+      text = result.response.text().trim();
+
+      if (text.startsWith("```json")) {
+        text = text.replace(/^```json\n/, "").replace(/\n```$/, "");
+      } else if (text.startsWith("```")) {
+        text = text.replace(/^```\n/, "").replace(/\n```$/, "");
+      }
+
+      const newNode = JSON.parse(text);
+      console.log(`[AI] Generated node ${i + 1}:`, newNode);
+
+      // Validate node type
+      const nodeTypeExists = availableNodes.nodes.find((n: any) => n.type === newNode.type);
+      if (!nodeTypeExists) {
+        throw new Error(`Invalid node type: ${newNode.type}`);
+      }
+
+      // Add node to workflow
+      workflow.nodes.push(newNode);
+
+      // Create connection from previous node if not first node
+      if (i > 0) {
+        const previousNode = workflow.nodes[i - 1];
+        workflow.connections[previousNode.name] = {
+          main: [
+            [
+              {
+                node: newNode.name,
+                type: "main",
+                index: 0
+              }
+            ]
+          ]
+        };
+        console.log(`[AI] Connected "${previousNode.name}" -> "${newNode.name}"`);
+      }
     }
 
-    // Parse workflow JSON
-    const workflowJson = JSON.parse(jsonText);
+    // Finalize workflow
+    onProgress?.({
+      step: "finalizing",
+      message: "Finalizing workflow structure...",
+    });
 
-    // Final validation
-    const validation = await validateWorkflow(workflowJson);
+    // Step 6: Validate and fix if needed
+    onProgress?.({
+      step: "validating",
+      message: "Validating workflow structure...",
+    });
+
+    let validation = await validateWorkflow(workflow);
+
+    // If validation fails, attempt to fix
     if (!validation.valid) {
+      console.log("[AI] Validation issues found, attempting to fix...", validation.issues);
+
+      const fixPrompt = `This n8n workflow has validation issues. Fix them carefully.
+
+Current Workflow: ${JSON.stringify(workflow, null, 2)}
+
+Validation Issues:
+${validation.issues.map((issue, i) => `${i + 1}. ${issue}`).join('\n')}
+
+FIXING GUIDELINES:
+1. If node types are invalid, replace with valid types from the original available nodes
+2. If connections reference non-existent nodes, remove those connections
+3. If duplicate IDs exist, make them unique
+4. Ensure connection keys use node NAMES not IDs
+5. Ensure all positions are valid [x, y] arrays
+6. Keep the workflow structure intact, only fix the specific issues
+
+Return the COMPLETE fixed workflow JSON in valid n8n format. No explanation, just JSON.`;
+
+      result = await model.generateContent(fixPrompt);
+      text = result.response.text().trim();
+
+      if (text.startsWith("```json")) {
+        text = text.replace(/^```json\n/, "").replace(/\n```$/, "");
+      } else if (text.startsWith("```")) {
+        text = text.replace(/^```\n/, "").replace(/\n```$/, "");
+      }
+
+      const fixedWorkflow = JSON.parse(text);
+      validation = await validateWorkflow(fixedWorkflow);
+
+      if (!validation.valid) {
+        console.warn("[AI] Workflow still has issues after fix attempt:", validation.issues);
+        // Return the workflow anyway with a warning
+        onProgress?.({
+          step: "complete",
+          message: "Workflow generated with warnings. May need manual adjustment.",
+          data: fixedWorkflow,
+        });
+        return fixedWorkflow;
+      }
+
       onProgress?.({
-        step: "error",
-        message: `Validation failed: ${validation.issues.join(", ")}`,
+        step: "complete",
+        message: "Workflow generated and validated successfully!",
+        data: fixedWorkflow,
       });
-      throw new Error(`Workflow validation failed: ${validation.issues.join(", ")}`);
+
+      return fixedWorkflow;
     }
 
     onProgress?.({
       step: "complete",
       message: "Workflow generated successfully!",
-      data: workflowJson,
+      data: workflow,
     });
 
-    return workflowJson;
+    return workflow;
   } catch (error) {
     console.error("AI Workflow Generation Error:", error);
     onProgress?.({
