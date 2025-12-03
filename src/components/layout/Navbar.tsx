@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Workflow, Search, Menu, X, Github } from "lucide-react"
 import { useState } from "react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -77,11 +76,6 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center space-x-3">
-            {/* Theme Toggle */}
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-
             <a
               href="https://github.com/yourusername/flowkit"
               target="_blank"
@@ -123,12 +117,6 @@ export default function Navbar() {
                 />
               </div>
             </form>
-
-            {/* Theme Toggle (Mobile) */}
-            <div className="flex items-center justify-between px-3">
-              <span className="text-sm font-medium text-foreground">Theme</span>
-              <ThemeToggle />
-            </div>
 
             {/* Mobile Navigation */}
             <div className="space-y-1">

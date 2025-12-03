@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
-import { MynaHero } from "@/components/ui/myna-hero";
+import { NewHero } from "@/components/ui/new-hero";
 import {
   Workflow,
   TrendingUp,
@@ -61,11 +61,24 @@ export default async function HomePage() {
   return (
     <div className="relative">
       {/* Hero Section */}
-      <MynaHero totalWorkflows={totalWorkflows} />
+      <NewHero totalWorkflows={totalWorkflows} />
 
-      {/* Featured Workflows */}
-      {featuredWorkflows.length > 0 && (
-        <section className="container mx-auto px-4 py-24">
+      {/* Content sections with grid background */}
+      <div className="relative bg-black">
+        {/* Grid Background Overlay - synced with hero gradient grid */}
+        <div
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{
+            backgroundImage: 'url(/grid.png)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '112px 112px',
+            opacity: 0.4,
+          }}
+        />
+
+        {/* Featured Workflows */}
+        {featuredWorkflows.length > 0 && (
+          <section className="relative z-20 container mx-auto px-4 py-24">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-mono font-bold mb-4">
               FEATURED WORKFLOWS
@@ -136,10 +149,10 @@ export default async function HomePage() {
             </Link>
           </div>
         </section>
-      )}
+        )}
 
-      {/* Categories */}
-      <section className="container mx-auto px-4 py-24">
+        {/* Categories */}
+        <section className="relative z-20 container mx-auto px-4 py-24">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-mono font-bold mb-4">
             BROWSE BY CATEGORY
@@ -188,8 +201,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-24">
+        {/* CTA Section */}
+        <section className="relative z-20 container mx-auto px-4 py-24">
         <div className="border-2 border-primary bg-primary/5 backdrop-blur-sm p-12 text-center max-w-4xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-mono font-bold mb-6">
             READY TO AUTOMATE?
@@ -266,6 +279,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }

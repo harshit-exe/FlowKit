@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Mono } from "next/font/google";
+import { Space_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { generateMetadata as generateSEOMetadata, siteConfig, jsonLd, organizationJsonLd } from "@/lib/seo";
@@ -9,6 +9,12 @@ const spaceMono = Space_Mono({
   weight: ['400', '700'],
   subsets: ["latin"],
   variable: '--font-space-mono',
+});
+
+const poppins = Poppins({
+  weight: ['400', '500', '600', '700'],
+  subsets: ["latin"],
+  variable: '--font-poppins',
 });
 
 export const metadata: Metadata = generateSEOMetadata({});
@@ -37,25 +43,14 @@ export default function RootLayout({
         {/* <meta name="google-site-verification" content="YOUR_GOOGLE_CODE" /> */}
         {/* <meta name="msvalidate.01" content="YOUR_BING_CODE" /> */}
       </head>
-      <body className={`${spaceMono.className} ${spaceMono.variable} font-mono`}>
+      <body className={`${spaceMono.variable} ${poppins.variable} font-mono`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          {/* Grid Overlay */}
-          <div
-            className="fixed inset-0 pointer-events-none z-0 grid-overlay"
-            style={{
-              backgroundImage: 'url(/grid.png)',
-              backgroundRepeat: 'repeat',
-              backgroundSize: '40px 40px',
-            }}
-          />
-          <div className="relative z-10">
-            {children}
-          </div>
+          {children}
           <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>

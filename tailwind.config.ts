@@ -11,6 +11,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         mono: ['var(--font-space-mono)', 'monospace'],
+        poppins: ['var(--font-poppins)', 'sans-serif'],
       },
       colors: {
         primary: {
