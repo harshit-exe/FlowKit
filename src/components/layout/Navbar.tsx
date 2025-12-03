@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Workflow, Search, Menu, X, Github } from "lucide-react"
 import { useState } from "react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -26,7 +27,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -35,7 +36,7 @@ export default function Navbar() {
               <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-lg flex items-center justify-center">
                 <Workflow className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-foreground">
                 FlowKit
               </span>
             </Link>
@@ -48,8 +49,8 @@ export default function Navbar() {
                   href={item.href}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     pathname === item.href
-                      ? "bg-primary-50 text-primary-600"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground/70 hover:bg-muted"
                   }`}
                 >
                   {item.name}
@@ -75,7 +76,12 @@ export default function Navbar() {
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
+
             <a
               href="https://github.com/yourusername/flowkit"
               target="_blank"
@@ -118,6 +124,12 @@ export default function Navbar() {
               </div>
             </form>
 
+            {/* Theme Toggle (Mobile) */}
+            <div className="flex items-center justify-between px-3">
+              <span className="text-sm font-medium text-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
+
             {/* Mobile Navigation */}
             <div className="space-y-1">
               {navItems.map((item) => (
@@ -127,7 +139,7 @@ export default function Navbar() {
                   className={`block px-3 py-2 rounded-md text-base font-medium ${
                     pathname === item.href
                       ? "bg-primary/10 text-primary"
-                      : "text-gray-700 hover:bg-gray-100"
+                      : "text-foreground/70 hover:bg-muted"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >

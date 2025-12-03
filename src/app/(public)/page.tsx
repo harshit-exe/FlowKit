@@ -82,7 +82,7 @@ export default async function HomePage() {
                 href={`/workflows/${workflow.slug}`}
                 className="group block"
               >
-                <div className="border-2 bg-background hover:border-primary transition-all duration-300 h-full flex flex-col">
+                <div className="border-2 bg-background/50 backdrop-blur-sm hover:border-primary transition-all duration-300 h-full flex flex-col">
                   {/* Workflow Icon */}
                   <div className="aspect-video w-full border-b-2 flex items-center justify-center bg-muted/30">
                     <Workflow className="h-12 w-12 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -139,7 +139,7 @@ export default async function HomePage() {
       )}
 
       {/* Categories */}
-      <section className="container mx-auto px-4 py-24 bg-muted/30">
+      <section className="container mx-auto px-4 py-24">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-mono font-bold mb-4">
             BROWSE BY CATEGORY
@@ -160,7 +160,7 @@ export default async function HomePage() {
                 href={`/category/${category.slug}`}
                 className="group"
               >
-                <div className="border-2 bg-background hover:border-primary transition-all duration-300 p-6 text-center h-full flex flex-col items-center justify-center">
+                <div className="border-2 bg-background/50 backdrop-blur-sm hover:border-primary transition-all duration-300 p-6 text-center h-full flex flex-col items-center justify-center">
                   <div
                     className="w-16 h-16 rounded-none flex items-center justify-center mb-4 border-2"
                     style={{
@@ -190,7 +190,7 @@ export default async function HomePage() {
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-24">
-        <div className="border-2 border-primary bg-primary/5 p-12 text-center max-w-4xl mx-auto">
+        <div className="border-2 border-primary bg-primary/5 backdrop-blur-sm p-12 text-center max-w-4xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-mono font-bold mb-6">
             READY TO AUTOMATE?
           </h2>

@@ -21,7 +21,9 @@ import {
   User,
   Menu,
   Box,
+  Search as SearchIcon,
 } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface AdminNavProps {
   user: {
@@ -55,6 +57,11 @@ export default function AdminNav({ user }: AdminNavProps) {
       icon: Box,
     },
     {
+      name: "SEO",
+      href: "/admin/seo",
+      icon: SearchIcon,
+    },
+    {
       name: "Settings",
       href: "/admin/settings",
       icon: Settings,
@@ -66,14 +73,14 @@ export default function AdminNav({ user }: AdminNavProps) {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Nav Links */}
           <div className="flex">
             <Link href="/admin" className="flex items-center px-2">
               <WorkflowIcon className="h-6 w-6 text-primary" />
-              <span className="ml-2 text-xl font-bold text-gray-900">FlowKit Admin</span>
+              <span className="ml-2 text-xl font-bold text-foreground">FlowKit Admin</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -88,7 +95,7 @@ export default function AdminNav({ user }: AdminNavProps) {
                     className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       isActive
                         ? "bg-primary/10 text-primary"
-                        : "text-gray-700 hover:bg-gray-100"
+                        : "text-foreground/70 hover:bg-muted"
                     }`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -100,7 +107,12 @@ export default function AdminNav({ user }: AdminNavProps) {
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
+
             <Link href="/" target="_blank">
               <Button variant="outline" size="sm">
                 View Site

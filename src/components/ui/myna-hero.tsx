@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { HoverPreview } from "@/components/ui/hover-preview";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navigationItems = [
   { title: "WORKFLOWS", href: "/workflows" },
@@ -74,7 +75,7 @@ export function MynaHero({ totalWorkflows = 150 }: MynaHeroProps) {
   ];
 
   return (
-    <div className="container mx-auto px-4 min-h-screen bg-background">
+    <div className="container mx-auto px-4 min-h-screen relative">
       <header>
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -96,7 +97,8 @@ export function MynaHero({ totalWorkflows = 150 }: MynaHeroProps) {
             ))}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            <ThemeToggle />
             <Link href="/workflows">
               <Button
                 variant="default"
@@ -123,6 +125,10 @@ export function MynaHero({ totalWorkflows = 150 }: MynaHeroProps) {
                       {item.title}
                     </Link>
                   ))}
+                  <div className="flex items-center justify-between px-3">
+                    <span className="text-sm font-medium text-foreground">Theme</span>
+                    <ThemeToggle />
+                  </div>
                   <Link href="/workflows">
                     <Button className="cursor-pointer rounded-none bg-primary hover:bg-primary/90 font-mono w-full">
                       GET STARTED <ArrowRight className="ml-1 w-4 h-4" />
@@ -251,7 +257,7 @@ export function MynaHero({ totalWorkflows = 150 }: MynaHeroProps) {
                   stiffness: 100,
                   damping: 10
                 }}
-                className="flex flex-col items-center text-center p-8 bg-background border"
+                className="flex flex-col items-center text-center p-8 border"
               >
                 <div className="mb-6 rounded-full bg-primary/10 p-4">
                   <feature.icon className="h-8 w-8 text-primary" />
