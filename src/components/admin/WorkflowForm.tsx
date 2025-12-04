@@ -12,11 +12,21 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { workflowFormSchema, WorkflowFormValues } from "@/lib/validations/workflow"
 import { generateSlug } from "@/lib/utils"
-import { Plus, X } from "lucide-react"
+import { parseWorkflowJSON } from "@/lib/gemini"
+import { Plus, X, FileJson, Sparkles, Loader2 } from "lucide-react"
 import { CloudinaryImageUpload } from "@/components/admin/CloudinaryImageUpload"
+import { AIButton } from "@/components/admin/AIButton"
+import { RichTextEditor } from "@/components/admin/RichTextEditor"
 
 interface WorkflowFormProps {
   initialData?: Workflow & {
@@ -30,6 +40,9 @@ interface WorkflowFormProps {
 export default function WorkflowForm({ initialData, categories, tags }: WorkflowFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false)
+  const [thumbnailPrompt, setThumbnailPrompt] = useState<any>(null)
+  const [showPromptDialog, setShowPromptDialog] = useState(false)
 
   // Initialize form with default values
   const {
@@ -158,6 +171,73 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
     )
   }
 
+  // Parse JSON and auto-fill fields
+  const handleParseJSON = () => {
+    const jsonString = watch("workflowJson")
+
+    try {
+      const parsed = parseWorkflowJSON(jsonString)
+
+      // Update form values
+      setValue("nodeCount", parsed.nodeCount)
+      setValue("nodes", parsed.nodes)
+      setValue("credentialsRequired", parsed.credentialsRequired)
+
+      toast.success(`Parsed ${parsed.nodeCount} nodes and ${parsed.credentialsRequired.length} credentials!`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to parse JSON")
+    }
+  }
+
+  // Generate AI thumbnail prompt
+  const handleGenerateThumbnail = async () => {
+    const name = watch("name")
+    const jsonString = watch("workflowJson")
+
+    if (!name || !jsonString) {
+      toast.error("Please provide workflow name and JSON first")
+      return
+    }
+
+    setIsGeneratingThumbnail(true)
+
+    try {
+      const response = await fetch("/api/ai/generate-thumbnail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          workflowName: name,
+          workflowJson: jsonString,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to generate thumbnail prompt")
+      }
+
+      const data = await response.json()
+      setThumbnailPrompt(data.prompt)
+      setShowPromptDialog(true)
+      toast.success("Thumbnail prompt generated! Copy it to use in AI Studio.")
+    } catch (error) {
+      console.error("Thumbnail prompt generation error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to generate thumbnail prompt")
+    } finally {
+      setIsGeneratingThumbnail(false)
+    }
+  }
+
+  // Copy prompt to clipboard
+  const copyPromptToClipboard = () => {
+    if (thumbnailPrompt) {
+      navigator.clipboard.writeText(JSON.stringify(thumbnailPrompt, null, 2))
+      toast.success("Prompt copied to clipboard!")
+    }
+  }
+
   // Form submission
   const onSubmit: SubmitHandler<WorkflowFormValues> = async (data) => {
     setIsLoading(true)
@@ -215,7 +295,14 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
               <Label htmlFor="name">
                 Name <span className="text-red-500">*</span>
               </Label>
-              <Input id="name" {...register("name")} placeholder="Email Newsletter Automation" />
+              <div className="flex items-start gap-2">
+                <Input id="name" {...register("name")} placeholder="Email Newsletter Automation" className="flex-1" />
+                <AIButton
+                  value={watch("name")}
+                  onGenerate={(content) => setValue("name", content)}
+                  fieldType="name"
+                />
+              </div>
               {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
 
@@ -229,16 +316,22 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">
-              Description <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              {...register("description")}
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="description">
+                Description <span className="text-red-500">*</span>
+              </Label>
+              <AIButton
+                value={watch("description")}
+                onGenerate={(content) => setValue("description", content)}
+                fieldType="description"
+              />
+            </div>
+            <RichTextEditor
+              value={watch("description")}
+              onChange={(content) => setValue("description", content)}
               placeholder="Describe what this workflow does..."
-              rows={4}
+              error={errors.description?.message}
             />
-            {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -308,7 +401,32 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
       {/* Media */}
       <Card>
         <CardHeader>
-          <CardTitle>Media</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Media</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateThumbnail}
+              disabled={isGeneratingThumbnail || !watch("name") || !watch("workflowJson")}
+              className="border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white transition-colors"
+            >
+              {isGeneratingThumbnail ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate AI Prompt
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Generate an AI prompt for thumbnail creation - copy and use in Google AI Studio
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <CloudinaryImageUpload
@@ -453,22 +571,30 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
         </CardHeader>
         <CardContent className="space-y-2">
           {watchUseCases?.map((useCase, index) => (
-            <div key={index} className="flex gap-2">
-              <Textarea
-                value={useCase}
-                onChange={(e) => updateArrayItem("useCases", index, e.target.value)}
-                placeholder="Describe a use case..."
-                rows={2}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => removeArrayItem("useCases", index)}
-                disabled={watchUseCases.length === 1}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+            <div key={index} className="space-y-2">
+              <div className="flex gap-2 items-start">
+                <Textarea
+                  value={useCase}
+                  onChange={(e) => updateArrayItem("useCases", index, e.target.value)}
+                  placeholder="Describe a use case..."
+                  rows={2}
+                  className="flex-1"
+                />
+                <AIButton
+                  value={useCase}
+                  onGenerate={(content) => updateArrayItem("useCases", index, content)}
+                  fieldType="useCase"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removeArrayItem("useCases", index)}
+                  disabled={watchUseCases.length === 1}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
           {errors.useCases && <p className="text-sm text-red-500">{errors.useCases.message}</p>}
@@ -485,8 +611,8 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
         </CardHeader>
         <CardContent className="space-y-2">
           {watchSetupSteps?.map((step, index) => (
-            <div key={index} className="flex gap-2">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
+            <div key={index} className="flex gap-2 items-start">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium mt-1">
                 {index + 1}
               </span>
               <Textarea
@@ -494,6 +620,12 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
                 onChange={(e) => updateArrayItem("setupSteps", index, e.target.value)}
                 placeholder="Describe setup step..."
                 rows={2}
+                className="flex-1"
+              />
+              <AIButton
+                value={step}
+                onGenerate={(content) => updateArrayItem("setupSteps", index, content)}
+                fieldType="setupStep"
               />
               <Button
                 type="button"
@@ -516,9 +648,24 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
       {/* Workflow JSON */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Workflow JSON <span className="text-red-500">*</span>
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              Workflow JSON <span className="text-red-500">*</span>
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleParseJSON}
+              className="border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white transition-colors"
+            >
+              <FileJson className="h-4 w-4 mr-2" />
+              Parse JSON
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Paste your n8n workflow JSON here. Click "Parse JSON" to automatically extract node count, nodes, and credentials.
+          </p>
         </CardHeader>
         <CardContent className="space-y-2">
           <Textarea
@@ -540,6 +687,44 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           {isLoading ? "Saving..." : initialData ? "Update Workflow" : "Create Workflow"}
         </Button>
       </div>
+
+      {/* Thumbnail Prompt Dialog */}
+      <Dialog open={showPromptDialog} onOpenChange={setShowPromptDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>AI Thumbnail Prompt</DialogTitle>
+            <DialogDescription>
+              Copy this JSON prompt and paste it into Google AI Studio to generate your thumbnail image.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
+                <code>{JSON.stringify(thumbnailPrompt, null, 2)}</code>
+              </pre>
+              <Button
+                onClick={copyPromptToClipboard}
+                variant="outline"
+                size="sm"
+                className="absolute top-2 right-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white"
+              >
+                Copy JSON
+              </Button>
+            </div>
+            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-sm font-medium mb-2">How to use:</p>
+              <ol className="text-sm space-y-1 list-decimal list-inside">
+                <li>Copy the JSON prompt above</li>
+                <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-[#FF6B35] hover:underline">Google AI Studio</a></li>
+                <li>Select Gemini 2.5 Flash Image model</li>
+                <li>Paste the JSON prompt</li>
+                <li>Generate the thumbnail image</li>
+                <li>Download and upload it here</li>
+              </ol>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   )
 }
