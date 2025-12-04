@@ -23,7 +23,7 @@ async function seedWorkflows() {
       slug: 'automated-email-newsletter',
       description: 'Automatically send weekly newsletter emails to subscribers from Google Sheets. Includes personalization, tracking, and scheduling.',
       icon: 'mail',
-      thumbnail: '/thumbnails/email-newsletter.jpg',
+      thumbnail: 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg', // Replace with actual Cloudinary URL
       difficulty: Difficulty.BEGINNER,
       featured: true,
       indiaBadge: true,
@@ -82,7 +82,7 @@ async function seedWorkflows() {
       slug: 'whatsapp-business-notifications',
       description: 'Send automated WhatsApp notifications for order updates, appointment reminders, and customer alerts using Twilio WhatsApp API.',
       icon: 'message-circle',
-      thumbnail: '/thumbnails/whatsapp-notifications.jpg',
+      thumbnail: 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg', // Replace with actual Cloudinary URL
       difficulty: Difficulty.INTERMEDIATE,
       featured: true,
       indiaBadge: true,
@@ -133,7 +133,7 @@ async function seedWorkflows() {
       slug: 'ai-content-generator-chatgpt',
       description: 'Generate blog posts, social media content, and product descriptions using OpenAI GPT-4. Includes content review and publishing workflow.',
       icon: 'sparkles',
-      thumbnail: '/thumbnails/ai-content-generator.jpg',
+      thumbnail: 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg', // Replace with actual Cloudinary URL
       difficulty: Difficulty.INTERMEDIATE,
       featured: true,
       indiaBadge: false,
@@ -176,7 +176,7 @@ async function seedWorkflows() {
       slug: 'lead-management-crm-sync',
       description: 'Capture leads from multiple sources (website forms, social media, emails) and automatically sync to your CRM with enrichment and scoring.',
       icon: 'users',
-      thumbnail: '/thumbnails/lead-management.jpg',
+      thumbnail: 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg', // Replace with actual Cloudinary URL
       difficulty: Difficulty.ADVANCED,
       featured: false,
       indiaBadge: true,
@@ -228,7 +228,7 @@ async function seedWorkflows() {
       slug: 'database-backup-sync',
       description: 'Automated daily backup of MySQL/PostgreSQL databases to cloud storage with encryption and versioning. Includes restore workflow.',
       icon: 'database',
-      thumbnail: '/thumbnails/database-backup.jpg',
+      thumbnail: 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg', // Replace with actual Cloudinary URL
       difficulty: Difficulty.ADVANCED,
       featured: false,
       indiaBadge: true,
@@ -280,7 +280,7 @@ async function seedWorkflows() {
       slug: 'social-media-auto-poster',
       description: 'Publish content simultaneously to Twitter, LinkedIn, Facebook, and Instagram from a single source. Includes scheduling and analytics.',
       icon: 'share-2',
-      thumbnail: '/thumbnails/social-media-poster.jpg',
+      thumbnail: 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg', // Replace with actual Cloudinary URL
       difficulty: Difficulty.INTERMEDIATE,
       featured: true,
       indiaBadge: false,

@@ -48,18 +48,35 @@ export function StickyNavbar({
 }: StickyNavbarProps) {
   const [isVisible, setIsVisible] = useState(!showOnScroll);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (!showOnScroll) return;
+    if (!showOnScroll) {
+      setIsVisible(true);
+      return;
+    }
 
     const handleScroll = () => {
       const scrolled = window.scrollY > scrollThreshold;
       setIsVisible(scrolled);
     };
 
+    // Check initial scroll position
+    handleScroll();
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [showOnScroll, scrollThreshold]);
+
+  // Prevent SSR/hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>

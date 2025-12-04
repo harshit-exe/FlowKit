@@ -15,7 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { workflowFormSchema, WorkflowFormValues } from "@/lib/validations/workflow"
 import { generateSlug } from "@/lib/utils"
-import { Plus, X, Upload } from "lucide-react"
+import { Plus, X } from "lucide-react"
+import { CloudinaryImageUpload } from "@/components/admin/CloudinaryImageUpload"
 
 interface WorkflowFormProps {
   initialData?: Workflow & {
@@ -29,7 +30,6 @@ interface WorkflowFormProps {
 export default function WorkflowForm({ initialData, categories, tags }: WorkflowFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.thumbnail || null)
 
   // Initialize form with default values
   const {
@@ -98,22 +98,10 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
     }
   }, [watchName, setValue, initialData])
 
-  // Handle thumbnail upload
-  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // In a real app, upload to server or cloud storage
-    // For now, we'll just use a data URL for preview
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const result = reader.result as string
-      setImagePreview(result)
-      setValue("thumbnail", `/thumbnails/${file.name}`)
-    }
-    reader.readAsDataURL(file)
-
-    toast.info("Note: Save the file manually to public/thumbnails/")
+  // Handle Cloudinary thumbnail upload
+  const handleThumbnailUpload = (url: string, publicId?: string) => {
+    setValue("thumbnail", url)
+    toast.success("Image uploaded successfully!")
   }
 
   // Dynamic array helpers
@@ -323,14 +311,17 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           <CardTitle>Media</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <CloudinaryImageUpload
+            value={watch("thumbnail")}
+            onChange={handleThumbnailUpload}
+            folder="flowkit-workflows"
+            label="Workflow Thumbnail"
+            description="Upload a workflow thumbnail image (1200x630px recommended, max 10MB)"
+          />
+
           <div className="space-y-2">
-            <Label htmlFor="thumbnail">Thumbnail</Label>
-            <Input id="thumbnail" type="file" accept="image/*" onChange={handleThumbnailChange} />
-            {imagePreview && (
-              <div className="mt-2">
-                <img src={imagePreview} alt="Preview" className="w-full max-w-md h-48 object-cover rounded-lg" />
-              </div>
-            )}
+            <Label htmlFor="videoUrl">Video URL (Optional)</Label>
+            <Input id="videoUrl" {...register("videoUrl")} placeholder="https://youtube.com/..." />
           </div>
         </CardContent>
       </Card>

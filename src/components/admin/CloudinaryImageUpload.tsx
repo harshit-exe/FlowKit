@@ -18,7 +18,7 @@ export function CloudinaryImageUpload({
   onChange,
   folder = "flowkit-workflows",
   label = "Workflow Image",
-  description = "Upload an image for this workflow (max 5MB, JPG/PNG/WebP/GIF)",
+  description = "Upload an image for this workflow (max 10MB, JPG/PNG/WebP/GIF)",
 }: CloudinaryImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +39,8 @@ export function CloudinaryImageUpload({
     }
 
     // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5MB");
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size must be less than 10MB");
       return;
     }
 

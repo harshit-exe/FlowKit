@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="78" height="78"><svg width="78" height="78" viewBox="0 0 78 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M39.0024 22.1547C40.0961 22.3088 40.858 23.3202 40.7041 24.414L39.2057 35.058C39.3515 35.9151 39.578 36.8367 39.9149 37.5721C40.5191 38.8909 40.7153 38.6824 42.1698 39.5019C42.944 39.938 44.1691 40.3503 44.1951 40.359L44.1237 40.418L54.4245 41.8681C55.5182 42.022 56.28 43.0336 56.1262 44.1273L54.409 56.3254C54.255 57.4192 53.2435 58.1811 52.1497 58.0271L38.8241 56.1512C37.7305 55.9971 36.9685 54.9856 37.1224 53.8919L38.6696 42.9017C38.6038 42.5759 38.5233 42.2549 38.4225 41.9872C37.9282 40.6741 37.3258 39.5882 36.1253 38.7605C35.799 38.5355 35.2508 38.2701 34.7008 38.0284L23.402 36.4378C22.3082 36.2839 21.5464 35.2723 21.7003 34.1786L23.4175 21.9805C23.5715 20.8867 24.583 20.1248 25.6768 20.2788L39.0024 22.1547Z" fill="url(#paint0_linear_129_8)"></path>
+<defs>
+<linearGradient id="SvgjsLinearGradient1009" x1="41.2614" y1="22.4727" x2="36.5651" y2="55.8332" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFAC36"></stop>
+<stop offset="1" stop-color="#EA7201"></stop>
+</linearGradient>
+</defs>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>
