@@ -7,12 +7,13 @@ import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AnimatedGlowingSearchBar from "@/components/ui/animated-glowing-search-bar";
+import { GithubStarButton } from "@/components/ui/github-star-button";
 
 const navigationItems = [
   { title: "Workflows", href: "/workflows" },
-  { title: "Categories", href: "#categories" },
+  { title: "Categories", href: "/#categories" },
   { title: "AI Builder", href: "/ai-builder" },
-  { title: "About", href: "#about" },
+  { title: "About", href: "/#about" },
 ];
 
 const navStyles = `
@@ -131,16 +132,9 @@ export function StickyNavbar({
               />
             </div>
 
-            {/* Get Started Button - Desktop Right */}
+            {/* Github Star Button - Desktop Right */}
             <div className="hidden md:block flex-shrink-0">
-              <Link href="/workflows">
-                <Button
-                  variant="default"
-                  className="rounded-full bg-white text-black hover:bg-white/90 font-poppins font-medium px-5 py-2 text-sm h-9"
-                >
-                  Get Started
-                </Button>
-              </Link>
+              <GithubStarButton />
             </div>
 
             {/* Mobile Menu Button */}
@@ -177,15 +171,9 @@ export function StickyNavbar({
                   {item.title}
                 </Link>
               ))}
-              <Link href="/workflows">
-                <Button
-                  variant="default"
-                  className="w-full rounded-full bg-white text-black hover:bg-white/90 font-poppins font-medium"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Get Started
-                </Button>
-              </Link>
+              <div className="pt-2">
+                <GithubStarButton className="w-full justify-center" />
+              </div>
             </div>
           )}
         </div>

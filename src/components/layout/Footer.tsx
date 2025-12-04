@@ -33,7 +33,7 @@ export default function Footer() {
   return (
     <AnimatedFooter
       brandName="FlowKit"
-      brandDescription="Production-ready automation workflows for modern teams. Built by developers, for developers."
+      brandDescription="Production-ready automation workflows for modern teams. Open Source & Maintained by Cipher Labs."
       socialLinks={socialLinks}
       navLinks={navLinks}
       brandIcon={

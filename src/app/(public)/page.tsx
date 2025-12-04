@@ -152,7 +152,7 @@ export default async function HomePage() {
         )}
 
         {/* Categories */}
-        <section className="relative z-20 container mx-auto px-4 py-24">
+        <section id="categories" className="relative z-20 container mx-auto px-4 py-24">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-mono font-bold mb-4">
             BROWSE BY CATEGORY
@@ -202,7 +202,7 @@ export default async function HomePage() {
       </section>
 
         {/* CTA Section */}
-        <section className="relative z-20 container mx-auto px-4 py-24">
+        <section id="about" className="relative z-20 container mx-auto px-4 py-24">
         <div className="border-2 border-primary bg-primary/5 backdrop-blur-sm p-12 text-center max-w-4xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-mono font-bold mb-6">
             READY TO AUTOMATE?

@@ -23,7 +23,7 @@ import { toast } from "sonner"
 import { workflowFormSchema, WorkflowFormValues } from "@/lib/validations/workflow"
 import { generateSlug } from "@/lib/utils"
 import { parseWorkflowJSON } from "@/lib/gemini"
-import { Plus, X, FileJson, Sparkles, Loader2 } from "lucide-react"
+import { Plus, X, FileJson, Sparkles, Loader2, Copy } from "lucide-react"
 import { CloudinaryImageUpload } from "@/components/admin/CloudinaryImageUpload"
 import { AIButton } from "@/components/admin/AIButton"
 import { RichTextEditor } from "@/components/admin/RichTextEditor"
@@ -690,38 +690,39 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
 
       {/* Thumbnail Prompt Dialog */}
       <Dialog open={showPromptDialog} onOpenChange={setShowPromptDialog}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col font-mono border-2">
           <DialogHeader>
-            <DialogTitle>AI Thumbnail Prompt</DialogTitle>
+            <DialogTitle>AI THUMBNAIL PROMPT</DialogTitle>
             <DialogDescription>
               Copy this JSON prompt and paste it into Google AI Studio to generate your thumbnail image.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="relative">
-              <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
+          
+          <div className="flex-1 overflow-auto space-y-4 mt-4 pr-2">
+            <div className="bg-muted/30 p-4 border-2 border-border rounded-md">
+              <pre className="text-xs">
                 <code>{JSON.stringify(thumbnailPrompt, null, 2)}</code>
               </pre>
-              <Button
-                onClick={copyPromptToClipboard}
-                variant="outline"
-                size="sm"
-                className="absolute top-2 right-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white"
-              >
-                Copy JSON
-              </Button>
             </div>
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <p className="text-sm font-medium mb-2">How to use:</p>
-              <ol className="text-sm space-y-1 list-decimal list-inside">
-                <li>Copy the JSON prompt above</li>
-                <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-[#FF6B35] hover:underline">Google AI Studio</a></li>
+
+            <div className="p-4 bg-blue-500/10 border-2 border-blue-500/20 rounded-lg">
+              <p className="text-sm font-bold mb-2 uppercase">How to use:</p>
+              <ol className="text-sm space-y-1 list-decimal list-inside font-mono">
+                <li>Copy the JSON prompt below</li>
+                <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-[#FF6B35] hover:underline font-bold">Google AI Studio</a></li>
                 <li>Select Gemini 2.5 Flash Image model</li>
                 <li>Paste the JSON prompt</li>
                 <li>Generate the thumbnail image</li>
                 <li>Download and upload it here</li>
               </ol>
             </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-4 pt-2 border-t">
+            <Button onClick={copyPromptToClipboard} className="font-mono border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white bg-transparent">
+              <Copy className="h-4 w-4 mr-2" />
+              COPY JSON PROMPT
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

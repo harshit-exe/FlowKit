@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Workflow, Search, Menu, X, Github } from "lucide-react"
+import { GithubStarButton } from "@/components/ui/github-star-button"
 import { useState } from "react"
 
 export default function Navbar() {
@@ -76,16 +77,9 @@ export default function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center space-x-3">
-            <a
-              href="https://github.com/yourusername/flowkit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:block"
-            >
-              <Button variant="ghost" size="icon">
-                <Github className="h-5 w-5" />
-              </Button>
-            </a>
+            <div className="hidden md:block">
+              <GithubStarButton />
+            </div>
 
             {/* Mobile menu button */}
             <button
