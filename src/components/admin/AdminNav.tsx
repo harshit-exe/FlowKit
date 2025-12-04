@@ -23,7 +23,6 @@ import {
   Box,
   Search as SearchIcon,
 } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 interface AdminNavProps {
   user: {
@@ -108,11 +107,6 @@ export default function AdminNav({ user }: AdminNavProps) {
 
           {/* User Menu */}
           <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-
             <Link href="/" target="_blank">
               <Button variant="outline" size="sm">
                 View Site

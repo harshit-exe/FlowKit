@@ -15,8 +15,8 @@ export default async function AdminCategoriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
-        <p className="text-gray-600 mt-1">Manage workflow categories</p>
+        <h1 className="text-3xl font-bold text-white">Categories</h1>
+        <p className="text-white mt-1">Manage workflow categories</p>
       </div>
 
       <Card>
@@ -33,14 +33,14 @@ export default async function AdminCategoriesPage() {
                       <span className="text-2xl">{category.icon}</span>
                       <div>
                         <h3 className="font-semibold">{category.name}</h3>
-                        <p className="text-xs text-gray-500">{category.slug}</p>
+                        <p className="text-xs text-gray-100">{category.slug}</p>
                       </div>
                     </div>
                     <Badge variant="outline">{category._count.workflows} workflows</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-600">{category.description}</p>
+                  <p className="text-sm text-gray-100">{category.description}</p>
                   <div
                     className="mt-2 h-1 rounded-full"
                     style={{ backgroundColor: category.color }}

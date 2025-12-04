@@ -21,8 +21,8 @@ export default async function AdminWorkflowsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Workflows</h1>
-          <p className="text-gray-600 mt-1">Manage all n8n workflows</p>
+          <h1 className="text-3xl font-bold text-foreground">Workflows</h1>
+          <p className="text-muted-foreground mt-1">Manage all n8n workflows</p>
         </div>
         <Link href="/admin/workflows/new">
           <Button>
@@ -39,7 +39,7 @@ export default async function AdminWorkflowsPage() {
         <CardContent>
           {workflows.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">No workflows yet</p>
+              <p className="text-muted-foreground mb-4">No workflows yet</p>
               <Link href="/admin/workflows/new">
                 <Button>Create your first workflow</Button>
               </Link>
@@ -49,23 +49,23 @@ export default async function AdminWorkflowsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Categories</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Stats</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-700">Actions</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Name</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Categories</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Stats</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Created</th>
+                    <th className="text-right py-3 px-4 font-medium text-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {workflows.map((workflow) => (
-                    <tr key={workflow.id} className="border-b hover:bg-gray-50">
+                    <tr key={workflow.id} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           {workflow.icon && <span className="text-lg">{workflow.icon}</span>}
                           <div>
                             <p className="font-medium">{workflow.name}</p>
-                            <p className="text-sm text-gray-500">{workflow.slug}</p>
+                            <p className="text-sm text-muted-foreground">{workflow.slug}</p>
                           </div>
                         </div>
                       </td>
@@ -99,7 +99,7 @@ export default async function AdminWorkflowsPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-muted-foreground">
                           <div className="flex items-center gap-3">
                             <span className="flex items-center gap-1">
                               <Eye className="h-3 w-3" /> {workflow.views}
@@ -108,7 +108,7 @@ export default async function AdminWorkflowsPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
+                      <td className="py-3 px-4 text-sm text-muted-foreground">
                         {new Date(workflow.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4">

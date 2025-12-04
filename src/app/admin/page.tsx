@@ -68,8 +68,8 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Welcome to FlowKit admin panel</p>
+        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        <p className="text-white mt-1">Welcome to FlowKit admin panel</p>
       </div>
 
       {/* Stats Grid */}
@@ -79,7 +79,7 @@ export default async function AdminDashboard() {
           return (
             <Card key={stat.name}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-gray-100">
                   {stat.name}
                 </CardTitle>
                 <div className={`p-2 rounded-lg ${stat.bgColor}`}>
@@ -101,7 +101,7 @@ export default async function AdminDashboard() {
         </CardHeader>
         <CardContent>
           {recentWorkflows.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
+            <p className="text-center text-gray-100 py-8">
               No workflows yet. Create your first workflow!
             </p>
           ) : (
@@ -109,16 +109,16 @@ export default async function AdminDashboard() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Views</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Downloads</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Name</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Views</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Downloads</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground">Created</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentWorkflows.map((workflow) => (
-                    <tr key={workflow.id} className="border-b hover:bg-gray-50">
+                    <tr key={workflow.id} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4 font-medium">{workflow.name}</td>
                       <td className="py-3 px-4">
                         <span
@@ -133,7 +133,7 @@ export default async function AdminDashboard() {
                       </td>
                       <td className="py-3 px-4">{workflow.views}</td>
                       <td className="py-3 px-4">{workflow.downloads}</td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-gray-100">
                         {new Date(workflow.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
