@@ -84,9 +84,6 @@ export default function LoginPage() {
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <div className="mt-4 text-xs text-center text-muted-foreground">
-            Default credentials: admin@flowkit.in / admin123
-          </div>
         </CardContent>
       </Card>
     </div>
