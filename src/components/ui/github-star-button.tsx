@@ -18,7 +18,7 @@ export function GithubStarButton({ className }: GithubStarButtonProps) {
       try {
         // Using a default repo for now, can be parameterized
         const res = await fetch(
-          "https://img.shields.io/github/stars/keenthemes/reui.json"
+          "https://img.shields.io/github/stars/harshit-exe/FlowKit.json"
         );
         const data = await res.json();
         // shields.io gives: { "name": "GitHub Repo stars", "value": "1.5k", ... }
@@ -40,7 +40,7 @@ export function GithubStarButton({ className }: GithubStarButtonProps) {
 
   return (
     <Link
-      href="https://github.com/keenthemes/reui"
+      href="https://github.com/harshit-exe/FlowKit"
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

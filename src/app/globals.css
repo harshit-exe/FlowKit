@@ -63,6 +63,10 @@
   * {
     @apply border-border;
   }
+  html, body {
+    height: 100%;
+    overscroll-behavior-y: none;
+  }
   body {
     @apply text-foreground font-mono;
     background-color: hsl(var(--background));

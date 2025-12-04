@@ -75,8 +75,8 @@ export const siteConfig = {
 
   // Social Media
   social: {
-    twitter: "@flowkit_io",
-    github: "https://github.com/yourusername/flowkit",
+    twitter: "@flowkit_in",
+    github: "https://github.com/harshit-exe/FlowKit",
   },
 
   // Open Graph Images
