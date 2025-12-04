@@ -3,8 +3,9 @@ import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Search Workflows | FlowKit",
-  description: "Search for n8n workflows",
+  title: "Search n8n Workflows & Templates | FlowKit",
+  description: "Search free n8n workflow templates and automation workflows. Find n8n templates for Slack, Email, AI automation, data sync, and more. Open source n8n workflow library.",
+  keywords: "search n8n workflows, find n8n templates, n8n workflow search, n8n template search, search automation workflows",
 }
 
 export default async function SearchPage({

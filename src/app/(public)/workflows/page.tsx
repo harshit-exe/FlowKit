@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "All Workflows | FlowKit",
-  description: "Browse all n8n workflows in the FlowKit library",
+  title: "Free n8n Workflow Templates & Automation Library | FlowKit",
+  description: "Browse 150+ free n8n workflow templates. Download production-ready n8n automation workflows. Open source n8n template library with integrations for Slack, Email, AI, and more.",
+  keywords: "n8n workflows, n8n templates, free n8n workflows, n8n workflow library, n8n automation templates, open source workflows",
 }
 
 export default async function WorkflowsPage() {

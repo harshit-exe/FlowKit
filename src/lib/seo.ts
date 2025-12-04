@@ -7,23 +7,67 @@ export const siteConfig = {
   name: "FlowKit",
   domain: "flowkit.in",
   url: "https://www.flowkit.in",
-  title: "FlowKit - Free n8n Workflow Templates & AI Builder",
-  description: "Discover 1000+ free n8n workflow templates. Build automation workflows with AI, browse by category, and deploy instantly. Open-source workflow marketplace.",
+  title: "FlowKit - Free n8n Workflow Templates & Open Source Automation Library",
+  description: "Explore 150+ free n8n workflow templates. Open source n8n automation library with AI-powered workflow builder. Download production-ready n8n workflows, templates, and integrations. Free n8n workflow marketplace.",
   keywords: [
+    // Primary Keywords
+    "n8n workflow",
     "n8n workflows",
-    "workflow templates",
-    "automation templates",
+    "n8n template",
+    "n8n templates",
+    "n8n workflow templates",
+    "n8n automation",
+
+    // Free & Open Source
+    "free n8n workflows",
+    "free n8n templates",
+    "open source n8n",
+    "open source workflow library",
+    "open source automation",
+    "free workflow templates",
+
+    // Marketplace & Library
     "n8n marketplace",
+    "n8n library",
+    "n8n workflow library",
+    "n8n template library",
+    "workflow marketplace",
+
+    // Automation
     "workflow automation",
-    "n8n templates free",
-    "workflow builder",
-    "ai workflow generator",
     "automation workflows",
-    "n8n community",
-    "workflow hub",
+    "automation templates",
+    "workflow templates",
+    "no-code automation",
+    "low-code automation",
+
+    // AI & Tools
+    "ai workflow builder",
+    "ai workflow generator",
+    "workflow builder",
+    "automation builder",
+
+    // Integration
     "n8n integrations",
+    "workflow integrations",
+    "automation integrations",
+
+    // Community
+    "n8n community",
+    "n8n examples",
+    "n8n workflows free download",
+    "n8n workflow examples",
+
+    // Use Cases
+    "slack automation n8n",
+    "email automation n8n",
+    "data sync automation",
+    "ai automation workflows",
+
+    // Tools
     "automation tools",
-    "no-code automation"
+    "workflow tools",
+    "n8n workflow hub"
   ],
   author: "FlowKit Team",
   creator: "@flowkit",
@@ -143,9 +187,29 @@ export function generateMetadata({
       creator: siteConfig.social.twitter,
     },
     icons: {
-      icon: "/favicon.ico",
-      shortcut: "/favicon-16x16.png",
-      apple: "/apple-touch-icon.png",
+      icon: [
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      ],
+      shortcut: "/favicon.ico",
+      apple: [
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
+      other: [
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "192x192",
+          url: "/android-chrome-192x192.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "512x512",
+          url: "/android-chrome-512x512.png",
+        },
+      ],
     },
     manifest: "/site.webmanifest",
   };
