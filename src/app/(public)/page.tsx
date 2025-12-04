@@ -72,7 +72,7 @@ export default async function HomePage() {
             backgroundImage: 'url(/grid.png)',
             backgroundRepeat: 'repeat',
             backgroundSize: '112px 112px',
-            opacity: 0.4,
+            opacity:0.4,
           }}
         />
 

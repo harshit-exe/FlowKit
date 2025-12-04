@@ -17,17 +17,20 @@ const navigationItems = [
 
 const previewData = {
   automation: {
-    image: "https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=560&h=320&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=560&h=320&fit=crop",
     title: "AI Automation Workflows",
     subtitle: "Streamline repetitive tasks",
   },
   integration: {
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=320&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=320&fit=crop",
     title: "Integrations",
     subtitle: "Connect your favorite tools",
   },
   productivity: {
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=560&h=320&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=560&h=320&fit=crop",
     title: "Productivity Boost",
     subtitle: "Boost team efficiency",
   },
@@ -109,7 +112,9 @@ interface NewHeroProps {
 
 export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activePreview, setActivePreview] = useState<keyof typeof previewData | null>(null);
+  const [activePreview, setActivePreview] = useState<
+    keyof typeof previewData | null
+  >(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -174,28 +179,28 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
       <style>{previewStyles}</style>
 
       {/* LightRays Component - Subtle white effect */}
-      <div className="absolute inset-0 z-0 opacity-40">
+      <div className="absolute inset-0 -z-99 opacity-1">
         <LightRays
           raysOrigin="top-center"
           raysColor="#ffffff"
-          raysSpeed={0.3}
-          lightSpread={2}
-          rayLength={2.5}
-          fadeDistance={2}
+          raysSpeed={0.5}
+          lightSpread={3}
+          rayLength={0.5}
+          fadeDistance={3}
           saturation={0.8}
           followMouse={true}
-          mouseInfluence={0.1}
+          mouseInfluence={0.6}
           className="w-full h-full"
         />
       </div>
 
       {/* Background Gradient Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-10">
         <Image
           src="/BG.svg"
           alt="Background"
           fill
-          className="object-cover opacity-80"
+          className="object-cover opacity-60"
           priority
         />
       </div>
@@ -294,27 +299,19 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
               <span className="inline-flex items-center justify-center flex-wrap gap-2 sm:gap-3">
                 <span>with</span>{" "}
                 <span className="inline-flex items-center gap-1 sm:gap-2">
-                  <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-b from-orange-100 via-orange-300 to-orange-600 bg-clip-text text-transparent">
                     n8n
                   </span>
                   {/* Tilted Icon - Right next to n8n */}
-                  <span className="inline-block relative top-0 transform rotate-12 ml-1">
-                    <div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12">
+                  <span className="inline-block relative top-1 transform rotate-12 ml-1">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-20 md:h-20 ">
                       <Image
-                        src="/Rectangle 840.png"
+                        src="/LogoHero.svg"
                         alt=""
-                        fill
+                        height={100}
+                        width={100}
                         className="object-contain"
                       />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Image
-                          src="/Union.png"
-                          alt=""
-                          width={20}
-                          height={20}
-                          className="object-contain w-3/5 h-3/5"
-                        />
-                      </div>
                     </div>
                   </span>
                 </span>
@@ -322,7 +319,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
               </span>
             </h1>
 
-            <div className="text-base sm:text-lg md:text-xl font-poppins text-white/70 mb-8 sm:mb-10 max-w-3xl mx-auto px-4">
+            <div className="lg:pt-12 text-base sm:text-lg md:text-xl font-poppins text-white mb-8 sm:mb-10 max-w-3xl mx-auto px-4">
               <span>{totalWorkflows}+ Production-Ready </span>
               <span
                 className="hover-word"
@@ -354,12 +351,16 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
             </div>
 
             <Link href="/workflows">
-              <Button
-                size="lg"
-                className="rounded-full bg-white text-black hover:bg-white/90 font-poppins font-medium px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg"
-              >
-                Connect with us
-              </Button>
+              <div className="p-2 rounded-2xl bg-[rgba(251,169,169,0.2)] inline-block">
+                <div className="p-0.5 rounded-xl bg-gradient-to-b from-[#f5deb3] to-[#d4a574] inline-block">
+                  <Button
+                    size="lg"
+                    className="rounded-xl bg-white text-black hover:bg-white/95 font-poppins font-medium px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-sm"
+                  >
+                    Connect with us
+                  </Button>
+                </div>
+              </div>
             </Link>
           </div>
         </div>
@@ -382,8 +383,12 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
               crossOrigin="anonymous"
               referrerPolicy="no-referrer"
             />
-            <div className="preview-card-title font-poppins">{previewCardData.title}</div>
-            <div className="preview-card-subtitle font-poppins">{previewCardData.subtitle}</div>
+            <div className="preview-card-title font-poppins">
+              {previewCardData.title}
+            </div>
+            <div className="preview-card-subtitle font-poppins">
+              {previewCardData.subtitle}
+            </div>
           </div>
         </div>
       )}
