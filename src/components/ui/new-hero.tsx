@@ -203,7 +203,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
   const previewCardData = activePreview ? previewData[activePreview] : null;
 
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden">
+    <div className="relative bg-black overflow-hidden">
       <style>{previewStyles}</style>
 
       {/* LightRays Component - Subtle white effect */}
@@ -306,7 +306,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
         </nav>
 
         {/* Hero Section */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 md:py-28 lg:py-32">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 md:pt-28 lg:pt-32 pb-4 sm:pb-8">
           <div className="max-w-5xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium font-poppins text-white leading-tight mb-6 sm:mb-8">
               Automate Everything

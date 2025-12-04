@@ -1,7 +1,7 @@
 "use client";
 import { Workflow, Github, Twitter, Linkedin } from "lucide-react";
 import { Footer as AnimatedFooter } from "@/components/ui/modem-animated-footer";
-
+import Image from "next/image";
 export default function Footer() {
   const socialLinks = [
     {
@@ -37,7 +37,13 @@ export default function Footer() {
       socialLinks={socialLinks}
       navLinks={navLinks}
       brandIcon={
-        <Workflow className="w-8 sm:w-10 md:w-14 h-8 sm:h-10 md:h-14 text-background drop-shadow-lg" />
+        <Image
+                               src="/LogoHero.svg"
+                               alt=""
+                               height={100}
+                               width={100}
+                               className="object-contain"
+                             />
       }
     />
   );

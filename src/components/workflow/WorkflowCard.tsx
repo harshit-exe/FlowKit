@@ -11,7 +11,7 @@ interface WorkflowCardProps {
 export default function WorkflowCard({ workflow }: WorkflowCardProps) {
   return (
     <Link href={`/workflows/${workflow.slug}`}>
-      <Card className="h-full hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer">
+      <Card className="h-full hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer border-2 border-transparent hover:border-[#FF6B35]/50">
         {/* Thumbnail */}
         {workflow.thumbnail && (
           <div className="aspect-video w-full overflow-hidden rounded-t-lg">

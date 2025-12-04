@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { NewHero } from "@/components/ui/new-hero";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 import {
   Workflow,
   TrendingUp,
@@ -62,6 +63,38 @@ export default async function HomePage() {
     <div className="relative">
       {/* Hero Section */}
       <NewHero totalWorkflows={totalWorkflows} />
+      
+      <div className="relative bg-black pt-44 flex flex-col justify-center items-center px-4 overflow-hidden">
+        {/* Grid Background */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: 'url(/grid.png)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '112px 112px',
+            opacity: 0.2,
+          }}
+        />
+        {/* Badge */}
+        <div className="relative z-10 mb-8 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/70 backdrop-blur-sm font-poppins">
+          More than Automation
+        </div>
+
+        <div className="relative z-10">
+          <ScrollReveal
+            baseOpacity={0}
+            enableBlur={true}
+            baseRotation={5}
+            blurStrength={10}
+            containerClassName="max-w-7xl mx-auto text-center px-4 sm:px-6"
+            textClassName="text-white/90 font-poppins text-sm sm:text-lg md:text-xl leading-relaxed"
+            rotationEnd="bottom center"
+            wordAnimationEnd="bottom center"
+          >
+            Our node-based system gives you the freedom to build with precision nothing more, nothing less. Each connection flows naturally mirroring the way you think and solve problems. The result is a creative process that feels effortless, intelligent and uniquely yours.
+          </ScrollReveal>
+        </div>
+      </div>
 
       {/* Content sections with grid background */}
       <div className="relative bg-black">

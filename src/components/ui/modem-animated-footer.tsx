@@ -119,13 +119,13 @@ export const Footer = ({
         </div>
 
         {/* Bottom logo */}
-        <div className="absolute hover:border-primary duration-400 drop-shadow-[0_0px_20px_rgba(0,0,0,0.5)] dark:drop-shadow-[0_0px_20px_rgba(255,255,255,0.3)] bottom-24 md:bottom-20 backdrop-blur-sm bg-background/60 left-1/2 border-2 border-border flex items-center justify-center p-3 -translate-x-1/2 z-10">
-          <div className="w-12 sm:w-16 md:w-24 h-12 sm:h-16 md:h-24 bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
-            {brandIcon || (
-              <Workflow className="w-8 sm:w-10 md:w-14 h-8 sm:h-10 md:h-14 text-background drop-shadow-lg" />
-            )}
-          </div>
-        </div>
+  <div className="absolute left-1/2 -translate-x-1/2 bottom-24 md:bottom-20 z-10">
+  {brandIcon || (
+    <Workflow className="w-16 sm:w-20 md:w-28 h-16 sm:h-20 md:h-28 drop-shadow-lg" />
+  )}
+</div>
+
+
 
         {/* Bottom line */}
         <div className="absolute bottom-32 sm:bottom-34 backdrop-blur-sm h-0.5 bg-gradient-to-r from-transparent via-border to-transparent w-full left-1/2 -translate-x-1/2"></div>
