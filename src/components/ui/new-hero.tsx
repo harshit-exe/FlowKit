@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LightRays from "@/components/ui/LightRays";
+import AnimatedGlowingSearchBar from "@/components/ui/animated-glowing-search-bar";
 
 const navigationItems = [
   { title: "Workflows", href: "/workflows" },
@@ -58,6 +59,26 @@ const previewStyles = `
   }
 
   .hover-word:hover::after {
+    width: 100%;
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-block;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #FF6B35;
+    transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .nav-link:hover::after {
     width: 100%;
   }
 
@@ -118,6 +139,12 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleQuickSearch = (query: string) => {
+    if (typeof window !== 'undefined') {
+      window.location.href = `/search?q=${encodeURIComponent(query)}`;
+    }
+  };
 
   // Preload all images on mount
   useEffect(() => {
@@ -232,7 +259,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-sm font-poppins font-normal text-white/90 hover:text-white transition-colors"
+                  className="nav-link text-sm font-poppins font-normal text-white/90 hover:text-white transition-colors"
                 >
                   {item.title}
                 </Link>
@@ -350,18 +377,49 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
               <span>.</span>
             </div>
 
-            <Link href="/workflows">
-              <div className="p-2 rounded-2xl bg-[rgba(251,169,169,0.2)] inline-block">
-                <div className="p-0.5 rounded-xl bg-gradient-to-b from-[#f5deb3] to-[#d4a574] inline-block">
-                  <Button
-                    size="lg"
-                    className="rounded-xl bg-white text-black hover:bg-white/95 font-poppins font-medium px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-sm"
-                  >
-                    Connect with us
-                  </Button>
-                </div>
+            {/* Modern Search Bar Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <div className="h-px w-12 bg-gradient-to-r from-transparent to-primary"></div>
+                <span className="text-xs font-poppins text-white/60 tracking-widest uppercase">
+                  Free & Open Source
+                </span>
+                <div className="h-px w-12 bg-gradient-to-l from-transparent to-primary"></div>
               </div>
-            </Link>
+
+              <AnimatedGlowingSearchBar
+                placeholder="Try slack automation"
+                className="mt-4"
+              />
+
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+                <span className="text-xs font-poppins text-white/40">Try:</span>
+                <button
+                  onClick={() => handleQuickSearch('AI automation')}
+                  className="px-3 py-1 text-xs font-poppins bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/70 hover:text-white transition-all"
+                >
+                  AI Automation
+                </button>
+                <button
+                  onClick={() => handleQuickSearch('Slack')}
+                  className="px-3 py-1 text-xs font-poppins bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/70 hover:text-white transition-all"
+                >
+                  Slack
+                </button>
+                <button
+                  onClick={() => handleQuickSearch('Email')}
+                  className="px-3 py-1 text-xs font-poppins bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/70 hover:text-white transition-all"
+                >
+                  Email
+                </button>
+                <button
+                  onClick={() => handleQuickSearch('Data sync')}
+                  className="px-3 py-1 text-xs font-poppins bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/70 hover:text-white transition-all"
+                >
+                  Data Sync
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
