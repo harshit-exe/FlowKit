@@ -156,3 +156,19 @@ enum Role {
   ADMIN
   SUPER_ADMIN
 }
+
+// WAITLIST (for access gate)
+model Waitlist {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  accessCode   String    @unique // 6-digit access code
+  hasAccessed  Boolean   @default(false) // Track if they've used the code
+  accessedAt   DateTime? // When they first accessed the site
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([email])
+  @@index([accessCode])
+  @@map("waitlist")
+}
