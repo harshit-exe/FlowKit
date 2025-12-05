@@ -6,28 +6,26 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 let isWarmedUp = false;
 
 /**
- * Warm up the Resend connection with a dummy email
+ * Warm up the Resend connection with a lightweight API call
  * This is critical for serverless environments where the first request is a cold start
+ * Uses domains.list() instead of sending dummy emails to preserve email quota
  */
-async function warmUpWithDummyEmail() {
+async function warmUpResendConnection() {
   if (isWarmedUp) return;
 
   try {
-    console.log('🔥 Warming up Resend connection with dummy email...');
+    console.log('🔥 Warming up Resend connection...');
 
-    // Send a dummy email to warm up the connection
-    // This establishes the connection pool and DNS resolution
-    const dummyResponse = await resend.emails.send({
-      from: 'FlowKit <noreply@flowkit.in>',
-      to: ['warmup@resend.dev'], // Resend's special warmup address
-      subject: 'Connection Warmup',
-      text: 'This is a warmup email to establish the connection.',
-    });
+    // Make a lightweight API call to establish connection
+    // This warms up the connection pool and DNS resolution
+    // WITHOUT consuming email quota (100 emails/day on free tier)
+    await resend.domains.list();
 
     isWarmedUp = true;
-    console.log('✅ Resend connection warmed up successfully');
+    console.log('✅ Resend connection warmed up successfully (no email quota used)');
   } catch (error) {
     console.log('⚠️ Resend warmup failed (this is OK, will warm up on first real send):', error);
+    // Don't throw - if warmup fails, the retry logic will handle it
   }
 }
 
@@ -167,10 +165,11 @@ Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}
   };
 
   // Warm up connection on first call (critical for serverless cold starts)
-  // This sends a dummy email to establish the connection, then sends the real email
+  // This makes a lightweight API call to establish the connection
+  // WITHOUT consuming email quota - preserves all 100 emails/day for actual users
   if (!isWarmedUp) {
     console.log('🔥 First email send detected - warming up connection...');
-    await warmUpWithDummyEmail();
+    await warmUpResendConnection();
   }
 
   // Retry logic - attempt up to 3 times with exponential backoff
