@@ -54,32 +54,29 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Send access code email
-    try {
-      await sendAccessCodeEmail(normalizedEmail, accessCode)
-    } catch (emailError: any) {
-      console.error("Failed to send email:", emailError)
+    // Send access code email asynchronously (non-blocking)
+    // This responds immediately to the user while email sends in background
+    sendAccessCodeEmail(normalizedEmail, accessCode)
+      .then(() => {
+        console.log(`✓ Access code email sent successfully to ${normalizedEmail}`)
+      })
+      .catch((emailError: any) => {
+        console.error(`✗ Failed to send email to ${normalizedEmail}:`, emailError)
 
-      // Provide more specific error messages
-      let errorMessage = "Failed to send access code email. Please try again."
+        // Log specific error for debugging
+        if (emailError.code === "ETIMEDOUT") {
+          console.error("Email server timeout - check SMTP settings")
+        } else if (emailError.code === "EAUTH") {
+          console.error("Email authentication failed - check SMTP credentials")
+        } else if (emailError.code === "ECONNECTION") {
+          console.error("Cannot connect to email server - check SMTP configuration")
+        }
+      })
 
-      if (emailError.code === "ETIMEDOUT") {
-        errorMessage = "Email server timeout. Please check your SMTP settings or try again later."
-      } else if (emailError.code === "EAUTH") {
-        errorMessage = "Email authentication failed. Please check your SMTP credentials."
-      } else if (emailError.code === "ECONNECTION") {
-        errorMessage = "Cannot connect to email server. Please check your SMTP configuration."
-      }
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
-      )
-    }
-
+    // Respond immediately - don't wait for email
     return NextResponse.json({
       success: true,
-      message: "Access code sent to your email",
+      message: "Access code is being sent to your email",
     })
   } catch (error) {
     console.error("Waitlist signup error:", error)

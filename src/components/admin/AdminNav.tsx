@@ -22,6 +22,7 @@ import {
   Menu,
   Box,
   Search as SearchIcon,
+  Mail,
 } from "lucide-react"
 
 interface AdminNavProps {
@@ -54,6 +55,11 @@ export default function AdminNav({ user }: AdminNavProps) {
       name: "Nodes",
       href: "/admin/nodes",
       icon: Box,
+    },
+    {
+      name: "Emails",
+      href: "/admin/emails",
+      icon: Mail,
     },
     {
       name: "SEO",

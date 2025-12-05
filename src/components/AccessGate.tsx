@@ -67,7 +67,7 @@ export default function AccessGate() {
         throw new Error(data.error || "Something went wrong")
       }
 
-      toast.success("Access code sent! Check your inbox.")
+      toast.success("✓ Check your inbox! Access code arriving now...")
       setStep("code")
       setWaitlistCount(prev => prev + 1)
     } catch (error: any) {
@@ -171,66 +171,6 @@ export default function AccessGate() {
 
       {/* Main Content Container - Perfectly centered, no scroll */}
       <div className={`relative h-full w-full flex flex-col items-center ${isMobile ? 'justify-start pt-[88px] px-3' : 'justify-center px-6'} overflow-hidden`}>
-        {/* Stats Bar - Top on desktop, compact */}
-        {!isMobile && (
-          <div className="w-full max-w-4xl mb-6">
-            <div className="grid grid-cols-3 gap-3">
-              {/* Total Builders */}
-              <div className="border-2 border-primary/30 bg-black/80 backdrop-blur-xl p-3 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center gap-2">
-                  <div className="w-8 h-8 border-2 border-primary bg-primary/10 flex items-center justify-center shrink-0">
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xl font-mono font-bold text-primary tabular-nums leading-none">
-                      {waitlistCount.toString().padStart(3, '0')}
-                    </div>
-                    <div className="text-[9px] font-mono text-muted-foreground tracking-wider mt-0.5">
-                      BUILDERS WAITING
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Access Granted */}
-              <div className="border-2 border-primary/30 bg-black/80 backdrop-blur-xl p-3 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center gap-2">
-                  <div className="w-8 h-8 border-2 border-green-500 bg-green-500/10 flex items-center justify-center shrink-0">
-                    <Eye className="h-4 w-4 text-green-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xl font-mono font-bold text-green-500 tabular-nums leading-none">
-                      {accessedCount.toString().padStart(3, '0')}
-                    </div>
-                    <div className="text-[9px] font-mono text-muted-foreground tracking-wider mt-0.5">
-                      ALREADY INSIDE
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Live Indicator */}
-              <div className="border-2 border-primary/30 bg-black/80 backdrop-blur-xl p-3 relative overflow-hidden group hover:border-primary/50 transition-all">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center gap-2">
-                  <div className="w-8 h-8 border-2 border-primary bg-primary/10 flex items-center justify-center relative shrink-0">
-                    <div className="absolute inset-0 bg-primary/20 animate-ping" />
-                    <TrendingUp className="h-4 w-4 text-primary relative z-10" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xl font-mono font-bold text-white leading-none">LIVE</div>
-                    <div className="text-[9px] font-mono text-muted-foreground tracking-wider mt-0.5">
-                      SYSTEM STATUS
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Main Access Card */}
         <div className="w-full max-w-2xl flex-shrink-0">
           {/* Brand Header - Compact */}
@@ -315,17 +255,17 @@ export default function AccessGate() {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className={`w-full ${isMobile ? 'h-11 text-xs' : 'h-12 text-sm'} rounded-none bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary font-mono font-bold tracking-wider shadow-[0_0_30px_rgba(255,102,51,0.3)] hover:shadow-[0_0_40px_rgba(255,102,51,0.5)] transition-all`}
+                      className={`w-full ${isMobile ? 'h-11 text-xs' : 'h-12 text-sm'} rounded-none bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary font-mono font-bold tracking-wider shadow-[0_0_30px_rgba(255,102,51,0.3)] hover:shadow-[0_0_40px_rgba(255,102,51,0.5)] transition-all disabled:opacity-90`}
                     >
                       {isLoading ? (
                         <>
-                          <Loader2 className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} animate-spin`} />
-                          SENDING...
+                          <Loader2 className={`${isMobile ? 'h-4 w-4 mr-2' : 'h-4 w-4 mr-2'} animate-spin`} />
+                          PROCESSING...
                         </>
                       ) : (
                         <>
                           {isMobile ? "GET ACCESS CODE" : "GET MY ACCESS CODE"}
-                          <ArrowRight className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'}`} />
+                          <ArrowRight className={`${isMobile ? 'h-4 w-4 ml-2' : 'h-4 w-4 ml-2'}`} />
                         </>
                       )}
                     </Button>
@@ -496,23 +436,62 @@ export default function AccessGate() {
             </div>
           </div>
 
-          {/* Bottom Stats - Compact single line */}
-          {waitlistCount > 0 && (
-            <div className={`${isMobile ? 'mt-3' : 'mt-4'} text-center`}>
-              <div className={`inline-flex items-center ${isMobile ? 'gap-2' : 'gap-2.5'} border border-primary/30 bg-black/80 backdrop-blur-xl ${isMobile ? 'px-3 py-2' : 'px-5 py-2'}`}>
+          {/* Bottom Stats - Compact 2 cards */}
+          {!isMobile && (
+            <div className="mt-6 w-full">
+              <div className="grid grid-cols-2 gap-3">
+                {/* Total Builders - Compact */}
+                <div className="border border-primary/30 bg-black/80 backdrop-blur-xl px-4 py-2 relative overflow-hidden group hover:border-primary/50 transition-all">
+                  <div className="relative flex items-center gap-2">
+                    <div className="w-7 h-7 border border-primary bg-primary/10 flex items-center justify-center shrink-0">
+                      <Users className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-lg font-mono font-bold text-primary tabular-nums leading-none">
+                        {waitlistCount.toString().padStart(3, '0')}
+                      </div>
+                      <div className="text-[9px] font-mono text-white/60 tracking-wider uppercase leading-tight mt-0.5">
+                        Builders
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Status - Compact */}
+                <div className="border border-green-500/30 bg-black/80 backdrop-blur-xl px-4 py-2 relative overflow-hidden group hover:border-green-500/50 transition-all">
+                  <div className="relative flex items-center gap-2">
+                    <div className="w-7 h-7 border border-green-500 bg-green-500/10 flex items-center justify-center relative shrink-0">
+                      <div className="absolute inset-0 bg-green-500/20 animate-ping" />
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full relative z-10" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-lg font-mono font-bold text-green-500 leading-none">LIVE</div>
+                      <div className="text-[9px] font-mono text-white/60 tracking-wider uppercase leading-tight mt-0.5">
+                        Status
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile bottom stats */}
+          {isMobile && waitlistCount > 0 && (
+            <div className="mt-3 text-center">
+              <div className="inline-flex items-center gap-2 border border-primary/30 bg-black/80 backdrop-blur-xl px-3 py-2">
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                  {!isMobile && <span className="text-[10px] font-mono text-muted-foreground">LIVE</span>}
                 </div>
                 <div className="w-px h-3 bg-primary/30" />
-                <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-mono`}>
+                <span className="text-xs font-mono">
                   <span className="text-primary font-bold tabular-nums">{waitlistCount}</span>
-                  <span className="text-muted-foreground"> {isMobile ? 'waiting' : 'builders in line'}</span>
+                  <span className="text-muted-foreground"> waiting</span>
                 </span>
                 <div className="w-px h-3 bg-primary/30" />
-                <span className={`${isMobile ? 'text-xs' : 'text-xs'} font-mono`}>
+                <span className="text-xs font-mono">
                   <span className="text-green-500 font-bold tabular-nums">{accessedCount}</span>
-                  <span className="text-muted-foreground"> {isMobile ? 'inside' : 'exploring inside'}</span>
+                  <span className="text-muted-foreground"> inside</span>
                 </span>
               </div>
             </div>
