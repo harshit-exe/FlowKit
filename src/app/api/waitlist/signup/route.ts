@@ -54,30 +54,24 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Send access code email asynchronously (non-blocking)
-    // This responds immediately to the user while email sends in background
-    sendAccessCodeEmail(normalizedEmail, accessCode)
-      .then(() => {
-        console.log(`✓ Access code email sent successfully to ${normalizedEmail}`)
-      })
-      .catch((emailError: any) => {
-        console.error(`✗ Failed to send email to ${normalizedEmail}:`, emailError)
+    // Send access code email with retry logic
+    try {
+      const emailResult = await sendAccessCodeEmail(normalizedEmail, accessCode);
+      console.log(`✅ Access code email sent successfully to ${normalizedEmail} on attempt ${emailResult.attempt}, ID: ${emailResult.id}`);
 
-        // Log specific error for debugging
-        if (emailError.code === "ETIMEDOUT") {
-          console.error("Email server timeout - check SMTP settings")
-        } else if (emailError.code === "EAUTH") {
-          console.error("Email authentication failed - check SMTP credentials")
-        } else if (emailError.code === "ECONNECTION") {
-          console.error("Cannot connect to email server - check SMTP configuration")
-        }
-      })
+      return NextResponse.json({
+        success: true,
+        message: "Access code sent to your email",
+      });
+    } catch (emailError: any) {
+      console.error(`❌ Failed to send email to ${normalizedEmail} after all retries:`, emailError);
 
-    // Respond immediately - don't wait for email
-    return NextResponse.json({
-      success: true,
-      message: "Access code is being sent to your email",
-    })
+      // Email failed but user is in waitlist, they can try again
+      return NextResponse.json({
+        success: false,
+        error: "Failed to send email. Please try again in a moment.",
+      }, { status: 500 });
+    }
   } catch (error) {
     console.error("Waitlist signup error:", error)
     return NextResponse.json(

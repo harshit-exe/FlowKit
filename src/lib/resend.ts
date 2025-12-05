@@ -2,13 +2,40 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Track warmup status
+let isWarmedUp = false;
+
+/**
+ * Warm up the Resend connection on server start
+ * This helps prevent the "first request is slow" issue
+ */
+async function warmUpResend() {
+  if (isWarmedUp) return;
+
+  try {
+    // Make a lightweight call to establish connection
+    await resend.domains.list();
+    isWarmedUp = true;
+    console.log('✅ Resend connection warmed up successfully');
+  } catch (error) {
+    console.log('⚠️ Resend warmup failed, will retry on first send:', error);
+  }
+}
+
+// Warm up connection immediately when module is loaded
+warmUpResend();
+
+/**
+ * Send access code email with retry logic and exponential backoff
+ * This ensures emails are sent reliably even on first attempt
+ */
 export async function sendAccessCodeEmail(
-    to: string,
-    accessCode: string
-): Promise<void> {
-    // Plain text version for better spam score
-    // IMPORTANT: Access code is at the top for mobile preview visibility
-    const emailText = `
+  to: string,
+  accessCode: string
+): Promise<{ success: boolean; id?: string; attempt: number }> {
+  // Plain text version for better spam score
+  // IMPORTANT: Access code is at the top for mobile preview visibility
+  const emailText = `
 YOUR FLOWKIT ACCESS CODE: ${accessCode}
 
 Welcome to FlowKit!
@@ -37,9 +64,9 @@ You received this email because you requested access to FlowKit.
 Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}
   `.trim();
 
-    // HTML version with inline styles (email clients strip <style> tags)
-    // IMPORTANT: Access code is at the top for mobile preview visibility
-    const emailHtml = `
+  // HTML version with inline styles (email clients strip <style> tags)
+  // IMPORTANT: Access code is at the top for mobile preview visibility
+  const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -125,18 +152,47 @@ Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}
 </html>
   `.trim();
 
+  const emailOptions = {
+    from: 'FlowKit <noreply@flowkit.in>',
+    to: [to],
+    subject: 'Your FlowKit Access Code',
+    text: emailText,
+    html: emailHtml,
+  };
+
+  // Retry logic - attempt up to 3 times with exponential backoff
+  let lastError: any;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-        await resend.emails.send({
-            from: 'FlowKit <noreply@flowkit.in>',
-            to,
-            subject: 'Your FlowKit Access Code',
-            text: emailText,
-            html: emailHtml,
-        });
-    } catch (error) {
-        console.error('Failed to send access code email:', error);
-        throw error;
+      console.log(`📧 Attempt ${attempt}/3 - Sending OTP to ${to}`);
+
+      const response = await resend.emails.send(emailOptions);
+
+      // Check if the response has an error
+      if (response.error) {
+        throw new Error(response.error.message || 'Email send failed');
+      }
+
+      console.log(`✅ Email sent successfully on attempt ${attempt}:`, response.data?.id);
+      return { success: true, id: response.data?.id, attempt };
+
+    } catch (error: any) {
+      lastError = error;
+      console.error(`❌ Attempt ${attempt}/3 failed:`, error.message);
+
+      // Wait before retry with exponential backoff (1s, 2s)
+      if (attempt < 3) {
+        const waitTime = attempt * 1000;
+        console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
     }
+  }
+
+  // All attempts failed
+  console.error('❌ All 3 email send attempts failed:', lastError);
+  throw new Error(`Failed to send email after 3 attempts: ${lastError?.message || 'Unknown error'}`);
 }
 
 export { resend };
