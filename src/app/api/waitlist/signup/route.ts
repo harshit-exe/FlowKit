@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { sendAccessCodeEmail } from "@/lib/nodemailer"
+import { sendAccessCodeEmail } from "@/lib/resend"
 
 function generateAccessCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString()

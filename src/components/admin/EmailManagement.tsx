@@ -139,7 +139,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
         <Card className="p-6 border-2">
           <h3 className="text-xl font-mono font-bold mb-4">TEST EMAIL DELIVERY</h3>
           <p className="text-sm text-muted-foreground font-mono mb-6">
-            Send a test email to verify your SMTP configuration is working correctly.
+            Send a test email to verify your Resend configuration is working correctly.
           </p>
 
           <div className="space-y-4">
@@ -277,7 +277,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
                 <div className="font-bold mb-1">Subject:</div>
                 <div className="mb-3">Your FlowKit Access Code 🔑</div>
                 <div className="font-bold mb-1">Template Location:</div>
-                <div className="text-primary">src/lib/nodemailer.ts</div>
+                <div className="text-primary">src/lib/resend.ts</div>
               </div>
             </div>
 
@@ -307,7 +307,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
                 <span className="text-xs font-mono text-muted-foreground">SYSTEM</span>
               </div>
               <p className="text-sm text-muted-foreground font-mono mb-3">
-                Simple test email to verify SMTP configuration.
+                Simple test email to verify Resend configuration.
               </p>
               <div className="bg-muted/50 p-3 rounded font-mono text-xs">
                 <div className="font-bold mb-1">Purpose:</div>
