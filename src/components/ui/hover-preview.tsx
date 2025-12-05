@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 
 const previewData = {
   automation: {
@@ -74,13 +75,6 @@ const styles = `
     overflow: hidden;
   }
 
-  .preview-card img {
-    width: 280px;
-    height: auto;
-    display: block;
-    border: 1px solid hsl(var(--border));
-  }
-
   .preview-card-title {
     padding: 12px 8px 4px;
     font-size: 0.875rem;
@@ -143,12 +137,17 @@ const PreviewCard = ({
       }}
     >
       <div className="preview-card-inner">
-        <img
-          src={data.image || "/placeholder.svg"}
-          alt={data.title || ""}
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
+        <div className="relative w-[280px] h-[160px]">
+          <Image
+            src={data.image || "/placeholder.svg"}
+            alt={data.title || ""}
+            fill
+            sizes="280px"
+            className="object-cover border border-border"
+            loading="lazy"
+            quality={80}
+          />
+        </div>
         <div className="preview-card-title font-mono">{data.title}</div>
         <div className="preview-card-subtitle font-mono">{data.subtitle}</div>
       </div>
@@ -167,7 +166,7 @@ export function HoverPreview({ totalWorkflows = 150 }: { totalWorkflows?: number
   // Preload all images on mount
   useEffect(() => {
     Object.entries(previewData).forEach(([, data]) => {
-      const img = new Image();
+      const img = new window.Image();
       img.crossOrigin = "anonymous";
       img.src = data.image;
     });

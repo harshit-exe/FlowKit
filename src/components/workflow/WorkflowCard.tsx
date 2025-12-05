@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Eye, Download } from "lucide-react"
@@ -14,11 +15,15 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
       <Card className="h-full hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer border-2 border-transparent hover:border-[#FF6B35]/50">
         {/* Thumbnail */}
         {workflow.thumbnail && (
-          <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-            <img
+          <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-muted relative">
+            <Image
               src={workflow.thumbnail}
               alt={workflow.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover"
+              loading="lazy"
+              quality={85}
             />
           </div>
         )}

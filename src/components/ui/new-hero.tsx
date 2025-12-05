@@ -230,6 +230,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
           fill
           className="object-cover opacity-60"
           priority
+          unoptimized
         />
       </div>
 
@@ -326,6 +327,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
                         height={100}
                         width={100}
                         className="object-contain"
+                        unoptimized
                       />
                     </div>
                   </span>
@@ -424,12 +426,17 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
           }}
         >
           <div className="preview-card-inner">
-            <img
-              src={previewCardData.image}
-              alt={previewCardData.title}
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
-            />
+            <div className="relative w-full h-[180px]">
+              <Image
+                src={previewCardData.image}
+                alt={previewCardData.title}
+                fill
+                sizes="560px"
+                className="object-cover"
+                loading="lazy"
+                quality={80}
+              />
+            </div>
             <div className="preview-card-title font-poppins">
               {previewCardData.title}
             </div>

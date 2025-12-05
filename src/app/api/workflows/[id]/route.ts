@@ -76,20 +76,31 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       where: { workflowId: params.id },
     })
 
-    // Create or connect tags
+    // Create or connect tags (deduplicate first)
+    const uniqueTagNames: string[] = Array.from(new Set(tagNames.map((name: string) => name.trim()).filter(Boolean)));
+
     const tagConnections = await Promise.all(
-      tagNames.map(async (tagName: string) => {
-        const tag = await prisma.tag.upsert({
-          where: { name: tagName },
-          update: {},
-          create: {
-            name: tagName,
-            slug: tagName.toLowerCase().replace(/\s+/g, "-"),
-          },
-        })
-        return { tag: { connect: { id: tag.id } } }
+      uniqueTagNames.map(async (tagName: string) => {
+        const tagSlug = tagName.toLowerCase().replace(/\s+/g, "-");
+
+        // Try to find existing tag by slug first
+        let tag = await prisma.tag.findUnique({
+          where: { slug: tagSlug },
+        });
+
+        // If not found, create it
+        if (!tag) {
+          tag = await prisma.tag.create({
+            data: {
+              name: tagName,
+              slug: tagSlug,
+            },
+          });
+        }
+
+        return { tag: { connect: { id: tag.id } } };
       })
-    )
+    );
 
     // Update workflow
     const workflow = await prisma.workflow.update({

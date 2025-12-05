@@ -41,6 +41,7 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false)
+  const [isAutoFilling, setIsAutoFilling] = useState(false)
   const [thumbnailPrompt, setThumbnailPrompt] = useState<any>(null)
   const [showPromptDialog, setShowPromptDialog] = useState(false)
 
@@ -237,6 +238,56 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
       toast.success("Prompt copied to clipboard!")
     }
   }
+
+  // Complete Auto-fill - AI analyzes JSON and fills ALL fields
+  const handleCompleteAutoFill = async () => {
+    const jsonString = watch("workflowJson");
+
+    if (!jsonString || jsonString.trim() === "{}") {
+      toast.error("Please paste your workflow JSON first");
+      return;
+    }
+
+    setIsAutoFilling(true);
+
+    try {
+      const response = await fetch("/api/ai/complete-autofill", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          workflowJson: jsonString,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to auto-fill");
+      }
+
+      const { data } = await response.json();
+
+      // Fill all fields with AI-generated data
+      setValue("name", data.name);
+      setValue("description", data.description);
+      setValue("icon", data.icon);
+      setValue("difficulty", data.difficulty);
+      setValue("nodeCount", data.nodeCount);
+      setValue("nodes", data.nodes || []);
+      setValue("credentialsRequired", data.credentialsRequired || []);
+      setValue("useCases", data.useCases || [""]);
+      setValue("setupSteps", data.setupSteps || [""]);
+      setValue("tagNames", data.tags || []);
+
+      toast.success("🎉 All fields auto-filled successfully! Review and adjust as needed.");
+    } catch (error) {
+      console.error("Complete auto-fill error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to auto-fill fields");
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
 
   // Form submission
   const onSubmit: SubmitHandler<WorkflowFormValues> = async (data) => {
@@ -652,20 +703,47 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
             <CardTitle>
               Workflow JSON <span className="text-red-500">*</span>
             </CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleParseJSON}
-              className="border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white transition-colors"
-            >
-              <FileJson className="h-4 w-4 mr-2" />
-              Parse JSON
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={handleCompleteAutoFill}
+                disabled={isAutoFilling || !watch("workflowJson") || watch("workflowJson").trim() === "{}"}
+                className="bg-[#FF6B35] hover:bg-[#FF6B35]/90 text-white border-2 border-[#FF6B35]"
+              >
+                {isAutoFilling ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Auto-filling...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Complete Auto-fill
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleParseJSON}
+                className="border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white transition-colors"
+              >
+                <FileJson className="h-4 w-4 mr-2" />
+                Parse JSON
+              </Button>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Paste your n8n workflow JSON here. Click "Parse JSON" to automatically extract node count, nodes, and credentials.
-          </p>
+          <div className="space-y-2 mt-3">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-[#FF6B35]">✨ Complete Auto-fill:</strong> AI analyzes your JSON and fills ALL fields (name, description, use cases, setup steps, credentials, tags, etc.)
+            </p>
+            <p className="text-sm text-muted-foreground">
+              <strong>Parse JSON:</strong> Extracts only node count, nodes, and credentials from JSON
+            </p>
+          </div>
         </CardHeader>
         <CardContent className="space-y-2">
           <Textarea

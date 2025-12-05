@@ -43,6 +43,7 @@ export default function Footer() {
                                height={100}
                                width={100}
                                className="object-contain"
+                               unoptimized
                              />
       }
     />
