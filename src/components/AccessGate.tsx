@@ -19,8 +19,8 @@ export default function AccessGate() {
   useEffect(() => {
     setMounted(true)
 
-    // Check if user has valid access in sessionStorage
-    const hasAccess = sessionStorage.getItem("flowkit_access")
+    // Check if user has valid access in localStorage (persists across tabs)
+    const hasAccess = localStorage.getItem("flowkit_access")
     if (hasAccess === "true") {
       window.location.reload()
     }
@@ -101,7 +101,7 @@ export default function AccessGate() {
       }
 
       toast.success("Access granted! Welcome to FlowKit.")
-      sessionStorage.setItem("flowkit_access", "true")
+      localStorage.setItem("flowkit_access", "true")
 
       setTimeout(() => {
         window.location.reload()
