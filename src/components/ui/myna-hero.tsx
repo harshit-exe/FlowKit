@@ -24,7 +24,7 @@ const navigationItems = [
   { title: "WORKFLOWS", href: "/workflows" },
   { title: "CATEGORIES", href: "#categories" },
   { title: "AI BUILDER", href: "/ai-builder" },
-  { title: "ABOUT", href: "#about" },
+  { title: "ABOUT", href: "/about" },
 ];
 
 const labels = [

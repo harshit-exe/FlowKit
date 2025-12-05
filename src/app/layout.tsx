@@ -56,7 +56,21 @@ export default function RootLayout({
           <NavigationLoader />
           <AccessGateWrapper />
           {children}
-          <Toaster position="top-center" richColors />
+          <Toaster 
+            position="top-center"
+            theme="dark"
+            toastOptions={{
+              style: {
+                background: '#0a0a0a',
+                color: '#ffffff',
+                border: '2px solid #FF6B35',
+                fontFamily: 'var(--font-space-mono)',
+                fontSize: '14px',
+                borderRadius: '8px',
+              },
+              className: 'font-mono',
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
