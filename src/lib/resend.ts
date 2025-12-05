@@ -6,24 +6,30 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 let isWarmedUp = false;
 
 /**
- * Warm up the Resend connection on server start
- * This helps prevent the "first request is slow" issue
+ * Warm up the Resend connection with a dummy email
+ * This is critical for serverless environments where the first request is a cold start
  */
-async function warmUpResend() {
+async function warmUpWithDummyEmail() {
   if (isWarmedUp) return;
 
   try {
-    // Make a lightweight call to establish connection
-    await resend.domains.list();
+    console.log('🔥 Warming up Resend connection with dummy email...');
+
+    // Send a dummy email to warm up the connection
+    // This establishes the connection pool and DNS resolution
+    const dummyResponse = await resend.emails.send({
+      from: 'FlowKit <noreply@flowkit.in>',
+      to: ['warmup@resend.dev'], // Resend's special warmup address
+      subject: 'Connection Warmup',
+      text: 'This is a warmup email to establish the connection.',
+    });
+
     isWarmedUp = true;
     console.log('✅ Resend connection warmed up successfully');
   } catch (error) {
-    console.log('⚠️ Resend warmup failed, will retry on first send:', error);
+    console.log('⚠️ Resend warmup failed (this is OK, will warm up on first real send):', error);
   }
 }
-
-// Warm up connection immediately when module is loaded
-warmUpResend();
 
 /**
  * Send access code email with retry logic and exponential backoff
@@ -159,6 +165,13 @@ Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}
     text: emailText,
     html: emailHtml,
   };
+
+  // Warm up connection on first call (critical for serverless cold starts)
+  // This sends a dummy email to establish the connection, then sends the real email
+  if (!isWarmedUp) {
+    console.log('🔥 First email send detected - warming up connection...');
+    await warmUpWithDummyEmail();
+  }
 
   // Retry logic - attempt up to 3 times with exponential backoff
   let lastError: any;
