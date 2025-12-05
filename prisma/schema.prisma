@@ -3,7 +3,7 @@
 
 datasource db {
   provider     = "mysql"
-  relationMode = "prisma"
+  relationMode = "prisma" // For compatibility with serverless databases
 }
 
 generator client {
