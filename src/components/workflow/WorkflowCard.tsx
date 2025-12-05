@@ -34,8 +34,10 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-2">{workflow.description}</p>
+          <p 
+            className="text-sm text-gray-400 line-clamp-2"
+            dangerouslySetInnerHTML={{ __html: workflow.description }}
+          />
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2">

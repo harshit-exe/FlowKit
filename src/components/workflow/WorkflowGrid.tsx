@@ -13,7 +13,7 @@ export default function WorkflowGrid({
   if (workflows.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">{emptyMessage}</p>
+        <p className="text-gray-400 text-lg">{emptyMessage}</p>
       </div>
     )
   }

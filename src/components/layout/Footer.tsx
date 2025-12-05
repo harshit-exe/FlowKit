@@ -6,7 +6,7 @@ export default function Footer() {
   const socialLinks = [
     {
       icon: <Github className="w-6 h-6" />,
-      href: "https://github.com/yourusername/flowkit",
+      href: "https://github.com/harshit-exe/flowkit",
       label: "GitHub",
     },
     {
@@ -24,10 +24,10 @@ export default function Footer() {
   const navLinks = [
     { label: "Workflows", href: "/workflows" },
     { label: "AI Builder", href: "/ai-builder" },
-    { label: "Categories", href: "/workflows" },
-    { label: "About", href: "#" },
-    { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
+    { label: "Categories", href: "/#categories" },
+    { label: "About", href: "/about" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
   ];
 
   return (

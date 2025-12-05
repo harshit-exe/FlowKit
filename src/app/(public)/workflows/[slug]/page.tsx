@@ -93,9 +93,10 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
               <h1 className="text-4xl font-bold font-mono uppercase tracking-tight">
                 {workflow.name}
               </h1>
-              <p className="text-xl text-muted-foreground font-mono mt-2">
-                {workflow.description}
-              </p>
+              <p 
+                className="text-xl text-muted-foreground font-mono mt-2"
+                dangerouslySetInnerHTML={{ __html: workflow.description }}
+              />
             </div>
           </div>
 

@@ -16,6 +16,8 @@ interface ScrollRevealProps {
   blurStrength?: number;
   containerClassName?: string;
   textClassName?: string;
+  textColor?: string;
+  secondaryTextColor?: string; // Color for text after '|||' marker
   rotationEnd?: string;
   wordAnimationEnd?: string;
 }
@@ -29,6 +31,8 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
   blurStrength = 4,
   containerClassName = '',
   textClassName = '',
+  textColor,
+  secondaryTextColor,
   rotationEnd = 'bottom bottom',
   wordAnimationEnd = 'bottom bottom'
 }) => {
@@ -36,15 +40,70 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
   const splitText = useMemo(() => {
     const text = typeof children === 'string' ? children : '';
+    
+    // Check if there's a secondary color marker
+    const parts = text.split('|||');
+    const hasSecondaryColor = parts.length > 1 && secondaryTextColor;
+    
+    if (hasSecondaryColor) {
+      // Split into primary and secondary parts
+      const primaryWords = parts[0].split(/(\s+)/);
+      const secondaryWords = parts[1].split(/(\s+)/);
+      
+      let index = 0;
+      const result: any[] = [];
+      
+      // Process primary words
+      primaryWords.forEach((word) => {
+        if (word.match(/^\s+$/)) {
+          result.push(word);
+        } else {
+          result.push(
+            <span 
+              className="word" 
+              key={index++}
+              style={textColor ? { color: textColor } : undefined}
+            >
+              {word}
+            </span>
+          );
+        }
+      });
+      
+      // Process secondary words with secondary color
+      secondaryWords.forEach((word) => {
+        if (word.match(/^\s+$/)) {
+          result.push(word);
+        } else {
+          result.push(
+            <span 
+              className="word" 
+              key={index++}
+              style={{ color: secondaryTextColor }}
+            >
+              {word}
+            </span>
+          );
+        }
+      });
+      
+      return result;
+    }
+    
+    // Original single-color logic
     return text.split(/(\s+)/).map((word, index) => {
       if (word.match(/^\s+$/)) return word;
       return (
-        <span className="word" key={index}>
+        <span 
+          className="word" 
+          key={index}
+          style={textColor ? { color: textColor } : undefined}
+        >
           {word}
         </span>
       );
     });
-  }, [children]);
+  }, [children, textColor, secondaryTextColor]);
 
   useEffect(() => {
     const el = containerRef.current;

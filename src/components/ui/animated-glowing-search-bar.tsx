@@ -7,6 +7,7 @@ import { Search } from 'lucide-react';
 interface AnimatedGlowingSearchBarProps {
   placeholder?: string;
   className?: string;
+  size?: 'normal' | 'large'; // normal = 301px (navbar), large = 500px (hero)
 }
 
 const styles = `
@@ -25,9 +26,27 @@ const styles = `
 
 const AnimatedGlowingSearchBar = ({
   placeholder = "Search workflows...",
-  className = ""
+  className = "",
+  size = "normal"
 }: AnimatedGlowingSearchBarProps) => {
   const [query, setQuery] = useState('');
+  
+  // Width configurations
+  const widths = size === 'large' 
+    ? {
+        outer: 514,
+        secondary: 512,
+        light: 507,
+        inner: 503,
+        input: 500
+      }
+    : {
+        outer: 314,
+        secondary: 312,
+        light: 307,
+        inner: 303,
+        input: 301
+      };
   const router = useRouter();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -42,37 +61,55 @@ const AnimatedGlowingSearchBar = ({
       <style>{styles}</style>
       <div className="relative flex items-center justify-center group">
         {/* Outer rotating gradient - Primary Orange theme */}
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[70px] max-w-[314px] rounded-xl blur-[3px] animate-border-spin
+        <div 
+          className="absolute z-[-1] overflow-hidden h-full w-full max-h-[70px] rounded-xl blur-[3px] animate-border-spin
                         before:absolute before:content-[''] before:z-[-2] before:w-[999px] before:h-[999px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
-                        before:bg-[conic-gradient(#000,#FF6B35_5%,#000_38%,#000_50%,#F44E11_60%,#000_87%)]">
+                        before:bg-[conic-gradient(#000,#FF6B35_5%,#000_38%,#000_50%,#F44E11_60%,#000_87%)]"
+          style={{ maxWidth: `${widths.outer}px` }}
+        >
         </div>
 
         {/* Secondary gradient layers - Orange tones */}
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] max-w-[312px] rounded-xl blur-[3px] animate-border-spin
+        <div 
+          className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px] animate-border-spin
                         before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
-                        before:bg-[conic-gradient(rgba(0,0,0,0),#C73D0D,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#9A2F0A,rgba(0,0,0,0)_60%)]">
+                        before:bg-[conic-gradient(rgba(0,0,0,0),#C73D0D,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#9A2F0A,rgba(0,0,0,0)_60%)]"
+          style={{ maxWidth: `${widths.secondary}px` }}
+        >
         </div>
 
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] max-w-[312px] rounded-xl blur-[3px] animate-border-spin
+        <div 
+          className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px] animate-border-spin
                         before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
-                        before:bg-[conic-gradient(rgba(0,0,0,0),#C73D0D,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#9A2F0A,rgba(0,0,0,0)_60%)]">
+                        before:bg-[conic-gradient(rgba(0,0,0,0),#C73D0D,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#9A2F0A,rgba(0,0,0,0)_60%)]"
+          style={{ maxWidth: `${widths.secondary}px` }}
+        >
         </div>
 
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] max-w-[312px] rounded-xl blur-[3px] animate-border-spin
+        <div 
+          className="absolute z-[-1] overflow-hidden h-full w-full max-h-[65px] rounded-xl blur-[3px] animate-border-spin
                         before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
-                        before:bg-[conic-gradient(rgba(0,0,0,0),#C73D0D,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#9A2F0A,rgba(0,0,0,0)_60%)]">
+                        before:bg-[conic-gradient(rgba(0,0,0,0),#C73D0D,rgba(0,0,0,0)_10%,rgba(0,0,0,0)_50%,#9A2F0A,rgba(0,0,0,0)_60%)]"
+          style={{ maxWidth: `${widths.secondary}px` }}
+        >
         </div>
 
         {/* Light layer - Orange glow */}
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[63px] max-w-[307px] rounded-lg blur-[2px] animate-border-spin
+        <div 
+          className="absolute z-[-1] overflow-hidden h-full w-full max-h-[63px] rounded-lg blur-[2px] animate-border-spin
                         before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
-                        before:bg-[conic-gradient(rgba(0,0,0,0)_0%,#FFD1C2,rgba(0,0,0,0)_8%,rgba(0,0,0,0)_50%,#FFE8E0,rgba(0,0,0,0)_58%)] before:brightness-140">
+                        before:bg-[conic-gradient(rgba(0,0,0,0)_0%,#FFD1C2,rgba(0,0,0,0)_8%,rgba(0,0,0,0)_50%,#FFE8E0,rgba(0,0,0,0)_58%)] before:brightness-140"
+          style={{ maxWidth: `${widths.light}px` }}
+        >
         </div>
 
         {/* Inner dark layer */}
-        <div className="absolute z-[-1] overflow-hidden h-full w-full max-h-[59px] max-w-[303px] rounded-xl blur-[0.5px] animate-border-spin
+        <div 
+          className="absolute z-[-1] overflow-hidden h-full w-full max-h-[59px] rounded-xl blur-[0.5px] animate-border-spin
                         before:absolute before:content-[''] before:z-[-2] before:w-[600px] before:h-[600px] before:bg-no-repeat before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
-                        before:bg-[conic-gradient(#1c191c,#FF6B35_5%,#1c191c_14%,#1c191c_50%,#F44E11_60%,#1c191c_64%)] before:brightness-130">
+                        before:bg-[conic-gradient(#1c191c,#FF6B35_5%,#1c191c_14%,#1c191c_50%,#F44E11_60%,#1c191c_64%)] before:brightness-130"
+          style={{ maxWidth: `${widths.inner}px` }}
+        >
         </div>
 
         {/* Main input container */}
@@ -82,7 +119,8 @@ const AnimatedGlowingSearchBar = ({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="bg-[#010201] border-none w-[301px] h-[56px] rounded-lg text-white px-[59px] text-lg focus:outline-none placeholder-gray-400 font-poppins"
+            className="bg-[#010201] border-none h-[56px] rounded-lg text-white px-[59px] text-lg focus:outline-none placeholder-gray-400 font-poppins"
+            style={{ width: `${widths.input}px` }}
           />
 
           {/* Orange glow mask */}

@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { generateMetadata as generateSEOMetadata, siteConfig, jsonLd, organizationJsonLd } from "@/lib/seo";
 import { ThemeProvider } from "@/components/theme-provider";
 import AccessGateWrapper from "@/components/AccessGateWrapper";
+import NavigationLoader from "@/components/ui/navigation-loader";
 
 const spaceMono = Space_Mono({
   weight: ['400', '700'],
@@ -52,6 +53,7 @@ export default function RootLayout({
           forcedTheme="dark"
           disableTransitionOnChange={false}
         >
+          <NavigationLoader />
           <AccessGateWrapper />
           {children}
           <Toaster position="top-center" richColors />

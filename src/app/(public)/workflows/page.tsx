@@ -29,7 +29,7 @@ export default async function WorkflowsPage() {
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold">All Workflows</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-400 mt-2">
             Browse {workflows.length} curated n8n workflows
           </p>
         </div>

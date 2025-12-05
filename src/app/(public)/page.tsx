@@ -86,12 +86,13 @@ export default async function HomePage() {
             enableBlur={true}
             baseRotation={5}
             blurStrength={10}
-            containerClassName="max-w-7xl mx-auto text-center px-4 sm:px-6"
+            containerClassName="max-w-5xl mx-auto text-center px-4 sm:px-6"
             textClassName="text-white/90 font-poppins text-sm sm:text-lg md:text-xl leading-relaxed"
+            secondaryTextColor="rgba(129, 129, 129, 1)"
             rotationEnd="bottom center"
             wordAnimationEnd="bottom center"
           >
-            Our node-based system gives you the freedom to build with precision nothing more, nothing less. Each connection flows naturally mirroring the way you think and solve problems. The result is a creative process that feels effortless, intelligent and uniquely yours.
+            Our node-based system gives you the freedom to build with precision nothing more, nothing less. Each connection flows naturally mirroring the way you think and solve problems. |||The result is a creative process that feels effortless, intelligent and uniquely yours.
           </ScrollReveal>
         </div>
       </div>
@@ -147,9 +148,10 @@ export default async function HomePage() {
                       )}
                     </div>
 
-                    <p className="text-sm text-muted-foreground font-mono line-clamp-2 mb-4 flex-1">
-                      {workflow.description}
-                    </p>
+                    <p 
+                      className="text-sm text-muted-foreground font-mono line-clamp-2 mb-4 flex-1"
+                      dangerouslySetInnerHTML={{ __html: workflow.description }}
+                    />
 
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary" className="font-mono text-xs">
