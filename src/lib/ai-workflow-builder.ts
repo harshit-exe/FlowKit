@@ -118,8 +118,17 @@ export type WorkflowGenerationProgress = {
 
 export async function generateWorkflowWithAI(
   prompt: string,
-  onProgress?: (progress: WorkflowGenerationProgress) => void
+  onProgress?: (progress: WorkflowGenerationProgress) => void,
+  userApiKey?: string
 ): Promise<any> {
+  // Use user's API key if provided, otherwise fall back to server key
+  const apiKey = userApiKey || process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("API key is required");
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash-exp",
   });

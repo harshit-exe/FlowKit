@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Copy, Download, Sparkles, Eye } from "lucide-react"
+import { Loader2, Copy, Download, Sparkles, Eye, Key } from "lucide-react"
 import { toast } from "sonner"
 import { copyWorkflowJSON, downloadWorkflowJSON } from "@/lib/utils"
 import { WorkflowProgress, ProgressStep } from "@/components/ui/workflow-progress"
 import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
+import ApiKeyModal from "@/components/ui/api-key-modal"
 
 export default function AIBuilderPage() {
   const [prompt, setPrompt] = useState("")
@@ -18,6 +19,8 @@ export default function AIBuilderPage() {
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([])
   const [currentMessage, setCurrentMessage] = useState("")
   const [showPreview, setShowPreview] = useState(false)
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false)
+  const [hasApiKey, setHasApiKey] = useState(false)
 
   const examplePrompts = [
     "Send email when new row is added to Google Sheets",
@@ -25,6 +28,17 @@ export default function AIBuilderPage() {
     "Create Discord notification for new GitHub issues",
     "Send weekly summary email from aggregated data",
   ]
+
+  useEffect(() => {
+    // Check if API key exists in localStorage
+    const apiKey = localStorage.getItem("gemini_api_key");
+    setHasApiKey(!!apiKey);
+  }, []);
+
+  const handleApiKeySave = (apiKey: string) => {
+    setHasApiKey(true);
+    toast.success("API key saved successfully!");
+  };
 
   const initializeSteps = () => {
     setProgressSteps([
@@ -48,6 +62,14 @@ export default function AIBuilderPage() {
       return
     }
 
+    // Check if API key exists
+    const apiKey = localStorage.getItem("gemini_api_key");
+    if (!apiKey) {
+      setShowApiKeyModal(true);
+      toast.error("Please add your Google Gemini API key first");
+      return;
+    }
+
     setIsGenerating(true)
     setGeneratedWorkflow(null)
     setShowPreview(false)
@@ -57,7 +79,7 @@ export default function AIBuilderPage() {
       const response = await fetch("/api/ai/generate-stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, apiKey }),
       })
 
       if (!response.ok) {
@@ -156,10 +178,21 @@ export default function AIBuilderPage() {
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <Badge className="text-sm px-4 py-1 font-mono border-2">
-            <Sparkles className="h-3 w-3 mr-1" />
-            POWERED BY GOOGLE GEMINI AI
-          </Badge>
+          <div className="flex items-center justify-center gap-3">
+            <Badge className="text-sm px-4 py-1 font-mono border-2">
+              <Sparkles className="h-3 w-3 mr-1" />
+              POWERED BY GOOGLE GEMINI AI
+            </Badge>
+            <Button
+              variant={hasApiKey ? "outline" : "default"}
+              size="sm"
+              onClick={() => setShowApiKeyModal(true)}
+              className="font-mono border-2"
+            >
+              <Key className="h-3 w-3 mr-1" />
+              {hasApiKey ? "API KEY SET ✓" : "ADD API KEY"}
+            </Button>
+          </div>
           <h1 className="text-5xl font-bold font-mono uppercase tracking-tight">
             AI WORKFLOW BUILDER
           </h1>
@@ -169,7 +202,7 @@ export default function AIBuilderPage() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className={`grid grid-cols-1 ${!generatedWorkflow ? 'lg:grid-cols-2' : ''} gap-8`}>
           {/* Input Section */}
           <div className="space-y-6">
             <Card className="border-2 font-mono">
@@ -233,7 +266,7 @@ export default function AIBuilderPage() {
           </div>
 
           {/* Output Section */}
-          <div>
+          <div className={generatedWorkflow ? 'lg:col-span-1' : ''}>
             {isGenerating ? (
               <Card className="border-2 font-mono">
                 <CardHeader>
@@ -305,7 +338,7 @@ export default function AIBuilderPage() {
                   </CardContent>
                 </Card>
 
-                {/* Workflow Visualizer */}
+                {/* Workflow Visualizer - Now Full Width */}
                 {showPreview && (
                   <Card className="border-2 font-mono">
                     <CardHeader>
@@ -316,7 +349,7 @@ export default function AIBuilderPage() {
                     <CardContent className="p-0">
                       <WorkflowVisualizer
                         workflowJson={generatedWorkflow}
-                        className="w-full"
+                        className="w-full min-h-[600px]"
                       />
                     </CardContent>
                   </Card>
@@ -395,6 +428,13 @@ export default function AIBuilderPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* API Key Modal */}
+        <ApiKeyModal
+          isOpen={showApiKeyModal}
+          onClose={() => setShowApiKeyModal(false)}
+          onSave={handleApiKeySave}
+        />
       </div>
     </div>
   )

@@ -4,10 +4,14 @@ import { generateWorkflowWithAI, WorkflowGenerationProgress } from "@/lib/ai-wor
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { prompt } = body;
+    const { prompt, apiKey } = body;
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ error: "Invalid prompt" }, { status: 400 });
+    }
+
+    if (!apiKey || typeof apiKey !== "string") {
+      return NextResponse.json({ error: "API key is required" }, { status: 400 });
     }
 
     if (prompt.length > 500) {
@@ -28,7 +32,8 @@ export async function POST(request: Request) {
               // Send progress updates as SSE
               const data = `data: ${JSON.stringify(progress)}\n\n`;
               controller.enqueue(encoder.encode(data));
-            }
+            },
+            apiKey // Pass user's API key
           );
 
           // Send final result
