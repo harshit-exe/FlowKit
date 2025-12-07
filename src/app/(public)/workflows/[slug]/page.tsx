@@ -120,7 +120,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
     data: { views: { increment: 1 } },
   }).catch(() => {})
 
-  // Fetch related workflows
+  // Fetch related workflows (optimized query)
   const categoryIds = workflow.categories.map((c) => c.categoryId)
   const relatedWorkflows = await prisma.workflow.findMany({
     where: {
@@ -138,17 +138,77 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         },
       ],
     },
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      icon: true,
+      thumbnail: true,
+      difficulty: true,
+      featured: true,
+      indiaBadge: true,
+      nodeCount: true,
+      views: true,
+      downloads: true,
+      createdAt: true,
       categories: {
-        include: { category: true },
+        select: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+              color: true,
+            },
+          },
+        },
       },
       tags: {
-        include: { tag: true },
+        select: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
       },
     },
     take: 3,
     orderBy: { views: "desc" },
   })
+
+  // Transform to match expected type
+  const transformedRelated = relatedWorkflows.map((wf) => ({
+    ...wf,
+    videoUrl: null,
+    workflowJson: {},
+    useCases: [],
+    setupSteps: [],
+    credentialsRequired: [],
+    nodes: [],
+    published: true,
+    updatedAt: wf.createdAt,
+    publishedAt: wf.createdAt,
+    categories: wf.categories.map((cat) => ({
+      category: {
+        ...cat.category,
+        description: null,
+        order: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    })),
+    tags: wf.tags.map((t) => ({
+      tag: {
+        ...t.tag,
+        createdAt: new Date(),
+      },
+    })),
+  }))
 
   const useCases = workflow.useCases as string[]
   const setupSteps = workflow.setupSteps as string[]
@@ -442,12 +502,12 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         </div>
 
         {/* Related Workflows */}
-        {relatedWorkflows.length > 0 && (
+        {transformedRelated.length > 0 && (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold font-mono uppercase tracking-wider">
               RELATED WORKFLOWS
             </h2>
-            <WorkflowGrid workflows={relatedWorkflows} />
+            <WorkflowGrid workflows={transformedRelated as any} />
           </div>
         )}
       </div>
