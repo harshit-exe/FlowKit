@@ -380,7 +380,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
               <AnimatedGlowingSearchBar
                 placeholder="Try slack automation"
                 className="mt-4"
-                size="large"
+                size="normal"
               />
 
               <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
