@@ -37,39 +37,26 @@ export async function sendAccessCodeEmail(
   to: string,
   accessCode: string
 ): Promise<{ success: boolean; id?: string; attempt: number }> {
-  // Plain text version for better spam score
-  // IMPORTANT: Access code is at the top for mobile preview visibility
+  // Plain text version - transactional and straightforward
+  // No marketing copy, just essential information
   const emailText = `
 YOUR FLOWKIT ACCESS CODE: ${accessCode}
 
-Welcome to FlowKit!
+This code is valid for 10 minutes.
 
-You've requested access to FlowKit, and we're thrilled to have you. We're not just building another automation tool—we're crafting an experience that respects your time, your workflow, and your intelligence.
+Enter this code at https://flowkit.in to complete your sign-in.
 
-This code is valid for 10 minutes for one-time access.
-
-Head back to https://flowkit.in, enter this code, and step into a workflow automation platform that doesn't compromise on power or elegance.
-
-What You'll Get:
-• NODE-BASED PRECISION: Build workflows that mirror how you think
-• PRODUCTION READY: Every workflow is tested and ready to deploy
-• 100% OPEN SOURCE: MIT licensed, community-driven
-
-Questions? Reply to this email—we read everything.
-
-Welcome aboard!
+If you did not request this code, please ignore this email.
 
 ---
-FlowKit - Workflow Automation Platform
+FlowKit
 https://flowkit.in
-© ${new Date().getFullYear()} FlowKit. All rights reserved.
 
-You received this email because you requested access to FlowKit.
-Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}
+You received this email because someone requested access to FlowKit using this email address.
   `.trim();
 
-  // HTML version with inline styles (email clients strip <style> tags)
-  // IMPORTANT: Access code is at the top for mobile preview visibility
+  // HTML version with minimal styling - looks transactional, not promotional
+  // Key changes: Simple layout, no marketing language, no features list, no badges
   const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -78,78 +65,41 @@ Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your FlowKit Access Code</title>
 </head>
-<body style="font-family: 'Courier New', monospace; background-color: #000000; color: #ffffff; padding: 0; margin: 0;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #000000;">
-    <!-- Header -->
-    <div style="padding: 40px 20px 20px 20px; text-align: center; background-color: #000000;">
-      <h1 style="font-size: 32px; font-weight: bold; color: #ffffff; margin: 0 0 10px 0; letter-spacing: 2px;">FLOWKIT</h1>
-      <div style="display: inline-block; padding: 6px 16px; border: 1px solid rgba(255, 102, 51, 0.3); background-color: rgba(255, 102, 51, 0.05); color: rgba(255, 102, 51, 0.9); font-size: 11px; border-radius: 20px; letter-spacing: 1px;">EXCLUSIVE EARLY ACCESS</div>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #ffffff; color: #000000; padding: 0; margin: 0;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    
+    <!-- Simple Header -->
+    <div style="margin-bottom: 30px;">
+      <h1 style="font-size: 24px; font-weight: 600; color: #000000; margin: 0 0 8px 0;">FlowKit</h1>
+      <p style="font-size: 14px; color: #666666; margin: 0;">Access Code Verification</p>
     </div>
 
-    <!-- Access Code Box - MOVED TO TOP for mobile preview -->
-    <div style="padding: 20px; background-color: #000000;">
-      <div style="background-color: #0a0a0a; border: 2px solid rgba(255, 102, 51, 0.3); padding: 30px; text-align: center;">
-        <div style="font-size: 11px; color: #a3a3a3; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px;">YOUR ACCESS CODE</div>
-        <div style="font-size: 48px; font-weight: bold; color: #FF6633; letter-spacing: 12px; font-family: 'Courier New', monospace;">${accessCode}</div>
-        <div style="font-size: 12px; color: #666666; margin-top: 15px;">Valid for 10 minutes (one-time use)</div>
-      </div>
+    <!-- Access Code Box - Clean and Simple -->
+    <div style="background-color: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 32px; text-align: center; margin-bottom: 30px;">
+      <div style="font-size: 12px; color: #666666; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Your Access Code</div>
+      <div style="font-size: 42px; font-weight: 700; color: #FF6633; letter-spacing: 8px; font-family: 'Courier New', monospace; margin-bottom: 12px;">${accessCode}</div>
+      <div style="font-size: 13px; color: #666666;">Valid for 10 minutes</div>
     </div>
 
-    <!-- Content -->
-    <div style="padding: 20px 20px 40px 20px; background-color: #000000; border-top: 2px solid #FF6633;">
-      <div style="font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #ffffff; letter-spacing: 1px;">WELCOME TO THE INNER CIRCLE</div>
-
-      <p style="font-size: 14px; line-height: 1.8; color: #a3a3a3; margin: 0 0 20px 0;">
-        You've requested access to FlowKit, and we're thrilled to have you. We're not just building another automation tool—we're crafting an experience that respects your time, your workflow, and your intelligence.
+    <!-- Simple Instructions -->
+    <div style="margin-bottom: 30px;">
+      <p style="font-size: 15px; line-height: 1.6; color: #333333; margin: 0 0 16px 0;">
+        Enter this code at <a href="https://flowkit.in" style="color: #FF6633; text-decoration: none;">flowkit.in</a> to complete your sign-in.
       </p>
-
-      <p style="font-size: 14px; line-height: 1.8; color: #a3a3a3; margin: 0 0 20px 0;">
-        Head back to <a href="https://flowkit.in" style="color: #FF6633; text-decoration: none;">flowkit.in</a>, enter the code above, and step into a workflow automation platform that doesn't compromise on power or elegance.
-      </p>
-
-      <!-- Features Section -->
-      <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #262626;">
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 12px; font-weight: bold; color: #ffffff; margin-bottom: 5px; letter-spacing: 1px;">• NODE-BASED PRECISION</div>
-          <div style="font-size: 11px; color: #666666; line-height: 1.6; padding-left: 12px;">Build workflows that mirror how you think and solve problems</div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 12px; font-weight: bold; color: #ffffff; margin-bottom: 5px; letter-spacing: 1px;">• PRODUCTION READY</div>
-          <div style="font-size: 11px; color: #666666; line-height: 1.6; padding-left: 12px;">Every workflow is tested, documented, and ready to deploy</div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 12px; font-weight: bold; color: #ffffff; margin-bottom: 5px; letter-spacing: 1px;">• 100% OPEN SOURCE</div>
-          <div style="font-size: 11px; color: #666666; line-height: 1.6; padding-left: 12px;">Built in public, MIT licensed, community-driven</div>
-        </div>
-      </div>
-
-      <div style="height: 1px; background-color: #262626; margin: 30px 0;"></div>
-
-      <p style="font-size: 14px; line-height: 1.8; color: #a3a3a3; margin: 0 0 20px 0;">
-        Questions? Feedback? We're all ears. Reply to this email or reach out—we read everything.
-      </p>
-
-      <p style="margin-top: 30px; font-size: 14px; line-height: 1.8; color: #ffffff;">
-        Welcome aboard.
+      <p style="font-size: 14px; line-height: 1.6; color: #666666; margin: 0;">
+        If you did not request this code, please ignore this email.
       </p>
     </div>
 
-    <!-- Footer -->
-    <div style="padding: 30px 20px; text-align: center; border-top: 1px solid #262626; background-color: #000000;">
-      <div style="font-size: 11px; color: #666666; margin-bottom: 15px; line-height: 1.6;">
-        Built with precision. Powered by automation.<br>
-        <a href="https://flowkit.in" style="color: #FF6633; text-decoration: none;">flowkit.in</a><br>
-        © ${new Date().getFullYear()} FlowKit. All rights reserved.
-      </div>
-      <div style="font-size: 11px; color: #666666; margin-bottom: 15px; line-height: 1.6;">
-        You received this email because you requested access to FlowKit.<br>
-        No spam. No BS. Just your access code.
-      </div>
-      <div style="font-size: 10px; color: #555555; margin-top: 15px;">
-        <a href="https://flowkit.in/unsubscribe?email=${encodeURIComponent(to)}" style="color: #888888; text-decoration: underline;">Unsubscribe</a>
-      </div>
+    <!-- Simple Footer -->
+    <div style="padding-top: 30px; border-top: 1px solid #e0e0e0; margin-top: 40px;">
+      <p style="font-size: 13px; color: #999999; margin: 0 0 8px 0;">
+        FlowKit<br>
+        <a href="https://flowkit.in" style="color: #999999; text-decoration: none;">flowkit.in</a>
+      </p>
+      <p style="font-size: 12px; color: #999999; margin: 0;">
+        You received this email because someone requested access to FlowKit using this email address.
+      </p>
     </div>
   </div>
 </body>
