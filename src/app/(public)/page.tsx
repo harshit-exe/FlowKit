@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { NewHero } from "@/components/ui/new-hero";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import GlobalStatsWidget from "@/components/stats/GlobalStatsWidget";
 import {
   Workflow,
   TrendingUp,
@@ -185,6 +186,20 @@ export default async function HomePage() {
           </div>
         </section>
         )}
+
+        {/* Global Stats Widget */}
+        <section className="relative z-20 container mx-auto px-4 py-24">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-mono font-bold mb-4">
+              PLATFORM STATISTICS
+            </h2>
+            <p className="text-lg text-muted-foreground font-mono">
+              Real-time insights into our growing community
+            </p>
+          </div>
+
+          <GlobalStatsWidget variant="full" className="max-w-6xl mx-auto" />
+        </section>
 
         {/* Categories */}
         <section id="categories" className="relative z-20 container mx-auto px-4 py-24">
