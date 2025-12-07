@@ -11,17 +11,88 @@ import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const workflow = await prisma.workflow.findUnique({
     where: { slug: params.slug },
+    include: {
+      categories: {
+        include: { category: true },
+      },
+      tags: {
+        include: { tag: true },
+      },
+    },
   })
 
   if (!workflow) {
     return {
-      title: "Workflow Not Found",
+      title: "Workflow Not Found | FlowKit",
+      description: "The requested n8n workflow could not be found. Browse our library of 150+ free workflow templates.",
     }
   }
 
+  // Clean HTML from description
+  const cleanDescription = workflow.description?.replace(/<[^>]*>/g, '') || '';
+  
+  // Generate optimized meta description
+  const metaDescription = cleanDescription.length > 155 
+    ? cleanDescription.substring(0, 152) + '...'
+    : cleanDescription;
+
+  // Extract keywords from categories and tags
+  const keywords = [
+    workflow.name,
+    'n8n workflow',
+    'n8n template',
+    'workflow automation',
+    ...workflow.categories.map(c => c.category.name),
+    ...workflow.tags.map(t => t.tag.name),
+    workflow.difficulty,
+    'free download',
+    'production ready',
+  ];
+
+  const pageUrl = `https://www.flowkit.in/workflows/${workflow.slug}`;
+  const ogImage = workflow.thumbnail || 'https://www.flowkit.in/og-image.png';
+
   return {
-    title: `${workflow.name} | FlowKit`,
-    description: workflow.description,
+    title: `${workflow.name} - Free n8n Workflow Template | FlowKit`,
+    description: metaDescription,
+    keywords: keywords.join(', '),
+    authors: [{ name: 'FlowKit Team' }],
+    openGraph: {
+      type: 'article',
+      url: pageUrl,
+      title: `${workflow.name} - n8n Workflow Template`,
+      description: metaDescription,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: workflow.name,
+        },
+      ],
+      siteName: 'FlowKit',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${workflow.name} - n8n Workflow`,
+      description: metaDescription,
+      images: [ogImage],
+      creator: '@flowkit_in',
+    },
+    alternates: {
+      canonical: pageUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   }
 }
 
@@ -83,8 +154,94 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
   const setupSteps = workflow.setupSteps as string[]
   const credentialsRequired = workflow.credentialsRequired as string[]
 
+  // Generate structured data for SEO
+  const workflowSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": workflow.name,
+    "description": workflow.description?.replace(/<[^>]*>/g, ''),
+    "url": `https://www.flowkit.in/workflows/${workflow.slug}`,
+    "programmingLanguage": "JSON",
+    "codeRepository": "https://github.com/harshit-exe/FlowKit",
+    "keywords": [
+      ...workflow.categories.map(c => c.category.name),
+      ...workflow.tags.map(t => t.tag.name),
+      "n8n",
+      "workflow",
+      "automation"
+    ],
+    "dateCreated": workflow.createdAt.toISOString(),
+    "dateModified": workflow.updatedAt.toISOString(),
+    "interactionStatistic": [
+      {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/DownloadAction",
+        "userInteractionCount": workflow.downloads
+      },
+      {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/ViewAction",
+        "userInteractionCount": workflow.views
+      }
+    ],
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform"
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": `How to Set Up ${workflow.name}`,
+    "description": workflow.description?.replace(/<[^>]*>/g, ''),
+    "step": setupSteps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "name": `Step ${index + 1}`,
+      "text": step
+    }))
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.flowkit.in"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Workflows",
+        "item": "https://www.flowkit.in/workflows"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": workflow.name,
+        "item": `https://www.flowkit.in/workflows/${workflow.slug}`
+      }
+    ]
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(workflowSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      
       <div className="space-y-8">
         {/* Hero Section */}
         <div className="space-y-4">

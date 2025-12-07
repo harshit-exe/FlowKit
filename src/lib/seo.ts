@@ -7,8 +7,8 @@ export const siteConfig = {
   name: "FlowKit",
   domain: "flowkit.in",
   url: "https://www.flowkit.in",
-  title: "FlowKit - Free n8n Workflow Templates & Open Source Automation Library",
-  description: "Explore 150+ free n8n workflow templates. Open source n8n automation library with AI-powered workflow builder. Download production-ready n8n workflows, templates, and integrations. Free n8n workflow marketplace.",
+  title: "FlowKit - 150+ Free n8n Workflow Templates | AI-Powered Automation Library",
+  description: "Download 150+ production-ready n8n workflow templates for free. Open-source automation library with AI workflow builder, pre-built integrations, and ready-to-use templates. Build powerful automations in minutes with our curated n8n workflow marketplace.",
   keywords: [
     // Primary Keywords
     "n8n workflow",
@@ -67,7 +67,42 @@ export const siteConfig = {
     // Tools
     "automation tools",
     "workflow tools",
-    "n8n workflow hub"
+    "n8n workflow hub",
+
+    // Long-tail Keywords
+    "best n8n workflows",
+    "n8n workflow best practices",
+    "n8n automation examples",
+    "ready to use n8n workflows",
+    "production ready n8n templates",
+    "n8n workflow json",
+    "download n8n workflows",
+    "n8n workflow repository",
+
+    // Commercial Intent
+    "n8n workflow for business",
+    "enterprise automation workflows",
+    "business process automation n8n",
+    "n8n workflow for startups",
+
+    // Specific Integrations
+    "n8n slack integration",
+    "n8n google sheets automation",
+    "n8n email automation",
+    "n8n discord bot",
+    "n8n webhook automation",
+    "n8n api integration",
+
+    // Problem-solving Keywords
+    "how to automate with n8n",
+    "n8n workflow ideas",
+    "n8n automation use cases",
+    "n8n vs zapier workflows",
+
+    // India-specific
+    "n8n workflows india",
+    "automation tools india",
+    "free automation india"
   ],
   author: "FlowKit Team",
   creator: "@flowkit",

@@ -179,9 +179,9 @@ export default function AIBuilderPage() {
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <Badge className="text-sm px-4 py-1 font-mono border-2">
+            <Badge className="text-sm px-4 py-1 font-mono border-2 bg-gradient-to-r from-primary/20 to-purple-500/20">
               <Sparkles className="h-3 w-3 mr-1" />
-              POWERED BY GOOGLE GEMINI AI
+              AI-POWERED WORKFLOW GENERATOR
             </Badge>
             <Button
               variant={hasApiKey ? "outline" : "default"}
