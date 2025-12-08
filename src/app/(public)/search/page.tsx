@@ -24,17 +24,77 @@ export default async function SearchPage({
             { description: { contains: query } },
           ],
         },
-        include: {
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          description: true,
+          icon: true,
+          thumbnail: true,
+          difficulty: true,
+          featured: true,
+          indiaBadge: true,
+          nodeCount: true,
+          views: true,
+          downloads: true,
+          createdAt: true,
           categories: {
-            include: { category: true },
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  icon: true,
+                  color: true,
+                },
+              },
+            },
           },
           tags: {
-            include: { tag: true },
+            select: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
           },
         },
         orderBy: { views: "desc" },
       })
     : []
+
+  // Transform to match WorkflowWithRelations type
+  const transformedWorkflows = workflows.map((workflow) => ({
+    ...workflow,
+    videoUrl: null,
+    workflowJson: {},
+    useCases: [],
+    setupSteps: [],
+    credentialsRequired: [],
+    nodes: [],
+    published: true,
+    updatedAt: workflow.createdAt,
+    publishedAt: workflow.createdAt,
+    categories: workflow.categories.map((cat) => ({
+      category: {
+        ...cat.category,
+        description: null,
+        order: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    })),
+    tags: workflow.tags.map((t) => ({
+      tag: {
+        ...t.tag,
+        createdAt: new Date(),
+      },
+    })),
+  }))
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -49,7 +109,7 @@ export default async function SearchPage({
         </div>
 
         <WorkflowGrid
-          workflows={workflows}
+          workflows={transformedWorkflows as any}
           emptyMessage={query ? `No workflows found for "${query}"` : "Enter a search query to find workflows"}
         />
       </div>

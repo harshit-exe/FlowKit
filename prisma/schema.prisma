@@ -49,6 +49,9 @@ model Workflow {
   @@index([difficulty])
   @@index([published])
   @@index([createdAt])
+  @@index([views])
+  @@index([published, createdAt])
+  @@index([published, views])
   @@map("workflows")
 }
 

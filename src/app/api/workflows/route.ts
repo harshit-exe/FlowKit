@@ -19,15 +19,42 @@ export async function GET(request: Request) {
     const [workflows, total] = await Promise.all([
       prisma.workflow.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          description: true,
+          icon: true,
+          thumbnail: true,
+          difficulty: true,
+          featured: true,
+          indiaBadge: true,
+          nodeCount: true,
+          views: true,
+          downloads: true,
+          createdAt: true,
           categories: {
-            include: {
-              category: true,
+            select: {
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  icon: true,
+                  color: true,
+                },
+              },
             },
           },
           tags: {
-            include: {
-              tag: true,
+            select: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                },
+              },
             },
           },
         },

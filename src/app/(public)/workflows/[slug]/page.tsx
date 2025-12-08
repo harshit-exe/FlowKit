@@ -7,6 +7,7 @@ import { Metadata } from "next"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
 import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
+import WorkflowJsonViewer from "@/components/workflow/WorkflowJsonViewer"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const workflow = await prisma.workflow.findUnique({
@@ -413,11 +414,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-muted/30 p-4 border-2 border-border overflow-auto max-h-96 text-sm font-mono">
-                  <pre className="whitespace-pre">
-                    <code>{JSON.stringify(workflow.workflowJson, null, 2)}</code>
-                  </pre>
-                </div>
+                <WorkflowJsonViewer workflowJson={workflow.workflowJson} />
               </CardContent>
             </Card>
           </div>
