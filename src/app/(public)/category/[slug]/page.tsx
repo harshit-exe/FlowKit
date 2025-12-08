@@ -67,55 +67,69 @@ export default async function CategoryPage({
           },
         },
       },
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-        description: true,
-        icon: true,
-        thumbnail: true,
-        difficulty: true,
-        featured: true,
-        indiaBadge: true,
-        nodeCount: true,
-        views: true,
-        downloads: true,
-        createdAt: true,
-        categories: {
-          select: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-                icon: true,
-                color: true,
-              },
-            },
-          },
-        },
-        tags: {
-          select: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-        },
-      },
+      select: { id: true },
       orderBy: { createdAt: "desc" },
       take: ITEMS_PER_PAGE,
       skip: skip,
     }),
   ])
 
+  // Step 2: Fetch full details for the IDs
+  const workflowsData = await prisma.workflow.findMany({
+    where: {
+      id: { in: workflows.map((w) => w.id) },
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      icon: true,
+      thumbnail: true,
+      difficulty: true,
+      featured: true,
+      indiaBadge: true,
+      nodeCount: true,
+      views: true,
+      downloads: true,
+      createdAt: true,
+      workflowJson: true,
+      categories: {
+        select: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+              color: true,
+            },
+          },
+        },
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Re-order workflows to match the sorted IDs
+  const workflowsWithDetails = workflows.map((w) => 
+    workflowsData.find((wd) => wd.id === w.id)!
+  )
+
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   // Transform to match expected type
-  const transformedWorkflows = workflows.map((workflow) => ({
+  const transformedWorkflows = workflowsWithDetails.map((workflow) => ({
     ...workflow,
     videoUrl: null,
     workflowJson: {},

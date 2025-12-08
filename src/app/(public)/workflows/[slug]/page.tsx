@@ -152,6 +152,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
       views: true,
       downloads: true,
       createdAt: true,
+      workflowJson: true,
       categories: {
         select: {
           category: {

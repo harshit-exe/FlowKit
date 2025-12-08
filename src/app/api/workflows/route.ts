@@ -89,6 +89,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Workflow with this slug already exists" }, { status: 400 })
     }
 
+    // Check if workflow JSON already exists (prevent duplicates)
+    // Parse stringified JSON if necessary for comparison
+    let parsedJson = workflowJson
+    if (typeof workflowJson === 'string') {
+      try {
+        parsedJson = JSON.parse(workflowJson)
+      } catch (e) {
+        // Ignore parse error here, validation happened before
+      }
+    }
+
+    const existingJson = await prisma.workflow.findFirst({
+      where: {
+        workflowJson: {
+          equals: parsedJson
+        }
+      },
+      select: { name: true, slug: true }
+    })
+
+    if (existingJson) {
+      return NextResponse.json({
+        error: `Workflow JSON already exists as "${existingJson.name}" (/${existingJson.slug})`
+      }, { status: 400 })
+    }
+
     // Create or connect tags (deduplicate first)
     const uniqueTagNames: string[] = Array.from(new Set(tagNames.map((name: string) => name.trim()).filter(Boolean)));
 

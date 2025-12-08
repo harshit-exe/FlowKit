@@ -23,7 +23,7 @@ import { toast } from "sonner"
 import { workflowFormSchema, WorkflowFormValues } from "@/lib/validations/workflow"
 import { generateSlug } from "@/lib/utils"
 import { parseWorkflowJSON } from "@/lib/gemini"
-import { Plus, X, FileJson, Sparkles, Loader2, Copy } from "lucide-react"
+import { Plus, X, FileJson, Sparkles, Loader2, Copy, AlertCircle } from "lucide-react"
 import { CloudinaryImageUpload } from "@/components/admin/CloudinaryImageUpload"
 import { AIButton } from "@/components/admin/AIButton"
 import { RichTextEditor } from "@/components/admin/RichTextEditor"
@@ -44,6 +44,8 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
   const [isAutoFilling, setIsAutoFilling] = useState(false)
   const [thumbnailPrompt, setThumbnailPrompt] = useState<any>(null)
   const [showPromptDialog, setShowPromptDialog] = useState(false)
+  const [duplicateWarning, setDuplicateWarning] = useState<{ name: string; slug: string } | null>(null)
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false)
 
   // Initialize form with default values
   const {
@@ -289,8 +291,51 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
     }
   };
 
+  // Check for duplicate JSON
+  const checkDuplicate = async (jsonContent: string) => {
+    if (!jsonContent || jsonContent.trim() === "{}" || jsonContent.trim() === "") {
+      setDuplicateWarning(null)
+      return
+    }
+
+    // Don't check if it's the same as initial data (editing existing workflow)
+    if (initialData && JSON.stringify(initialData.workflowJson, null, 2) === jsonContent) {
+      return
+    }
+
+    setIsCheckingDuplicate(true)
+    setDuplicateWarning(null)
+
+    try {
+      const response = await fetch("/api/workflows/check-duplicate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workflowJson: jsonContent }),
+      })
+
+      const data = await response.json()
+
+      if (data.exists && data.workflow) {
+        // If editing, check if the found workflow is NOT the current one
+        if (!initialData || initialData.id !== data.workflow.id) {
+          setDuplicateWarning(data.workflow)
+          toast.error("This workflow JSON already exists in the database!")
+        }
+      }
+    } catch (error) {
+      console.error("Failed to check duplicate:", error)
+    } finally {
+      setIsCheckingDuplicate(false)
+    }
+  }
+
   // Form submission
   const onSubmit: SubmitHandler<WorkflowFormValues> = async (data) => {
+    if (duplicateWarning) {
+      toast.error(`Cannot save: Duplicate workflow JSON detected (${duplicateWarning.name})`)
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -319,7 +364,8 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
       })
 
       if (!response.ok) {
-        throw new Error("Failed to save workflow")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to save workflow")
       }
 
       toast.success(initialData ? "Workflow updated successfully" : "Workflow created successfully")
@@ -327,7 +373,7 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
       router.refresh()
     } catch (error) {
       console.error(error)
-      toast.error("Something went wrong")
+      toast.error(error instanceof Error ? error.message : "Something went wrong")
     } finally {
       setIsLoading(false)
     }
@@ -746,12 +792,32 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Textarea
-            {...register("workflowJson")}
-            placeholder='{"name": "My Workflow", "nodes": [], "connections": {}}'
-            rows={12}
-            className="font-mono text-sm"
-          />
+          <div className="relative">
+            <Textarea
+              {...register("workflowJson")}
+              placeholder='{"name": "My Workflow", "nodes": [], "connections": {}}'
+              rows={12}
+              className={`font-mono text-sm ${duplicateWarning ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              onBlur={(e) => {
+                register("workflowJson").onBlur(e)
+                checkDuplicate(e.target.value)
+              }}
+            />
+            {isCheckingDuplicate && (
+              <div className="absolute top-2 right-2">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
+          </div>
+          {duplicateWarning && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <span>
+                <strong>Duplicate Detected:</strong> This workflow JSON already exists as <strong>{duplicateWarning.name}</strong> (/{duplicateWarning.slug}).
+                Please avoid uploading duplicates.
+              </span>
+            </div>
+          )}
           {errors.workflowJson && <p className="text-sm text-red-500">{errors.workflowJson.message}</p>}
         </CardContent>
       </Card>
