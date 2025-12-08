@@ -93,7 +93,7 @@ export default async function CategoryPage({
       views: true,
       downloads: true,
       createdAt: true,
-      workflowJson: true,
+
       categories: {
         select: {
           category: {
