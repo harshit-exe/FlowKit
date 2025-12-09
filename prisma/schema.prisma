@@ -37,6 +37,7 @@ model Workflow {
   // Relationships
   categories          WorkflowCategory[]
   tags                WorkflowTag[]
+  bundles             BundleWorkflow[]
 
   // Metadata
   published           Boolean    @default(false)
@@ -174,4 +175,56 @@ model Waitlist {
   @@index([email])
   @@index([accessCode])
   @@map("waitlist")
+}
+
+// BUNDLES (curated collections of workflows)
+model Bundle {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  description     String   @db.Text
+  objective       String   @db.Text // Main goal/purpose of the bundle
+  thumbnail       String?  // AI-generated or custom image
+  aiImagePrompt   String?  @db.Text // Prompt used for AI image generation
+  icon            String?  // Emoji icon
+  color           String   @default("#667eea") // Theme color for UI
+  featured        Boolean  @default(false)
+  order           Int      @default(0) // Display order
+  views           Int      @default(0)
+
+  // Bundle-specific metadata
+  benefits        Json     // Array of key benefits/features
+  targetAudience  String?  @db.Text // Who is this bundle for
+  estimatedTime   String?  // e.g., "30 minutes setup"
+
+  // Relationships
+  workflows       BundleWorkflow[]
+
+  // Metadata
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  publishedAt     DateTime?
+
+  @@index([slug])
+  @@index([featured])
+  @@index([published])
+  @@index([order])
+  @@index([published, createdAt])
+  @@index([published, views])
+  @@map("bundles")
+}
+
+// BUNDLE WORKFLOWS (junction table for bundle-workflow many-to-many)
+model BundleWorkflow {
+  bundle       Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  bundleId     String
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId   String
+  order        Int      @default(0) // Order of workflow within the bundle
+
+  @@id([bundleId, workflowId])
+  @@index([bundleId])
+  @@index([workflowId])
+  @@map("bundle_workflows")
 }

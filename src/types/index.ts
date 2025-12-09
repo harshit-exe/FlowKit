@@ -1,4 +1,4 @@
-import { Workflow, Category, Tag, Difficulty } from "@prisma/client"
+import { Workflow, Category, Tag, Difficulty, Bundle } from "@prisma/client"
 
 // Workflow with relations
 export type WorkflowWithRelations = Workflow & {
@@ -47,4 +47,34 @@ export interface SearchParams {
   tags?: string
   page?: string
   sort?: string
+}
+
+// Bundle with relations
+export type BundleWithRelations = Bundle & {
+  workflows: {
+    workflow: WorkflowWithRelations
+    order: number
+  }[]
+  _count?: {
+    workflows: number
+  }
+}
+
+// Bundle form data
+export interface BundleFormData {
+  name: string
+  slug: string
+  description: string
+  objective: string
+  icon?: string
+  thumbnail?: string
+  aiImagePrompt?: string
+  color: string
+  featured: boolean
+  order: number
+  benefits: string[]
+  targetAudience?: string
+  estimatedTime?: string
+  workflowIds: string[]
+  published: boolean
 }

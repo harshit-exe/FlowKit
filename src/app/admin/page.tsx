@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { prisma } from "@/lib/prisma"
-import { Workflow as WorkflowIcon, Eye, Download, FolderOpen } from "lucide-react"
+import { Workflow as WorkflowIcon, Eye, Download, FolderOpen, Package } from "lucide-react"
 
 export default async function AdminDashboard() {
   // Fetch statistics
-  const [totalWorkflows, totalDownloads, totalViews, totalCategories] = await Promise.all([
+  const [totalWorkflows, totalDownloads, totalViews, totalCategories, totalBundles] = await Promise.all([
     prisma.workflow.count(),
     prisma.workflow.aggregate({
       _sum: {
@@ -17,6 +17,7 @@ export default async function AdminDashboard() {
       },
     }),
     prisma.category.count(),
+    prisma.bundle.count(),
   ])
 
   // Fetch recent workflows
@@ -41,6 +42,13 @@ export default async function AdminDashboard() {
       icon: WorkflowIcon,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
+    },
+    {
+      name: "Bundles",
+      value: totalBundles,
+      icon: Package,
+      color: "text-pink-600",
+      bgColor: "bg-pink-100",
     },
     {
       name: "Total Views",

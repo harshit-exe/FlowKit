@@ -12,6 +12,7 @@ import { GithubStarButton } from "@/components/ui/github-star-button";
 
 const navigationItems = [
   { title: "Workflows", href: "/workflows" },
+  { title: "Bundles", href: "/bundles" },
   { title: "Categories", href: "/#categories" },
   { title: "AI Builder", href: "/ai-builder" },
   { title: "About", href: "/about" },

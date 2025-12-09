@@ -13,6 +13,7 @@ const navigationItems = [
   { title: "Workflows", href: "/workflows" },
   { title: "Categories", href: "/#categories" },
   { title: "AI Builder", href: "/ai-builder" },
+  { title: "Bundles", href: "/bundles" },
   { title: "About", href: "/about" },
 ];
 
