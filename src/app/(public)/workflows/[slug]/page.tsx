@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, DownloadCloud } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Eye, DownloadCloud, Youtube, FileText } from "lucide-react"
 import { Metadata } from "next"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
@@ -451,6 +452,51 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 </div>
               </CardContent>
             </Card>
+
+            {/* Resources (Video & Documentation) */}
+            {(workflow.videoUrl || workflow.documentLink) && (
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="font-mono uppercase tracking-wider">
+                    RESOURCES
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {workflow.videoUrl && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full justify-start gap-2 border-2 font-mono hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-colors"
+                    >
+                      <a
+                        href={workflow.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Youtube className="h-4 w-4" />
+                        <span className="text-sm uppercase">Watch Video Tutorial</span>
+                      </a>
+                    </Button>
+                  )}
+                  {workflow.documentLink && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full justify-start gap-2 border-2 font-mono hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                    >
+                      <a
+                        href={workflow.documentLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span className="text-sm uppercase">View Documentation</span>
+                      </a>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Credentials */}
             {credentialsRequired.length > 0 && (

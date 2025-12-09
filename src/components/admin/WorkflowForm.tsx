@@ -64,6 +64,7 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           icon: initialData.icon || "",
           thumbnail: initialData.thumbnail || "",
           videoUrl: initialData.videoUrl || "",
+          documentLink: initialData.documentLink || "",
           difficulty: initialData.difficulty,
           featured: initialData.featured,
           indiaBadge: initialData.indiaBadge,
@@ -84,6 +85,7 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           icon: "",
           thumbnail: "",
           videoUrl: "",
+          documentLink: "",
           difficulty: "BEGINNER",
           featured: false,
           indiaBadge: false,
@@ -464,10 +466,20 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="videoUrl">Video URL (YouTube, Loom, etc.)</Label>
-            <Input id="videoUrl" {...register("videoUrl")} placeholder="https://youtube.com/watch?v=..." />
-            {errors.videoUrl && <p className="text-sm text-red-500">{errors.videoUrl.message}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="videoUrl">Video URL (Optional)</Label>
+              <Input id="videoUrl" {...register("videoUrl")} placeholder="https://youtube.com/watch?v=..." />
+              {errors.videoUrl && <p className="text-sm text-red-500">{errors.videoUrl.message}</p>}
+              <p className="text-xs text-muted-foreground">YouTube, Loom, or other video platforms</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="documentLink">Document Link (Optional)</Label>
+              <Input id="documentLink" {...register("documentLink")} placeholder="https://docs.google.com/..." />
+              {errors.documentLink && <p className="text-sm text-red-500">{errors.documentLink.message}</p>}
+              <p className="text-xs text-muted-foreground">Google Docs, Notion, or other documentation</p>
+            </div>
           </div>
 
           <div className="flex items-center space-x-6">
@@ -534,10 +546,6 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
             description="Upload a workflow thumbnail image (1200x630px recommended, max 10MB)"
           />
 
-          <div className="space-y-2">
-            <Label htmlFor="videoUrl">Video URL (Optional)</Label>
-            <Input id="videoUrl" {...register("videoUrl")} placeholder="https://youtube.com/..." />
-          </div>
         </CardContent>
       </Card>
 

@@ -20,6 +20,7 @@ model Workflow {
   icon                String?
   thumbnail           String?
   videoUrl            String?
+  documentLink        String?
   difficulty          Difficulty @default(BEGINNER)
   featured            Boolean    @default(false)
   indiaBadge          Boolean    @default(false)

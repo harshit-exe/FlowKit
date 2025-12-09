@@ -25,6 +25,7 @@ export interface WorkflowFormData {
   icon?: string
   thumbnail?: string
   videoUrl?: string
+  documentLink?: string
   difficulty: Difficulty
   featured: boolean
   indiaBadge: boolean

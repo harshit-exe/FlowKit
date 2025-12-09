@@ -7,6 +7,7 @@ export const workflowFormSchema = z.object({
   icon: z.string().optional(),
   thumbnail: z.string().optional(),
   videoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  documentLink: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   difficulty: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
   featured: z.boolean().default(false),
   indiaBadge: z.boolean().default(false),
