@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, Send, TestTube, FileText, Users, CheckCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react"
+import { Mail, Send, TestTube, FileText, Users, CheckCircle, Clock, ChevronLeft, ChevronRight, Settings } from "lucide-react"
 import { toast } from "sonner"
 
 type Stats = {
@@ -147,6 +147,10 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
           <Users className="h-4 w-4 mr-2" />
           Users
         </TabsTrigger>
+        <TabsTrigger value="settings" className="font-mono">
+          <Settings className="h-4 w-4 mr-2" />
+          Settings
+        </TabsTrigger>
       </TabsList>
 
       {/* Test Email Tab */}
@@ -154,7 +158,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
         <Card className="p-6 border-2">
           <h3 className="text-xl font-mono font-bold mb-4">TEST EMAIL DELIVERY</h3>
           <p className="text-sm text-muted-foreground font-mono mb-6">
-            Send a test email to verify your Resend configuration is working correctly.
+            Send a test email to verify your configuration is working correctly.
           </p>
 
           <div className="space-y-4">
@@ -292,7 +296,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
                 <div className="font-bold mb-1">Subject:</div>
                 <div className="mb-3">Your FlowKit Access Code 🔑</div>
                 <div className="font-bold mb-1">Template Location:</div>
-                <div className="text-primary">src/lib/resend.ts</div>
+                <div className="text-primary">src/lib/email.ts</div>
               </div>
             </div>
 
@@ -322,7 +326,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
                 <span className="text-xs font-mono text-muted-foreground">SYSTEM</span>
               </div>
               <p className="text-sm text-muted-foreground font-mono mb-3">
-                Simple test email to verify Resend configuration.
+                Simple test email to verify configuration.
               </p>
               <div className="bg-muted/50 p-3 rounded font-mono text-xs">
                 <div className="font-bold mb-1">Purpose:</div>
@@ -411,6 +415,108 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
           )}
         </Card>
       </TabsContent>
+
+      {/* Settings Tab */}
+      <TabsContent value="settings" className="space-y-4">
+        <EmailSettings />
+      </TabsContent>
     </Tabs>
+  )
+}
+
+function EmailSettings() {
+  const [provider, setProvider] = useState<"resend" | "nodemailer">("resend")
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/admin/settings/email")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.provider) setProvider(data.provider)
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleSave = async (newProvider: "resend" | "nodemailer") => {
+    setSaving(true)
+    try {
+      const response = await fetch("/api/admin/settings/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: newProvider }),
+      })
+
+      if (!response.ok) throw new Error("Failed to update settings")
+      
+      setProvider(newProvider)
+      toast.success(`Email provider switched to ${newProvider === 'resend' ? 'Resend' : 'Nodemailer'}`)
+    } catch (error) {
+      toast.error("Failed to update settings")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-6 border-2">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-6 border-2">
+      <h3 className="text-xl font-mono font-bold mb-4">EMAIL CONFIGURATION</h3>
+      <p className="text-sm text-muted-foreground font-mono mb-6">
+        Choose which service to use for sending emails.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div 
+          className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+            provider === "resend" 
+              ? "border-primary bg-primary/5" 
+              : "border-muted hover:border-primary/50"
+          }`}
+          onClick={() => handleSave("resend")}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-mono font-bold">Resend</h4>
+            {provider === "resend" && <CheckCircle className="h-5 w-5 text-primary" />}
+          </div>
+          <p className="text-xs text-muted-foreground font-mono mb-2">
+            Modern email API for developers. Best for transactional emails.
+          </p>
+          <div className="text-xs font-mono bg-muted p-2 rounded">
+            Env: RESEND_API_KEY
+          </div>
+        </div>
+
+        <div 
+          className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+            provider === "nodemailer" 
+              ? "border-primary bg-primary/5" 
+              : "border-muted hover:border-primary/50"
+          }`}
+          onClick={() => handleSave("nodemailer")}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-mono font-bold">Nodemailer (SMTP)</h4>
+            {provider === "nodemailer" && <CheckCircle className="h-5 w-5 text-primary" />}
+          </div>
+          <p className="text-xs text-muted-foreground font-mono mb-2">
+            Standard SMTP transport. Use with Gmail, Outlook, or custom SMTP.
+          </p>
+          <div className="text-xs font-mono bg-muted p-2 rounded">
+            Env: NODEMAILER_HOST, NODEMAILER_USER...
+          </div>
+        </div>
+      </div>
+    </Card>
   )
 }

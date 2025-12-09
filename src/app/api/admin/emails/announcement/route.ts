@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { resend } from "@/lib/resend"
+import { sendEmail } from "@/lib/email"
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
 
     for (const recipient of recipients) {
       try {
-        await resend.emails.send({
-          from: 'FlowKit <noreply@flowkit.in>',
+        await sendEmail({
           to: recipient.email,
           subject: subject,
           text: `

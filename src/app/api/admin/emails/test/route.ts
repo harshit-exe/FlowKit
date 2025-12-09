@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { resend } from "@/lib/resend"
+import { sendEmail } from "@/lib/email"
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send test email
-    await resend.emails.send({
-      from: 'FlowKit Test <noreply@flowkit.in>',
+    await sendEmail({
       to: email,
       subject: "Test Email - FlowKit Admin Panel",
       text: `
@@ -25,7 +24,7 @@ This is a test email sent from the FlowKit admin panel.
 If you're reading this, your email configuration is working correctly!
 
 Test Details:
-- Provider: Resend
+- Provider: (Check Admin Panel)
 - From: noreply@flowkit.in
 - To: ${email}
 - Time: ${new Date().toISOString()}
@@ -60,7 +59,6 @@ Unsubscribe: https://flowkit.in/unsubscribe?email=${encodeURIComponent(email)}
 
               <div style="background: #1a1a1a; border: 1px solid #333; padding: 15px; margin: 20px 0; font-size: 12px;">
                 <strong>Test Details:</strong><br>
-                <strong>Provider:</strong> Resend<br>
                 <strong>From:</strong> noreply@flowkit.in<br>
                 <strong>To:</strong> ${email}<br>
                 <strong>Time:</strong> ${new Date().toLocaleString()}<br>

@@ -228,3 +228,14 @@ model BundleWorkflow {
   @@index([workflowId])
   @@map("bundle_workflows")
 }
+
+// SYSTEM SETTINGS
+model SystemSetting {
+  key         String   @id
+  value       String   // JSON string or simple value
+  description String?
+
+  updatedAt   DateTime @updatedAt
+  
+  @@map("system_settings")
+}
