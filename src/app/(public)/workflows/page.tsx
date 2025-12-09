@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   keywords: "n8n workflows, n8n templates, free n8n workflows, n8n workflow library, n8n automation templates, open source workflows",
 }
 
-const ITEMS_PER_PAGE = 20
+const ITEMS_PER_PAGE = 12
 
 export default async function WorkflowsPage({
   searchParams,

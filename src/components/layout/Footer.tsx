@@ -9,14 +9,14 @@ export default function Footer() {
       href: "https://github.com/harshit-exe/flowkit",
       label: "GitHub",
     },
-    {
-      icon: <Twitter className="w-6 h-6" />,
-      href: "https://twitter.com/flowkit",
-      label: "Twitter",
-    },
+    // {
+    //   icon: <Twitter className="w-6 h-6" />,
+    //   href: "https://twitter.com/flowkit",
+    //   label: "Twitter",
+    // },
     {
       icon: <Linkedin className="w-6 h-6" />,
-      href: "https://linkedin.com/company/flowkit",
+      href: "https://www.linkedin.com/company/flowkit-io",
       label: "LinkedIn",
     },
   ];

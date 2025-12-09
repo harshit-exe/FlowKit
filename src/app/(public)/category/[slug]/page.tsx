@@ -4,7 +4,7 @@ import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import { Metadata } from "next"
 import { Pagination } from "@/components/ui/pagination"
 
-const ITEMS_PER_PAGE = 20
+const ITEMS_PER_PAGE = 12
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const category = await prisma.category.findUnique({
