@@ -114,9 +114,9 @@ export const siteConfig = {
     github: "https://github.com/harshit-exe/FlowKit",
   },
 
-  // Open Graph Images
-  ogImage: "/og-image.png",
-  twitterImage: "/twitter-image.png",
+  // Open Graph Images (dynamic generation)
+  ogImage: "/api/og",
+  twitterImage: "/api/og",
 
   // Contact
   email: "hello@flowkit.in",
@@ -163,6 +163,26 @@ export const organizationJsonLd = {
 };
 
 /**
+ * Generate dynamic OG image URL
+ */
+export function generateOGImageUrl({
+  title,
+  description,
+  type = 'default',
+}: {
+  title?: string;
+  description?: string;
+  type?: 'default' | 'workflow' | 'category' | 'bundle';
+}) {
+  const params = new URLSearchParams();
+  if (title) params.set('title', title);
+  if (description) params.set('description', description);
+  if (type) params.set('type', type);
+
+  return `${siteConfig.url}/api/og?${params.toString()}`;
+}
+
+/**
  * Generate page metadata for SEO
  */
 export function generateMetadata({
@@ -172,6 +192,7 @@ export function generateMetadata({
   image,
   noindex = false,
   keywords,
+  ogType,
 }: {
   title?: string;
   description?: string;
@@ -179,11 +200,19 @@ export function generateMetadata({
   image?: string;
   noindex?: boolean;
   keywords?: string[];
+  ogType?: 'default' | 'workflow' | 'category' | 'bundle';
 }) {
   const pageTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.title;
   const pageDescription = description || siteConfig.description;
   const pageUrl = `${siteConfig.url}${path}`;
-  const pageImage = image || siteConfig.ogImage;
+
+  // Generate dynamic OG image if no custom image provided
+  const pageImage = image || generateOGImageUrl({
+    title: title || siteConfig.title,
+    description: pageDescription.slice(0, 100),
+    type: ogType || 'default',
+  });
+
   const pageKeywords = keywords || siteConfig.keywords;
 
   return {

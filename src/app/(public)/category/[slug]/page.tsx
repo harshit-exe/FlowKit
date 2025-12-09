@@ -17,9 +17,45 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     }
   }
 
+  const categoryDescription = category.description || `Browse ${category.name} n8n workflow templates - production-ready automation workflows`
+  const pageUrl = `https://www.flowkit.in/category/${category.slug}`
+
+  // Generate dynamic OG image
+  const ogImageParams = new URLSearchParams({
+    title: `${category.icon} ${category.name} Workflows`,
+    description: categoryDescription.slice(0, 100),
+    type: 'category',
+  })
+  const ogImage = `https://www.flowkit.in/api/og?${ogImageParams.toString()}`
+
   return {
-    title: `${category.name} Workflows | FlowKit`,
-    description: category.description || `Browse ${category.name} workflows`,
+    title: `${category.name} n8n Workflows | FlowKit`,
+    description: categoryDescription,
+    keywords: `${category.name} workflows, ${category.name} n8n templates, ${category.name} automation, n8n ${category.name.toLowerCase()}`,
+    openGraph: {
+      title: `${category.name} n8n Workflows | FlowKit`,
+      description: categoryDescription,
+      url: pageUrl,
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${category.name} Workflows`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${category.name} n8n Workflows | FlowKit`,
+      description: categoryDescription,
+      images: [ogImage],
+      creator: '@flowkit_in',
+    },
+    alternates: {
+      canonical: pageUrl,
+    },
   }
 }
 

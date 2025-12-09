@@ -52,7 +52,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   ];
 
   const pageUrl = `https://www.flowkit.in/workflows/${workflow.slug}`;
-  const ogImage = workflow.thumbnail || 'https://www.flowkit.in/og-image.png';
+
+  // Generate dynamic OG image
+  const ogImageParams = new URLSearchParams({
+    title: workflow.name,
+    description: cleanDescription.slice(0, 100),
+    type: 'workflow',
+  });
+  const ogImage = `https://www.flowkit.in/api/og?${ogImageParams.toString()}`;
 
   return {
     title: `${workflow.name} - Free n8n Workflow Template | FlowKit`,

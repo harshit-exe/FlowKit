@@ -3,10 +3,45 @@ import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import { BundleGrid } from "@/components/bundle/BundleGrid"
 import { Metadata } from "next"
 
+const searchDescription = "Search free n8n workflow templates, bundles, and automation workflows. Find n8n templates for Slack, Email, AI automation, data sync, and more. Open source n8n workflow library."
+const pageUrl = "https://www.flowkit.in/search"
+
+// Generate dynamic OG image
+const ogImageParams = new URLSearchParams({
+  title: "Search n8n Workflows",
+  description: searchDescription.slice(0, 100),
+  type: 'default',
+})
+const ogImage = `https://www.flowkit.in/api/og?${ogImageParams.toString()}`
+
 export const metadata: Metadata = {
   title: "Search n8n Workflows & Bundles | FlowKit",
-  description: "Search free n8n workflow templates, bundles, and automation workflows. Find n8n templates for Slack, Email, AI automation, data sync, and more. Open source n8n workflow library.",
+  description: searchDescription,
   keywords: "search n8n workflows, find n8n templates, n8n workflow search, n8n template search, search automation workflows, search bundles",
+  openGraph: {
+    title: "Search n8n Workflows & Bundles | FlowKit",
+    description: searchDescription,
+    url: pageUrl,
+    type: 'website',
+    images: [
+      {
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: 'Search FlowKit',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Search n8n Workflows & Bundles | FlowKit",
+    description: searchDescription,
+    images: [ogImage],
+    creator: '@flowkit_in',
+  },
+  alternates: {
+    canonical: pageUrl,
+  },
 }
 
 export default async function SearchPage({

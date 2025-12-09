@@ -3,10 +3,45 @@ import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import { Metadata } from "next"
 import { Pagination } from "@/components/ui/pagination"
 
+const workflowsDescription = "Browse 150+ free n8n workflow templates. Download production-ready n8n automation workflows. Open source n8n template library with integrations for Slack, Email, AI, and more."
+const pageUrl = "https://www.flowkit.in/workflows"
+
+// Generate dynamic OG image
+const ogImageParams = new URLSearchParams({
+  title: "Free n8n Workflow Templates",
+  description: workflowsDescription.slice(0, 100),
+  type: 'default',
+})
+const ogImage = `https://www.flowkit.in/api/og?${ogImageParams.toString()}`
+
 export const metadata: Metadata = {
   title: "Free n8n Workflow Templates & Automation Library | FlowKit",
-  description: "Browse 150+ free n8n workflow templates. Download production-ready n8n automation workflows. Open source n8n template library with integrations for Slack, Email, AI, and more.",
+  description: workflowsDescription,
   keywords: "n8n workflows, n8n templates, free n8n workflows, n8n workflow library, n8n automation templates, open source workflows",
+  openGraph: {
+    title: "Free n8n Workflow Templates & Automation Library | FlowKit",
+    description: workflowsDescription,
+    url: pageUrl,
+    type: 'website',
+    images: [
+      {
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: 'FlowKit Workflow Templates',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Free n8n Workflow Templates & Automation Library | FlowKit",
+    description: workflowsDescription,
+    images: [ogImage],
+    creator: '@flowkit_in',
+  },
+  alternates: {
+    canonical: pageUrl,
+  },
 }
 
 const ITEMS_PER_PAGE = 12

@@ -24,14 +24,44 @@ export async function generateMetadata({ params }: BundlePageProps): Promise<Met
     }
   }
 
+  const bundleDescription = bundle.objective || bundle.description
+  const pageUrl = `https://www.flowkit.in/bundles/${bundle.slug}`
+
+  // Generate dynamic OG image
+  const ogImageParams = new URLSearchParams({
+    title: `${bundle.icon || '📦'} ${bundle.name}`,
+    description: bundleDescription.slice(0, 100),
+    type: 'bundle',
+  })
+  const ogImage = `https://www.flowkit.in/api/og?${ogImageParams.toString()}`
+
   return {
-    title: `${bundle.name} - Workflow Bundle | FlowKit`,
-    description: bundle.objective,
+    title: `${bundle.name} - n8n Workflow Bundle | FlowKit`,
+    description: bundleDescription,
+    keywords: `${bundle.name} bundle, n8n workflow collection, ${bundle.name} automation, workflow bundle`,
     openGraph: {
       title: `${bundle.name} - Workflow Bundle | FlowKit`,
-      description: bundle.objective,
-      images: bundle.thumbnail ? [bundle.thumbnail] : [],
+      description: bundleDescription,
+      url: pageUrl,
       type: "website",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${bundle.name} Bundle`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${bundle.name} - Workflow Bundle | FlowKit`,
+      description: bundleDescription,
+      images: [ogImage],
+      creator: '@flowkit_in',
+    },
+    alternates: {
+      canonical: pageUrl,
     },
   }
 }
