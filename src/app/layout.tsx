@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Mono, Poppins } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { generateMetadata as generateSEOMetadata, siteConfig, jsonLd, organizationJsonLd } from "@/lib/seo";
@@ -77,6 +78,7 @@ export default function RootLayout({
               className: 'font-mono',
             }}
           />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
