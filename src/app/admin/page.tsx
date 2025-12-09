@@ -1,10 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { prisma } from "@/lib/prisma"
-import { Workflow as WorkflowIcon, Eye, Download, FolderOpen, Package } from "lucide-react"
+import { Workflow as WorkflowIcon, Eye, Download, FolderOpen, Package, Clock, Users, ArrowUpRight, Activity } from "lucide-react"
 
 export default async function AdminDashboard() {
   // Fetch statistics
-  const [totalWorkflows, totalDownloads, totalViews, totalCategories, totalBundles] = await Promise.all([
+  const [totalWorkflows, totalDownloads, totalViews, totalCategories, totalBundles, pendingUsers, totalUsers] = await Promise.all([
     prisma.workflow.count(),
     prisma.workflow.aggregate({
       _sum: {
@@ -18,6 +18,10 @@ export default async function AdminDashboard() {
     }),
     prisma.category.count(),
     prisma.bundle.count(),
+    prisma.waitlist.count({
+      where: { hasAccessed: false },
+    }),
+    prisma.waitlist.count(),
   ])
 
   // Fetch recent workflows
@@ -37,65 +41,98 @@ export default async function AdminDashboard() {
 
   const stats = [
     {
+      name: "Total Users",
+      value: totalUsers,
+      icon: Users,
+      description: "Total waitlist signups",
+      gradient: "from-blue-500/20 via-blue-500/10 to-transparent",
+      borderColor: "border-blue-500/50",
+      iconColor: "text-blue-500",
+    },
+    {
+      name: "Pending Access",
+      value: pendingUsers,
+      icon: Clock,
+      description: "Users waiting for access",
+      gradient: "from-yellow-500/20 via-yellow-500/10 to-transparent",
+      borderColor: "border-yellow-500/50",
+      iconColor: "text-yellow-500",
+    },
+    {
       name: "Total Workflows",
       value: totalWorkflows,
       icon: WorkflowIcon,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      name: "Bundles",
-      value: totalBundles,
-      icon: Package,
-      color: "text-pink-600",
-      bgColor: "bg-pink-100",
+      description: "Published & Drafts",
+      gradient: "from-primary/20 via-primary/10 to-transparent",
+      borderColor: "border-primary/50",
+      iconColor: "text-primary",
     },
     {
       name: "Total Views",
       value: totalViews._sum.views || 0,
       icon: Eye,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      description: "All time page views",
+      gradient: "from-green-500/20 via-green-500/10 to-transparent",
+      borderColor: "border-green-500/50",
+      iconColor: "text-green-500",
     },
     {
       name: "Total Downloads",
       value: totalDownloads._sum.downloads || 0,
       icon: Download,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      description: "Workflow downloads",
+      gradient: "from-purple-500/20 via-purple-500/10 to-transparent",
+      borderColor: "border-purple-500/50",
+      iconColor: "text-purple-500",
     },
     {
-      name: "Categories",
-      value: totalCategories,
-      icon: FolderOpen,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      name: "Bundles",
+      value: totalBundles,
+      icon: Package,
+      description: "Curated collections",
+      gradient: "from-pink-500/20 via-pink-500/10 to-transparent",
+      borderColor: "border-pink-500/50",
+      iconColor: "text-pink-500",
     },
   ]
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <p className="text-white mt-1">Welcome to FlowKit admin panel</p>
+    <div className="space-y-8 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-mono font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground font-mono mt-1">Overview of your platform's performance.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full border">
+          <Activity className="h-4 w-4 text-green-500 animate-pulse" />
+          <span className="text-xs font-mono font-medium">System Operational</span>
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.name}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-100">
+            <Card key={stat.name} className={`relative overflow-hidden border-2 transition-all hover:shadow-lg ${stat.borderColor}`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-50`} />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+                <CardTitle className="text-sm font-medium font-mono text-muted-foreground uppercase tracking-wider">
                   {stat.name}
                 </CardTitle>
-                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                <div className={`p-2 rounded-lg bg-background/80 backdrop-blur-sm border shadow-sm ${stat.iconColor}`}>
+                  <Icon className="h-5 w-5" />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stat.value.toLocaleString()}</div>
+              <CardContent className="relative z-10">
+                <div className="flex items-baseline gap-2">
+                  <div className="text-4xl font-bold font-mono tracking-tighter">
+                    {stat.value.toLocaleString()}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground font-mono mt-2 flex items-center gap-1">
+                  {stat.description}
+                </p>
               </CardContent>
             </Card>
           )
@@ -103,55 +140,79 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Recent Workflows */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Workflows</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentWorkflows.length === 0 ? (
-            <p className="text-center text-gray-100 py-8">
-              No workflows yet. Create your first workflow!
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-foreground">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-foreground">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-foreground">Views</th>
-                    <th className="text-left py-3 px-4 font-medium text-foreground">Downloads</th>
-                    <th className="text-left py-3 px-4 font-medium text-foreground">Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentWorkflows.map((workflow) => (
-                    <tr key={workflow.id} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4 font-medium">{workflow.name}</td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            workflow.published
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {workflow.published ? "Published" : "Draft"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">{workflow.views}</td>
-                      <td className="py-3 px-4">{workflow.downloads}</td>
-                      <td className="py-3 px-4 text-gray-100">
-                        {new Date(workflow.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      <div className="grid gap-6">
+        <Card className="border-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="font-mono text-xl">Recent Workflows</CardTitle>
+              <CardDescription className="font-mono">Latest workflows added to the platform</CardDescription>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="p-2 bg-muted rounded-full">
+              <WorkflowIcon className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentWorkflows.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/10">
+                <WorkflowIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <p className="text-lg font-medium font-mono">No workflows yet</p>
+                <p className="text-sm text-muted-foreground font-mono">Create your first workflow to get started.</p>
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left py-3 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
+                      <th className="text-left py-3 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                      <th className="text-left py-3 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">Views</th>
+                      <th className="text-left py-3 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">Downloads</th>
+                      <th className="text-left py-3 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</th>
+                      <th className="text-right py-3 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentWorkflows.map((workflow) => (
+                      <tr key={workflow.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                        <td className="py-3 px-4 font-medium font-mono">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate max-w-[200px]">{workflow.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                              workflow.published
+                                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                            }`}
+                          >
+                            {workflow.published ? "Published" : "Draft"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-sm text-muted-foreground">{workflow.views.toLocaleString()}</td>
+                        <td className="py-3 px-4 font-mono text-sm text-muted-foreground">{workflow.downloads.toLocaleString()}</td>
+                        <td className="py-3 px-4 font-mono text-sm text-muted-foreground">
+                          {new Date(workflow.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <a 
+                            href={`/workflows/${workflow.slug}`} 
+                            target="_blank" 
+                            className="inline-flex items-center justify-center p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                          >
+                            <ArrowUpRight className="h-4 w-4" />
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

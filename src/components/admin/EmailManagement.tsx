@@ -1,28 +1,37 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, Send, TestTube, FileText, Users, CheckCircle, Clock } from "lucide-react"
+import { Mail, Send, TestTube, FileText, Users, CheckCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 
 type Stats = {
   totalUsers: number
   accessedUsers: number
   pendingUsers: number
-  recentSignups: {
+  users: {
     email: string
     hasAccessed: boolean
     createdAt: Date
     accessedAt: Date | null
   }[]
+  pagination: {
+    currentPage: number
+    totalPages: number
+  }
 }
 
 export default function EmailManagement({ stats }: { stats: Stats }) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
   const [testEmail, setTestEmail] = useState("")
   const [testLoading, setTestLoading] = useState(false)
 
@@ -30,6 +39,12 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
   const [announcementMessage, setAnnouncementMessage] = useState("")
   const [announcementLoading, setAnnouncementLoading] = useState(false)
   const [sendTo, setSendTo] = useState<"all" | "accessed" | "pending">("all")
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('page', page.toString())
+    router.push(`${pathname}?${params.toString()}`)
+  }
 
   // Test Email Sending
   const handleTestEmail = async () => {
@@ -130,7 +145,7 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
         </TabsTrigger>
         <TabsTrigger value="users" className="font-mono">
           <Users className="h-4 w-4 mr-2" />
-          Recent Users
+          Users
         </TabsTrigger>
       </TabsList>
 
@@ -318,21 +333,21 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
         </Card>
       </TabsContent>
 
-      {/* Recent Users Tab */}
+      {/* Users Tab */}
       <TabsContent value="users" className="space-y-4">
         <Card className="p-6 border-2">
-          <h3 className="text-xl font-mono font-bold mb-4">RECENT SIGNUPS</h3>
+          <h3 className="text-xl font-mono font-bold mb-4">ALL USERS</h3>
           <p className="text-sm text-muted-foreground font-mono mb-6">
-            Latest users who joined the waitlist.
+            Manage and view all registered users.
           </p>
 
           <div className="space-y-2">
-            {stats.recentSignups.length === 0 ? (
+            {stats.users.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground font-mono text-sm">
-                No signups yet
+                No users found
               </div>
             ) : (
-              stats.recentSignups.map((user, index) => (
+              stats.users.map((user, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 border-2 hover:bg-muted/50 transition-colors"
@@ -363,6 +378,37 @@ export default function EmailManagement({ stats }: { stats: Stats }) {
               ))
             )}
           </div>
+
+          {/* Pagination */}
+          {stats.pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t">
+              <div className="text-xs font-mono text-muted-foreground">
+                Page {stats.pagination.currentPage} of {stats.pagination.totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(stats.pagination.currentPage - 1)}
+                  disabled={stats.pagination.currentPage <= 1}
+                  className="font-mono h-8"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(stats.pagination.currentPage + 1)}
+                  disabled={stats.pagination.currentPage >= stats.pagination.totalPages}
+                  className="font-mono h-8"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
       </TabsContent>
     </Tabs>

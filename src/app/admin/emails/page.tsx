@@ -4,15 +4,18 @@ import EmailManagement from "@/components/admin/EmailManagement"
 import { Card } from "@/components/ui/card"
 import { Users, Mail, CheckCircle, Clock } from "lucide-react"
 
-async function getWaitlistStats() {
-  const [totalUsers, accessedUsers, recentSignups] = await Promise.all([
+async function getWaitlistStats(page: number = 1, limit: number = 10) {
+  const skip = (page - 1) * limit
+
+  const [totalUsers, accessedUsers, users] = await Promise.all([
     prisma.waitlist.count(),
     prisma.waitlist.count({
       where: { hasAccessed: true }
     }),
     prisma.waitlist.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 10,
+      take: limit,
+      skip: skip,
       select: {
         email: true,
         hasAccessed: true,
@@ -22,16 +25,27 @@ async function getWaitlistStats() {
     })
   ])
 
+  const totalPages = Math.ceil(totalUsers / limit)
+
   return {
     totalUsers,
     accessedUsers,
     pendingUsers: totalUsers - accessedUsers,
-    recentSignups
+    users,
+    pagination: {
+      currentPage: page,
+      totalPages,
+    }
   }
 }
 
-export default async function EmailsAdminPage() {
-  const stats = await getWaitlistStats()
+export default async function EmailsAdminPage({
+  searchParams,
+}: {
+  searchParams: { page?: string }
+}) {
+  const page = Number(searchParams?.page) || 1
+  const stats = await getWaitlistStats(page)
 
   return (
     <div className="p-6 space-y-6">
