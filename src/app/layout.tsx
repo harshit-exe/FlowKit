@@ -19,7 +19,10 @@ const poppins = Poppins({
   variable: '--font-poppins',
 });
 
-export const metadata: Metadata = generateSEOMetadata({});
+export const metadata: Metadata = {
+  ...generateSEOMetadata({}),
+  metadataBase: new URL('https://www.flowkit.in'),
+};
 
 export default function RootLayout({
   children,
@@ -39,14 +42,30 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
+
+        {/* Essential Open Graph Tags */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="FlowKit" />
+        <meta property="og:locale" content="en_US" />
+
         {/* Favicon Links - Explicit for better browser compatibility */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
+
+        {/* Logo for Search Engines */}
+        <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/logo.png" />
+
         {/* Theme Color */}
         <meta name="theme-color" content={siteConfig.themeColor} />
+
+        {/* Additional SEO Tags */}
+        <meta name="author" content="FlowKit Team" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
         {/* Verification Tags (Add these after setting up search consoles) */}
         {/* <meta name="google-site-verification" content="YOUR_GOOGLE_CODE" /> */}
         {/* <meta name="msvalidate.01" content="YOUR_BING_CODE" /> */}
