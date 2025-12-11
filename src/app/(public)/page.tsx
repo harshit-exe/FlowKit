@@ -33,7 +33,7 @@ const categoryIcons: Record<string, any> = {
 
 export default async function HomePage() {
   // Fetch data for homepage
-  const [featuredWorkflows, categories, totalWorkflows, totalUsers] = await Promise.all([
+  const [featuredWorkflows, categories, totalWorkflows, totalUsers, totalSubmissions, acceptedSubmissions] = await Promise.all([
     prisma.workflow.findMany({
       where: {
         featured: true,
@@ -59,7 +59,16 @@ export default async function HomePage() {
       where: { published: true },
     }),
     prisma.waitlist.count(),
+    prisma.workflowSubmission.count(),
+    prisma.workflowSubmission.count({ where: { status: "REVIEWED" } }),
   ]);
+
+  // Base counts
+  const baseTotal = 46;
+  const baseAccepted = 9;
+
+  const displayTotal = baseTotal + totalSubmissions;
+  const displayAccepted = baseAccepted + acceptedSubmissions;
 
   return (
     <div className="relative">
@@ -279,7 +288,7 @@ export default async function HomePage() {
                     </div>
                     <div className="text-right">
                       <div className="font-mono text-xs text-primary font-bold">Join {totalUsers} Contributors</div>
-                      <div className="font-mono text-[10px] text-gray-500">46 Submissions • 9 Accepted</div>
+                      <div className="font-mono text-[10px] text-gray-500">{displayTotal} Submissions • {displayAccepted} Accepted</div>
                     </div>
                   </div>
               </div>
