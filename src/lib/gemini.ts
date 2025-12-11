@@ -10,6 +10,11 @@ function getGeminiModel() {
   })
 }
 
+import { generateAIContent } from "./ai-provider"
+
+// ... (keep getGeminiModel for internal use or image generation if needed, or remove if unused)
+// Actually getGeminiModel is used by generateThumbnailImage so keep it but maybe not export it or keep as is.
+
 export async function generateWorkflow(prompt: string): Promise<any> {
   const systemPrompt = `You are an n8n workflow generator. Generate a valid n8n workflow JSON based on the user's request.
 
@@ -44,10 +49,7 @@ User Request: ${prompt}
 Generate the workflow JSON now:`
 
   try {
-    const model = getGeminiModel()
-    const result = await model.generateContent(systemPrompt)
-    const response = result.response
-    const text = response.text()
+    const text = await generateAIContent(systemPrompt, { jsonMode: true });
 
     // Try to extract JSON from the response
     let jsonText = text.trim()
@@ -63,7 +65,7 @@ Generate the workflow JSON now:`
     const workflowJson = JSON.parse(jsonText)
     return workflowJson
   } catch (error) {
-    console.error("Gemini generation error:", error)
+    console.error("AI generation error:", error)
     throw new Error("Failed to generate workflow")
   }
 }
@@ -144,14 +146,10 @@ User input: ${prompt}
 Return ONLY the optimized content, nothing else.`;
     }
 
-    const model = getGeminiModel()
-    const result = await model.generateContent(systemPrompt);
-    const response = result.response;
-    const text = response.text().trim();
-
-    return text;
+    const text = await generateAIContent(systemPrompt);
+    return text.trim();
   } catch (error) {
-    console.error('Gemini AI error:', error);
+    console.error('AI error:', error);
     throw new Error('Failed to generate SEO content');
   }
 }

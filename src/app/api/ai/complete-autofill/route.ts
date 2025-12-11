@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-if (!process.env.GEMINI_API_KEY) {
-    throw new Error("Missing GEMINI_API_KEY environment variable");
-}
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+import { generateAIContent } from "@/lib/ai-provider";
 
 export async function POST(request: Request) {
     try {
@@ -32,10 +26,6 @@ export async function POST(request: Request) {
             );
         }
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash-exp",
-        });
-
         const prompt = `You are an expert n8n workflow analyst. Analyze this workflow JSON and generate comprehensive metadata for a workflow marketplace.
 
 Workflow JSON:
@@ -59,12 +49,12 @@ Generate a complete analysis with the following structure (return ONLY valid JSO
     "Use case 5: Fifth use case if applicable (2-3 sentences)"
   ],
   "setupSteps": [
-    "Step 1: First setup instruction with clear action items",
-    "Step 2: Second setup instruction",
-    "Step 3: Third setup instruction",
-    "Step 4: Fourth setup instruction if needed",
-    "Step 5: Fifth setup instruction if needed",
-    "Step 6: Additional steps as needed"
+    "First setup instruction with clear action items",
+    "Second setup instruction",
+    "Third setup instruction",
+    "Fourth setup instruction if needed",
+    "Fifth setup instruction if needed",
+    "Additional steps as needed"
   ],
   "tags": ["5-10 relevant SEO tags like 'automation', 'email', 'slack', 'productivity', etc."]
 }
@@ -80,22 +70,29 @@ IMPORTANT GUIDELINES:
 5. **Nodes**: Extract actual node types from the JSON (look for "type" field in nodes array)
 6. **Credentials**: Identify what auth/credentials are needed based on the nodes used
 7. **Use Cases**: Provide 3-5 DETAILED, real-world scenarios. Each should be 2-3 sentences explaining WHO would use it and WHY.
-8. **Setup Steps**: Provide 5-8 clear, actionable steps. Include credential setup, node configuration, and testing.
+8. **Setup Steps**: Provide 5-8 clear, actionable steps. Include credential setup, node configuration, and testing. DO NOT include "Step 1", "Step 2" prefixes. Just the instruction text.
 9. **Tags**: Include relevant keywords for SEO (integrations, use cases, industries)
 
 Return ONLY the JSON object, no markdown formatting, no explanations.`;
 
-        const result = await model.generateContent(prompt);
-        let text = result.response.text().trim();
+        const text = await generateAIContent(prompt, { jsonMode: true });
 
-        // Clean markdown if present
-        if (text.startsWith("```json")) {
-            text = text.replace(/^```json\n/, "").replace(/\n```$/, "");
-        } else if (text.startsWith("```")) {
-            text = text.replace(/^```\n/, "").replace(/\n```$/, "");
+        // Clean markdown if present (handled by generateAIContent usually but good to be safe if provider returns raw text)
+        let jsonText = text.trim();
+        if (jsonText.startsWith("```json")) {
+            jsonText = jsonText.replace(/^```json\n/, "").replace(/\n```$/, "");
+        } else if (jsonText.startsWith("```")) {
+            jsonText = jsonText.replace(/^```\n/, "").replace(/\n```$/, "");
         }
 
-        const analysis = JSON.parse(text);
+        const analysis = JSON.parse(jsonText);
+
+        // Post-processing to remove "Step X" prefixes if AI ignored instructions
+        if (analysis.setupSteps && Array.isArray(analysis.setupSteps)) {
+            analysis.setupSteps = analysis.setupSteps.map((step: string) =>
+                step.replace(/^(Step\s*\d+[:.]\s*)/i, "")
+            );
+        }
 
         return NextResponse.json({
             success: true,
