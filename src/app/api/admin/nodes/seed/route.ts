@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // Comprehensive list of n8n official nodes
 const OFFICIAL_N8N_NODES = [
@@ -351,11 +353,10 @@ const OFFICIAL_N8N_NODES = [
 
 export async function POST(request: Request) {
   try {
-    // Optional: Add authentication check here for admin only
-    // const session = await getServerSession();
-    // if (!session || session.user.role !== 'ADMIN') {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    const session = await getServerSession(authOptions);
+    if (!session || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'SUPER_ADMIN')) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     console.log("[SEED_NODES] Starting seed process...");
 

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import LightRays from "@/components/ui/LightRays";
 import AnimatedGlowingSearchBar from "@/components/ui/animated-glowing-search-bar";
 import { GithubStarButton } from "@/components/ui/github-star-button";
+import { AuthButtons } from "@/components/auth/AuthButtons";
 
 const navigationItems = [
   { title: "Workflows", href: "/workflows" },
@@ -208,7 +209,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
       <style>{previewStyles}</style>
 
       {/* LightRays Component - Subtle white effect */}
-      <div className="absolute inset-0 -z-99 opacity-1">
+      <div className="absolute inset-0 z-0 opacity-1 pointer-events-none">
         <LightRays
           raysOrigin="top-center"
           raysColor="#ffffff"
@@ -218,7 +219,6 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
           fadeDistance={3}
           saturation={0.8}
           followMouse={true}
-          mouseInfluence={0.6}
           className="w-full h-full"
         />
       </div>
@@ -239,9 +239,9 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
       <div className="relative z-10">
         {/* Navbar */}
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
               <div className="w-6 h-6 sm:w-7 sm:h-7 relative flex-shrink-0">
                 <Image
                   src="/Union.png"
@@ -257,7 +257,7 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
             </Link>
 
             {/* Desktop Navigation - Centered */}
-            <div className="hidden md:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
+            <div className="hidden lg:flex items-center gap-8">
               {navigationItems.map((item) => (
                 <Link
                   key={item.href}
@@ -270,8 +270,9 @@ export function NewHero({ totalWorkflows = 150 }: NewHeroProps) {
             </div>
 
             {/* Github Star Button - Desktop */}
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-4 flex-shrink-0">
               <GithubStarButton />
+              <AuthButtons />
             </div>
 
             {/* Mobile Menu Button */}

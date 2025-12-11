@@ -79,6 +79,11 @@ export default function AdminNav({ user }: AdminNavProps) {
       icon: Inbox,
     },
     {
+      name: "Users",
+      href: "/admin/users",
+      icon: User,
+    },
+    {
       name: "Settings",
       href: "/admin/settings",
       icon: Settings,

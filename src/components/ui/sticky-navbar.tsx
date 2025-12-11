@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AnimatedGlowingSearchBar from "@/components/ui/animated-glowing-search-bar";
 import { GithubStarButton } from "@/components/ui/github-star-button";
+import { AuthButtons } from "@/components/auth/AuthButtons";
 
 const navigationItems = [
   { title: "Workflows", href: "/workflows" },
@@ -118,7 +119,7 @@ export function StickyNavbar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="nav-link text-sm font-poppins font-normal text-white/90 hover:text-white transition-colors"
+                  className="nav-link text-sm font-poppins font-normal text-white/90 hover:text-white transition-colors whitespace-nowrap"
                 >
                   {item.title}
                 </Link>
@@ -134,8 +135,9 @@ export function StickyNavbar({
             </div>
 
             {/* Github Star Button - Desktop Right */}
-            <div className="hidden md:block flex-shrink-0">
+            <div className="hidden md:flex items-center gap-4 flex-shrink-0">
               <GithubStarButton />
+              <AuthButtons />
             </div>
 
             {/* Mobile Menu Button */}

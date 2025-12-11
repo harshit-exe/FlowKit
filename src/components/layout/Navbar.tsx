@@ -4,14 +4,25 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Workflow, Search, Menu, X, Github } from "lucide-react"
+import { Workflow, Search, Menu, X, LogOut, User as UserIcon } from "lucide-react"
 import { GithubStarButton } from "@/components/ui/github-star-button"
 import { useState } from "react"
+import { useSession, signOut } from "next-auth/react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const { data: session, status } = useSession()
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -82,6 +93,55 @@ export default function Navbar() {
               <GithubStarButton />
             </div>
 
+            {/* Auth Buttons */}
+            <div className="hidden md:block">
+              {status === "loading" ? (
+                <div className="h-9 w-9 bg-muted animate-pulse rounded-full" />
+              ) : session ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
+                        <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {session.user?.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" asChild>
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {/* Mobile menu button */}
             <button
               className="md:hidden"
@@ -129,6 +189,49 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
+            </div>
+
+            {/* Mobile Auth */}
+            <div className="pt-4 border-t border-border">
+              {session ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 px-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user?.image || ""} />
+                      <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{session.user?.name}</p>
+                      <p className="text-xs text-muted-foreground">{session.user?.email}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-foreground/70 hover:bg-muted"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      signOut()
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-foreground/70 hover:bg-muted"
+                  >
+                    Log out
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2 px-3">
+                  <Button className="w-full" asChild>
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

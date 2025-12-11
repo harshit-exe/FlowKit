@@ -14,6 +14,10 @@ export default async function AdminLayout({
     redirect("/login")
   }
 
+  if ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "SUPER_ADMIN") {
+    redirect("/dashboard")
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <AdminNav user={session.user} />

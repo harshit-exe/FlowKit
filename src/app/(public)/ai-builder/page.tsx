@@ -1,441 +1,78 @@
-"use client"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Lock, Sparkles, Zap, BrainCircuit } from "lucide-react";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import WorkflowBuilder from "@/components/ai-builder/WorkflowBuilder";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Loader2, Copy, Download, Sparkles, Eye, Key } from "lucide-react"
-import { toast } from "sonner"
-import { copyWorkflowJSON, downloadWorkflowJSON } from "@/lib/utils"
-import { WorkflowProgress, ProgressStep } from "@/components/ui/workflow-progress"
-import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
-import ApiKeyModal from "@/components/ui/api-key-modal"
+export default async function AIBuilderPage() {
+  const session = await getServerSession(authOptions);
 
-export default function AIBuilderPage() {
-  const [prompt, setPrompt] = useState("")
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [generatedWorkflow, setGeneratedWorkflow] = useState<any>(null)
-  const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([])
-  const [currentMessage, setCurrentMessage] = useState("")
-  const [showPreview, setShowPreview] = useState(false)
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false)
-  const [hasApiKey, setHasApiKey] = useState(false)
+  if (!session) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[url('/grid.png')] bg-[size:60px_60px] opacity-5 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
 
-  const examplePrompts = [
-    "Send email when new row is added to Google Sheets",
-    "Post to Slack when RSS feed updates",
-    "Create Discord notification for new GitHub issues",
-    "Send weekly summary email from aggregated data",
-  ]
+        <div className="max-w-4xl w-full space-y-12 relative z-10">
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Lock className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold font-poppins tracking-tight">
+              Unlock the Power of <br />
+              <span className="text-primary">AI Automation</span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-mono">
+              Build complex n8n workflows in seconds using natural language. 
+              Join thousands of developers automating their work.
+            </p>
+          </div>
 
-  useEffect(() => {
-    // Check if API key exists in localStorage
-    const apiKey = localStorage.getItem("gemini_api_key");
-    setHasApiKey(!!apiKey);
-  }, []);
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="p-6 bg-white/5 border-white/10 backdrop-blur-sm">
+              <Sparkles className="h-8 w-8 text-yellow-400 mb-4" />
+              <h3 className="text-lg font-bold font-mono mb-2">Text to Workflow</h3>
+              <p className="text-sm text-muted-foreground">
+                Describe what you want to automate, and our AI will build the entire workflow structure for you.
+              </p>
+            </Card>
+            <Card className="p-6 bg-white/5 border-white/10 backdrop-blur-sm">
+              <BrainCircuit className="h-8 w-8 text-blue-400 mb-4" />
+              <h3 className="text-lg font-bold font-mono mb-2">Smart Optimization</h3>
+              <p className="text-sm text-muted-foreground">
+                Automatically optimize your workflows for performance and error handling best practices.
+              </p>
+            </Card>
+            <Card className="p-6 bg-white/5 border-white/10 backdrop-blur-sm">
+              <Zap className="h-8 w-8 text-purple-400 mb-4" />
+              <h3 className="text-lg font-bold font-mono mb-2">Instant Deploy</h3>
+              <p className="text-sm text-muted-foreground">
+                Get production-ready JSON that you can import directly into your n8n instance.
+              </p>
+            </Card>
+          </div>
 
-  const handleApiKeySave = (apiKey: string) => {
-    setHasApiKey(true);
-    toast.success("API key saved successfully!");
-  };
-
-  const initializeSteps = () => {
-    setProgressSteps([
-      { id: "planning", label: "Planning Workflow Structure", status: "pending" },
-      { id: "fetching_nodes", label: "Fetching Available Nodes", status: "pending" },
-      { id: "building", label: "Building Workflow Nodes", status: "pending" },
-      { id: "finalizing", label: "Finalizing Workflow", status: "pending" },
-      { id: "validating", label: "Validating Structure", status: "pending" },
-    ])
-  }
-
-  const updateStepStatus = (stepId: string, status: ProgressStep["status"]) => {
-    setProgressSteps((prev) =>
-      prev.map((step) => (step.id === stepId ? { ...step, status } : step))
-    )
-  }
-
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      toast.error("Please enter a prompt")
-      return
-    }
-
-    // Check if API key exists
-    const apiKey = localStorage.getItem("gemini_api_key");
-    if (!apiKey) {
-      setShowApiKeyModal(true);
-      toast.error("Please add your Google Gemini API key first");
-      return;
-    }
-
-    setIsGenerating(true)
-    setGeneratedWorkflow(null)
-    setShowPreview(false)
-    initializeSteps()
-
-    try {
-      const response = await fetch("/api/ai/generate-stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, apiKey }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to generate workflow")
-      }
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      if (!reader) {
-        throw new Error("No response body")
-      }
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value)
-        const lines = chunk.split("\n")
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = JSON.parse(line.slice(6))
-
-            // Update progress based on step
-            if (data.step === "planning") {
-              updateStepStatus("planning", "active")
-              setCurrentMessage(data.message)
-            } else if (data.step === "fetching_nodes") {
-              updateStepStatus("planning", "completed")
-              updateStepStatus("fetching_nodes", "active")
-              setCurrentMessage(data.message)
-            } else if (data.step.startsWith("building_node_")) {
-              updateStepStatus("fetching_nodes", "completed")
-              updateStepStatus("building", "active")
-              // Update message with current node progress
-              const nodeProgress = data.currentNode && data.nodeCount
-                ? ` (${data.currentNode}/${data.nodeCount})`
-                : '';
-              setCurrentMessage(data.message || `Building workflow nodes${nodeProgress}...`)
-            } else if (data.step === "finalizing") {
-              updateStepStatus("building", "completed")
-              updateStepStatus("finalizing", "active")
-              setCurrentMessage(data.message)
-            } else if (data.step === "validating") {
-              updateStepStatus("finalizing", "completed")
-              updateStepStatus("validating", "active")
-              setCurrentMessage(data.message)
-            } else if (data.step === "complete") {
-              updateStepStatus("validating", "completed")
-              setCurrentMessage("Workflow generated successfully!")
-              setGeneratedWorkflow(data.workflow)
-              setShowPreview(true)
-              toast.success("Workflow generated successfully!")
-            } else if (data.step === "error") {
-              setCurrentMessage(data.message)
-              toast.error(data.message)
-              // Mark current active step as error
-              setProgressSteps((prev) =>
-                prev.map((step) =>
-                  step.status === "active" ? { ...step, status: "error" } : step
-                )
-              )
-            }
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error(error)
-      toast.error(error.message || "Failed to generate workflow")
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  const handleCopy = async () => {
-    try {
-      await copyWorkflowJSON(generatedWorkflow)
-      toast.success("Workflow JSON copied to clipboard!")
-    } catch (error) {
-      toast.error("Failed to copy JSON")
-    }
-  }
-
-  const handleDownload = () => {
-    try {
-      downloadWorkflowJSON(generatedWorkflow, generatedWorkflow.name || "workflow")
-      toast.success("Workflow JSON downloaded!")
-    } catch (error) {
-      toast.error("Failed to download JSON")
-    }
+          <div className="flex flex-col items-center gap-4">
+            <Button asChild size="lg" className="rounded-full text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-black font-bold">
+              <Link href="/login?callbackUrl=/ai-builder">
+                Sign In to Access AI Builder
+              </Link>
+            </Button>
+            <p className="text-sm text-muted-foreground font-mono">
+              Free for all registered users
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3">
-            <Badge className="text-sm px-4 py-1 font-mono border-2 bg-gradient-to-r from-primary/20 to-purple-500/20">
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI-POWERED WORKFLOW GENERATOR
-            </Badge>
-            <Button
-              variant={hasApiKey ? "outline" : "default"}
-              size="sm"
-              onClick={() => setShowApiKeyModal(true)}
-              className="font-mono border-2"
-            >
-              <Key className="h-3 w-3 mr-1" />
-              {hasApiKey ? "API KEY SET ✓" : "ADD API KEY"}
-            </Button>
-          </div>
-          <h1 className="text-5xl font-bold font-mono uppercase tracking-tight">
-            AI WORKFLOW BUILDER
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-mono">
-            Describe your automation in plain English, and let AI generate the perfect n8n workflow with validated nodes.
-          </p>
-        </div>
-
-        {/* Main Content */}
-        <div className={`grid grid-cols-1 ${!generatedWorkflow ? 'lg:grid-cols-2' : ''} gap-8`}>
-          {/* Input Section */}
-          <div className="space-y-6">
-            <Card className="border-2 font-mono">
-              <CardHeader>
-                <CardTitle className="font-mono uppercase tracking-wider">
-                  DESCRIBE YOUR WORKFLOW
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  placeholder="E.g., Send an email notification when a new row is added to Google Sheets..."
-                  rows={6}
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  disabled={isGenerating}
-                  className="font-mono border-2 resize-none"
-                />
-                <Button
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !prompt.trim()}
-                  className="w-full font-mono font-bold"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      GENERATING...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      GENERATE WORKFLOW
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Example Prompts */}
-            <Card className="border-2 font-mono">
-              <CardHeader>
-                <CardTitle className="font-mono uppercase tracking-wider">
-                  EXAMPLE PROMPTS
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {examplePrompts.map((example, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setPrompt(example)}
-                      className="w-full text-left p-3 border-2 border-border hover:border-primary transition-colors text-sm font-mono"
-                      disabled={isGenerating}
-                    >
-                      {example}
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Output Section */}
-          <div className={generatedWorkflow ? 'lg:col-span-1' : ''}>
-            {isGenerating ? (
-              <Card className="border-2 font-mono">
-                <CardHeader>
-                  <CardTitle className="font-mono uppercase tracking-wider">
-                    GENERATION PROGRESS
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <WorkflowProgress
-                    steps={progressSteps}
-                    currentMessage={currentMessage}
-                  />
-                </CardContent>
-              </Card>
-            ) : generatedWorkflow ? (
-              <div className="space-y-6">
-                <Card className="border-2 font-mono">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="font-mono uppercase tracking-wider">
-                        GENERATED WORKFLOW
-                      </CardTitle>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={handleCopy} className="font-mono border-2">
-                          <Copy className="h-4 w-4 mr-1" />
-                          COPY
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleDownload} className="font-mono border-2">
-                          <Download className="h-4 w-4 mr-1" />
-                          DOWNLOAD
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowPreview(!showPreview)}
-                          className="font-mono border-2"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          {showPreview ? "HIDE" : "PREVIEW"}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="font-semibold text-lg font-mono">{generatedWorkflow.name}</p>
-                      <p className="text-sm text-muted-foreground font-mono">
-                        {generatedWorkflow.nodes?.length || 0} NODES • {Object.keys(generatedWorkflow.connections || {}).length} CONNECTIONS
-                      </p>
-                    </div>
-
-                    <div className="bg-muted/30 p-4 border-2 border-border max-h-96 overflow-y-auto">
-                      <pre className="text-xs font-mono">
-                        <code>{JSON.stringify(generatedWorkflow, null, 2)}</code>
-                      </pre>
-                    </div>
-
-                    <Button
-                      onClick={() => {
-                        setGeneratedWorkflow(null)
-                        setPrompt("")
-                        setShowPreview(false)
-                      }}
-                      variant="outline"
-                      className="w-full font-mono border-2"
-                    >
-                      GENERATE ANOTHER
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Workflow Visualizer - Now Full Width */}
-                {showPreview && (
-                  <Card className="border-2 font-mono">
-                    <CardHeader>
-                      <CardTitle className="font-mono uppercase tracking-wider">
-                        WORKFLOW PREVIEW
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <WorkflowVisualizer
-                        workflowJson={generatedWorkflow}
-                        className="w-full min-h-[600px]"
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            ) : (
-              <Card className="border-2 font-mono h-full flex items-center justify-center min-h-[400px]">
-                <CardContent className="text-center space-y-4">
-                  <Sparkles className="h-16 w-16 text-muted-foreground mx-auto" />
-                  <div>
-                    <p className="text-lg font-medium font-mono uppercase">NO WORKFLOW GENERATED YET</p>
-                    <p className="text-sm text-muted-foreground mt-1 font-mono">
-                      Enter a prompt and click Generate to create your workflow
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-
-        {/* How It Works */}
-        <Card className="border-2 font-mono">
-          <CardHeader>
-            <CardTitle className="font-mono uppercase tracking-wider">
-              HOW IT WORKS
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-              <div className="space-y-2">
-                <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
-                  1
-                </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Plan Workflow</h3>
-                <p className="text-xs text-muted-foreground font-mono">
-                  AI analyzes your request and creates a step-by-step plan
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
-                  2
-                </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Fetch Nodes</h3>
-                <p className="text-xs text-muted-foreground font-mono">
-                  Retrieves validated n8n nodes from database
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
-                  3
-                </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Build Block-by-Block</h3>
-                <p className="text-xs text-muted-foreground font-mono">
-                  Generates each node incrementally with automatic connections
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
-                  4
-                </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Validate</h3>
-                <p className="text-xs text-muted-foreground font-mono">
-                  Validates structure and ensures all connections work
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="w-10 h-10 bg-primary text-primary-foreground border-2 border-primary flex items-center justify-center font-bold font-mono">
-                  5
-                </div>
-                <h3 className="font-semibold font-mono uppercase text-sm">Deploy</h3>
-                <p className="text-xs text-muted-foreground font-mono">
-                  Copy JSON and import directly into your n8n instance
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* API Key Modal */}
-        <ApiKeyModal
-          isOpen={showApiKeyModal}
-          onClose={() => setShowApiKeyModal(false)}
-          onSave={handleApiKeySave}
-        />
-      </div>
+    <div className="container mx-auto px-4 py-12">
+      <WorkflowBuilder />
     </div>
-  )
+  );
 }

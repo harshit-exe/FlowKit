@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { setEmailProvider, getEmailProvider, EmailProvider } from "@/lib/email"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions)
+
+        if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "SUPER_ADMIN")) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const provider = await getEmailProvider()
         return NextResponse.json({ provider })
     } catch (error) {
@@ -15,6 +23,12 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
+        const session = await getServerSession(authOptions)
+
+        if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "SUPER_ADMIN")) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const { provider } = await request.json()
 
         if (!["resend", "nodemailer"].includes(provider)) {

@@ -9,6 +9,9 @@ import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
 import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
 import WorkflowJsonViewer from "@/components/workflow/WorkflowJsonViewer"
+import CommentsSection from "@/components/workflow/CommentsSection"
+import RatingComponent from "@/components/workflow/RatingComponent"
+import SaveButton from "@/components/workflow/SaveButton"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const workflow = await prisma.workflow.findUnique({
@@ -105,8 +108,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+
 export default async function WorkflowDetailPage({ params }: { params: { slug: string } }) {
-  // Fetch workflow
+  const session = await getServerSession(authOptions)
+  
+  // Fetch workflow with counts
   const workflow = await prisma.workflow.findUnique({
     where: { slug: params.slug, published: true },
     include: {
@@ -116,11 +124,57 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
       tags: {
         include: { tag: true },
       },
+      _count: {
+        select: {
+          savedBy: true,
+          ratings: true,
+        }
+      },
+      ratings: {
+        select: {
+          value: true,
+        }
+      }
     },
   })
 
   if (!workflow) {
     notFound()
+  }
+
+  // Calculate average rating
+  const avgRating = workflow.ratings.length > 0
+    ? workflow.ratings.reduce((acc, curr) => acc + curr.value, 0) / workflow.ratings.length
+    : 0
+
+  // Fetch user specific state
+  let isSaved = false
+  let userRating = 0
+
+  if (session?.user?.email) {
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+    if (user) {
+      const [savedWorkflow, rating] = await Promise.all([
+        prisma.savedWorkflow.findUnique({
+          where: {
+            userId_workflowId: {
+              userId: user.id,
+              workflowId: workflow.id,
+            },
+          },
+        }),
+        prisma.rating.findUnique({
+          where: {
+            userId_workflowId: {
+              userId: user.id,
+              workflowId: workflow.id,
+            },
+          },
+        }),
+      ])
+      isSaved = !!savedWorkflow
+      userRating = rating?.value || 0
+    }
   }
 
   // Increment view count (fire and forget)
@@ -348,11 +402,17 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
           </div>
 
           {/* Action Buttons */}
-          <WorkflowActions
-            workflowJson={workflow.workflowJson}
-            workflowSlug={workflow.slug}
-            workflowId={workflow.id}
-          />
+          <div className="flex flex-wrap gap-4">
+            <WorkflowActions
+              workflowJson={workflow.workflowJson}
+              workflowSlug={workflow.slug}
+              workflowId={workflow.id}
+            />
+            <SaveButton 
+              workflowId={workflow.id} 
+              initialSaved={isSaved} 
+            />
+          </div>
         </div>
 
         {/* Main Content Grid */}
@@ -373,6 +433,8 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 />
               </CardContent>
             </Card>
+
+
 
             {/* Use Cases */}
             <Card className="border-2">
@@ -465,7 +527,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
               </Card>
             )}
 
-            {/* Stats */}
+            {/* Statistics */}
             <Card className="border-2">
               <CardHeader>
                 <CardTitle className="font-mono uppercase tracking-wider">
@@ -488,11 +550,42 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                   <span className="font-bold">{workflow.downloads}</span>
                 </div>
                 <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    <span className="text-xs uppercase">Saves</span>
+                  </div>
+                  <span className="font-bold">{workflow._count.savedBy}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="text-xs uppercase">Rating</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold">{avgRating.toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground">({workflow._count.ratings})</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground text-xs uppercase">
                     Nodes
                   </span>
                   <span className="font-bold">{workflow.nodeCount}</span>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Rate this Workflow */}
+            <Card className="border-2">
+              <CardHeader>
+                <CardTitle className="font-mono uppercase tracking-wider">
+                  RATE THIS WORKFLOW
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                <RatingComponent 
+                  workflowId={workflow.id} 
+                  initialRating={userRating}
+                />
               </CardContent>
             </Card>
 
@@ -586,6 +679,20 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
               </Card>
             )}
           </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="mt-12">
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="font-mono uppercase tracking-wider">
+                COMMENTS
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CommentsSection workflowId={workflow.id} />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Related Workflows */}

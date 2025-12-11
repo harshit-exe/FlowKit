@@ -3,10 +3,10 @@ import { Space_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { generateMetadata as generateSEOMetadata, siteConfig, jsonLd, organizationJsonLd } from "@/lib/seo";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/components/providers";
 import AccessGateWrapper from "@/components/AccessGateWrapper";
 import NavigationLoader from "@/components/ui/navigation-loader";
-
+import EngagementModal from "@/components/EngagementModal";
 const spaceMono = Space_Mono({
   weight: ['400', '700'],
   subsets: ["latin"],
@@ -83,7 +83,8 @@ export default function RootLayout({
         {/* <meta name="msvalidate.01" content="YOUR_BING_CODE" /> */}
       </head>
       <body className={`${spaceMono.variable} ${poppins.variable} font-mono`}>
-        <ThemeProvider
+
+        <Providers
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
@@ -91,7 +92,7 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <NavigationLoader />
-          <AccessGateWrapper />
+          <EngagementModal />
           {children}
           <Toaster 
             position="top-center"
@@ -108,7 +109,7 @@ export default function RootLayout({
               className: 'font-mono',
             }}
           />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

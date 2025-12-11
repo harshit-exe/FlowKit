@@ -41,6 +41,11 @@ model Workflow {
   categories          WorkflowCategory[]
   tags                WorkflowTag[]
   bundles             BundleWorkflow[]
+  
+  // Community
+  comments            Comment[]
+  ratings             Rating[]
+  savedBy             SavedWorkflow[]
 
   // Metadata
   published           Boolean    @default(false)
@@ -138,18 +143,124 @@ model N8nNode {
   @@map("n8n_nodes")
 }
 
-// ADMIN USERS (for admin panel)
+// ADMIN USERS (for admin panel) -> Now General Users
 model User {
   id            String    @id @default(cuid())
-  email         String    @unique
   name          String?
-  password      String    // Hashed with bcrypt
-  role          Role      @default(ADMIN)
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // Hashed with bcrypt (optional for OAuth)
+  role          Role      @default(USER)
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Community relations
+  comments      Comment[]
+  ratings       Rating[]
+  savedWorkflows SavedWorkflow[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("users")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  userId    String
+  workflowId String
+  parentId  String?  // For nested comments
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow  Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([workflowId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  value     Int      // 1-5
+  userId    String
+  workflowId String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow  Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, workflowId]) // One rating per user per workflow
+  @@index([userId])
+  @@index([workflowId])
+  @@map("ratings")
+}
+
+model SavedWorkflow {
+  id        String   @id @default(cuid())
+  userId    String
+  workflowId String
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow  Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, workflowId])
+  @@index([userId])
+  @@index([workflowId])
+  @@map("saved_workflows")
 }
 
 // ENUMS
@@ -160,9 +271,12 @@ enum Difficulty {
 }
 
 enum Role {
+  USER
   ADMIN
   SUPER_ADMIN
 }
+
+// ... (Waitlist, Bundle, BundleWorkflow, SystemSetting, WorkflowSubmission remain same) ...
 
 // WAITLIST (for access gate)
 model Waitlist {
