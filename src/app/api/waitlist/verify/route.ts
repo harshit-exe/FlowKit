@@ -30,6 +30,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if OTP is expired (15 minutes validity)
+    const OTP_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
+    const now = new Date();
+    const otpAge = now.getTime() - new Date(waitlistEntry.updatedAt).getTime();
+
+    if (otpAge > OTP_EXPIRY_MS) {
+      return NextResponse.json(
+        { error: "Access code has expired. Please request a new one." },
+        { status: 401 }
+      )
+    }
+
     // Mark as accessed if first time
     if (!waitlistEntry.hasAccessed) {
       await prisma.waitlist.update({

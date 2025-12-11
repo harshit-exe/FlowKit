@@ -22,6 +22,18 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   ...generateSEOMetadata({}),
   metadataBase: new URL('https://www.flowkit.in'),
+  keywords: [
+    "n8n library",
+    "n8n workflow",
+    "n8n templates",
+    "n8n automation",
+    "free n8n workflows",
+    "n8n blueprint",
+    "workflow automation",
+    "open source automation",
+    "n8n examples",
+    "n8n community workflows"
+  ],
 };
 
 export default function RootLayout({
