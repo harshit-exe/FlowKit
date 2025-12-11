@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import AdminNav from "@/components/admin/AdminNav"
+import AdminSidebar from "@/components/admin/AdminSidebar"
 
 export default async function AdminLayout({
   children,
@@ -19,10 +19,10 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminNav user={session.user} />
-      <main className="p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+    <div className="flex min-h-screen bg-background">
+      <AdminSidebar user={session.user} />
+      <main className="flex-1 overflow-y-auto h-screen">
+        <div className="container mx-auto p-6 lg:p-10 max-w-7xl">
           {children}
         </div>
       </main>

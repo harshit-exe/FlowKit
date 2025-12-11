@@ -54,7 +54,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        return user;
+        return {
+          ...user,
+          email: user.email as string,
+        };
       },
     }),
   ],
