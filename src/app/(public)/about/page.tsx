@@ -188,7 +188,7 @@ export default function AboutPage() {
           <section className="border-t border-white/10 pt-12">
             <h2 className="text-3xl font-bold text-white mb-6">The Team</h2>
             <p className="mb-4">
-              FlowKit is maintained by <strong className="text-primary">Harshit</strong> and a growing 
+              FlowKit is maintained by <strong className="text-primary">CipherLabs</strong> and a growing 
               community of contributors.
             </p>
             <p className="mb-6">

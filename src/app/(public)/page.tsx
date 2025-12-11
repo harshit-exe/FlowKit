@@ -16,6 +16,7 @@ import {
   Code,
   Users,
   Bot,
+  Sparkles,
 } from "lucide-react";
 
 // Category icon mapping
@@ -32,7 +33,7 @@ const categoryIcons: Record<string, any> = {
 
 export default async function HomePage() {
   // Fetch data for homepage
-  const [featuredWorkflows, categories, totalWorkflows] = await Promise.all([
+  const [featuredWorkflows, categories, totalWorkflows, totalUsers] = await Promise.all([
     prisma.workflow.findMany({
       where: {
         featured: true,
@@ -57,6 +58,7 @@ export default async function HomePage() {
     prisma.workflow.count({
       where: { published: true },
     }),
+    prisma.waitlist.count(),
   ]);
 
   return (
@@ -76,9 +78,13 @@ export default async function HomePage() {
           }}
         />
         {/* Badge */}
-        <div className="relative z-10 mb-8 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/70 backdrop-blur-sm font-poppins">
-          More than Automation
-        </div>
+        <Link href="/submit-workflow">
+          <div className="relative z-10 mb-8 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm text-primary backdrop-blur-sm font-poppins hover:bg-primary/20 transition-colors cursor-pointer flex items-center gap-2 group">
+            <Sparkles className="w-4 h-4" />
+            <span>Contribute to Community</span>
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
 
         <div className="relative z-10">
           <ScrollReveal
@@ -236,8 +242,77 @@ export default async function HomePage() {
         </div>
       </section>
 
-        {/* CTA Section */}
-        <section id="about" className="relative z-20 container mx-auto px-4 py-24">
+      {/* Contribute Section */}
+      <section className="relative z-20 container mx-auto px-4 py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
+        
+        <div className="max-w-5xl mx-auto relative">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-2 md:order-1 relative">
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary to-purple-600 rounded-full blur-3xl opacity-20 animate-pulse" />
+              <div className="relative border border-white/10 bg-black/50 backdrop-blur-xl rounded-2xl p-8 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-mono font-bold text-white text-lg">Community Powered</h3>
+                    <p className="font-mono text-xs text-gray-400">Built by developers, for developers</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-2 w-3/4 bg-white/10 rounded animate-pulse" />
+                  <div className="h-2 w-full bg-white/10 rounded animate-pulse delay-75" />
+                  <div className="h-2 w-5/6 bg-white/10 rounded animate-pulse delay-150" />
+                </div>
+                  <div className="pt-4 flex items-center justify-between border-t border-white/5">
+                    <div className="flex -space-x-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-8 w-8 rounded-full border-2 border-black overflow-hidden bg-gray-800">
+                          <img 
+                            src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${i * 123}`} 
+                            alt={`Contributor ${i}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono text-xs text-primary font-bold">Join {totalUsers} Contributors</div>
+                      <div className="font-mono text-[10px] text-gray-500">46 Submissions • 9 Accepted</div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+
+            <div className="order-1 md:order-2 text-left space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold font-mono leading-tight">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
+                  Your Code.
+                </span>
+                <br />
+                <span className="text-primary">
+                  Their Solution.
+                </span>
+              </h2>
+              <p className="text-lg text-gray-400 font-mono leading-relaxed">
+                Every workflow you submit helps someone else solve a problem. 
+                Join the movement to democratize automation.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Link href="/submit-workflow">
+                  <Button size="lg" className="rounded-none bg-white text-black hover:bg-gray-200 font-mono h-12 px-8 font-bold">
+                    SUBMIT WORKFLOW <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section id="about" className="relative z-20 container mx-auto px-4 py-24">
         <div className="border-2 border-primary bg-primary/5 backdrop-blur-sm p-12 text-center max-w-4xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-mono font-bold mb-6">
             READY TO AUTOMATE?

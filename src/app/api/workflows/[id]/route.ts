@@ -58,6 +58,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       setupSteps,
       workflowJson,
       published,
+      author,
+      authorUrl,
     } = body
 
     // Check if workflow exists
@@ -124,6 +126,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         credentialsRequired,
         nodes,
         published,
+        author,
+        authorUrl,
         publishedAt: published && !existing.published ? new Date() : existing.publishedAt,
         categories: {
           create: categoryIds.map((categoryId: string) => ({

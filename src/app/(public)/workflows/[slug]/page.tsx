@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, DownloadCloud, Youtube, FileText } from "lucide-react"
+import { Eye, DownloadCloud, Youtube, FileText, User } from "lucide-react"
 import { Metadata } from "next"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
@@ -429,6 +429,42 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Creator */}
+            {workflow.author && (
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="font-mono uppercase tracking-wider">
+                    CREATOR
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      {workflow.authorUrl ? (
+                        <a
+                          href={workflow.authorUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold font-mono hover:text-primary transition-colors flex items-center gap-1 group"
+                        >
+                          {workflow.author}
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">↗</span>
+                        </a>
+                      ) : (
+                        <span className="font-bold font-mono">{workflow.author}</span>
+                      )}
+                      <span className="text-xs text-muted-foreground font-mono uppercase">
+                        Workflow Author
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Stats */}
             <Card className="border-2">
               <CardHeader>

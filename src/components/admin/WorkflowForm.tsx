@@ -32,6 +32,9 @@ interface WorkflowFormProps {
   initialData?: Workflow & {
     categories: { category: Category }[]
     tags: { tag: Tag }[]
+  } & {
+    author?: string | null
+    authorUrl?: string | null
   }
   categories: Category[]
   tags: Tag[]
@@ -77,6 +80,8 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           setupSteps: initialData.setupSteps as string[],
           workflowJson: JSON.stringify(initialData.workflowJson, null, 2),
           published: initialData.published,
+          author: initialData.author || "",
+          authorUrl: initialData.authorUrl || "",
         }
       : {
           name: "",
@@ -98,6 +103,8 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
           setupSteps: [""],
           workflowJson: "{}",
           published: false,
+          author: "",
+          authorUrl: "",
         },
   })
 
@@ -479,6 +486,16 @@ export default function WorkflowForm({ initialData, categories, tags }: Workflow
               <Input id="documentLink" {...register("documentLink")} placeholder="https://docs.google.com/..." />
               {errors.documentLink && <p className="text-sm text-red-500">{errors.documentLink.message}</p>}
               <p className="text-xs text-muted-foreground">Google Docs, Notion, or other documentation</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="author">Author Name (Optional)</Label>
+                <Input id="author" {...register("author")} placeholder="John Doe" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="authorUrl">Author URL (Optional)</Label>
+                <Input id="authorUrl" {...register("authorUrl")} placeholder="https://twitter.com/johndoe" />
+              </div>
             </div>
           </div>
 

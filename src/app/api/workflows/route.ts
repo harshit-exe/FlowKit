@@ -106,6 +106,8 @@ export async function POST(request: Request) {
       setupSteps,
       workflowJson,
       published,
+      author,
+      authorUrl,
     } = body
 
     // Check if slug already exists
@@ -189,6 +191,8 @@ export async function POST(request: Request) {
         credentialsRequired,
         nodes,
         published,
+        author,
+        authorUrl,
         publishedAt: published ? new Date() : null,
         categories: {
           create: categoryIds.map((categoryId: string) => ({

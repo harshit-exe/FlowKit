@@ -21,6 +21,8 @@ model Workflow {
   thumbnail           String?
   videoUrl            String?
   documentLink        String?
+  author              String?    // Name of the creator
+  authorUrl           String?    // Link to creator's profile (LinkedIn, X, etc.)
   difficulty          Difficulty @default(BEGINNER)
   featured            Boolean    @default(false)
   indiaBadge          Boolean    @default(false)
@@ -239,4 +241,24 @@ model SystemSetting {
   updatedAt   DateTime @updatedAt
   
   @@map("system_settings")
+}
+
+// SUBMISSIONS
+model WorkflowSubmission {
+  id              String   @id @default(cuid())
+  workflowJson    Json
+  category        String
+  submitterName   String?
+  contactEmail    String?
+  authorUrl       String?
+  status          SubmissionStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+  
+  @@map("workflow_submissions")
+}
+
+enum SubmissionStatus {
+  PENDING
+  REVIEWED
+  REJECTED
 }

@@ -24,6 +24,7 @@ import {
   Search as SearchIcon,
   Mail,
   Package,
+  Inbox,
 } from "lucide-react"
 
 interface AdminNavProps {
@@ -73,6 +74,11 @@ export default function AdminNav({ user }: AdminNavProps) {
       icon: SearchIcon,
     },
     {
+      name: "Submissions",
+      href: "/admin/submissions",
+      icon: Inbox,
+    },
+    {
       name: "Settings",
       href: "/admin/settings",
       icon: Settings,
@@ -95,7 +101,7 @@ export default function AdminNav({ user }: AdminNavProps) {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:ml-8 md:flex md:space-x-1">
+            <div className="hidden lg:ml-8 lg:flex lg:space-x-1 overflow-x-auto no-scrollbar">
               {navItems.map((item) => {
                 const isActive = pathname === item.href
                 const Icon = item.icon
@@ -103,7 +109,7 @@ export default function AdminNav({ user }: AdminNavProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`inline-flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                       isActive
                         ? "bg-primary/10 text-primary"
                         : "text-foreground/70 hover:bg-muted"
