@@ -12,34 +12,52 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect("/login");
   }
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      _count: {
-        select: {
-          comments: true,
-          ratings: true,
-          savedWorkflows: true,
+  const page = Number(searchParams.page) || 1;
+  const pageSize = 12;
+  const skip = (page - 1) * pageSize;
+
+  const [users, totalUsers] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: pageSize,
+      skip: skip,
+      include: {
+        _count: {
+          select: {
+            comments: true,
+            ratings: true,
+            savedWorkflows: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.user.count(),
+  ]);
+
+  const totalPages = Math.ceil(totalUsers / pageSize);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-mono">Users</h1>
         <Badge variant="outline" className="font-mono">
-          Total: {users.length}
+          Total: {totalUsers}
         </Badge>
       </div>
 
@@ -85,6 +103,37 @@ export default async function AdminUsersPage() {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Page {page} of {totalPages}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            asChild
+          >
+            <Link href={`/admin/users?page=${page - 1}`}>
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            asChild
+          >
+            <Link href={`/admin/users?page=${page + 1}`}>
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
