@@ -175,4 +175,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/#harshit-exe/FlowKit&type=timeline&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&legend=bottom-right" />
+ </picture>
+</a>
+
 **Built with ❤️ in India 🇮🇳**
