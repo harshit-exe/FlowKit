@@ -17,7 +17,11 @@ import SaveButton from "@/components/workflow/SaveButton"
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const workflow = await prisma.workflow.findUnique({
     where: { slug: params.slug },
-    include: {
+    select: {
+      name: true,
+      description: true,
+      slug: true,
+      difficulty: true,
       categories: {
         include: { category: true },
       },
@@ -116,9 +120,31 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
   const session = await getServerSession(authOptions)
   
   // 1. Fetch workflow (Critical Path)
+  // 1. Fetch workflow (Critical Path) - LIGHTWEIGHT (No workflowJson)
   const workflow = await prisma.workflow.findUnique({
     where: { slug: params.slug, published: true },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      icon: true,
+      thumbnail: true,
+      difficulty: true,
+      featured: true,
+      indiaBadge: true,
+      nodeCount: true,
+      views: true,
+      downloads: true,
+      createdAt: true,
+      updatedAt: true,
+      author: true,
+      authorUrl: true,
+      videoUrl: true,
+      documentLink: true,
+      useCases: true,
+      setupSteps: true,
+      credentialsRequired: true,
       categories: {
         include: { category: true },
       },
@@ -148,7 +174,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
   // - Related Workflows
   const categoryIds = workflow.categories.map((c) => c.categoryId)
 
-  const [userStatus, statsOffsets, relatedWorkflows] = await Promise.all([
+  const [userStatus, statsOffsets, relatedWorkflows, workflowJsonData] = await Promise.all([
     // Fetch User Status
     (async () => {
       if (!session?.user?.email) return { isSaved: false, userVote: null };
@@ -231,10 +257,18 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
       },
       take: 3,
       orderBy: { views: "desc" },
+    }),
+
+    // Fetch Workflow JSON (Heavy Blob)
+    prisma.workflow.findUnique({
+      where: { id: workflow.id },
+      select: { workflowJson: true }
     })
   ]);
 
   const { isSaved, userVote } = userStatus;
+  // Merge workflowJson
+  const workflowWithJson = { ...workflow, workflowJson: workflowJsonData?.workflowJson || {} };
 
   // Calculate vote counts
   let upvotes = workflow.votes.filter((v: { type: string }) => v.type === "UPVOTE").length;
@@ -427,7 +461,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4">
             <WorkflowActions
-              workflowJson={workflow.workflowJson}
+              workflowJson={workflowWithJson.workflowJson}
               workflowSlug={workflow.slug}
               workflowId={workflow.id}
             />
@@ -451,7 +485,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
               </CardHeader>
               <CardContent className="p-0">
                 <WorkflowVisualizer
-                  workflowJson={workflow.workflowJson}
+                  workflowJson={workflowWithJson.workflowJson}
                   className="w-full"
                 />
               </CardContent>
@@ -507,7 +541,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <WorkflowJsonViewer workflowJson={workflow.workflowJson} />
+                <WorkflowJsonViewer workflowJson={workflowWithJson.workflowJson} />
               </CardContent>
             </Card>
           </div>
