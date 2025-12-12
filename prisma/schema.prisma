@@ -45,7 +45,7 @@ model Workflow {
   
   // Community
   comments            Comment[]
-  ratings             Rating[]
+  votes               Vote[]
   savedBy             SavedWorkflow[]
 
   // Metadata
@@ -159,7 +159,7 @@ model User {
   
   // Community relations
   comments      Comment[]
-  ratings       Rating[]
+  votes         Vote[]
   savedWorkflows SavedWorkflow[]
 
   createdAt     DateTime  @default(now())
@@ -230,10 +230,10 @@ model Comment {
   @@map("comments")
 }
 
-model Rating {
-  id        String   @id @default(cuid())
-  value     Int      // 1-5
-  userId    String
+model Vote {
+  id         String   @id @default(cuid())
+  type       VoteType
+  userId     String
   workflowId String
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -242,10 +242,15 @@ model Rating {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, workflowId]) // One rating per user per workflow
+  @@unique([userId, workflowId])
   @@index([userId])
   @@index([workflowId])
-  @@map("ratings")
+  @@map("votes")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
 }
 
 model SavedWorkflow {

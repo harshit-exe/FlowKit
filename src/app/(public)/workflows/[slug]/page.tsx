@@ -3,14 +3,14 @@ import { prisma } from "@/lib/prisma"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, DownloadCloud, Youtube, FileText, User } from "lucide-react"
+import { Eye, DownloadCloud, Youtube, FileText, User, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Metadata } from "next"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
 import WorkflowVisualizer from "@/components/workflow/WorkflowVisualizer"
 import WorkflowJsonViewer from "@/components/workflow/WorkflowJsonViewer"
 import CommentsSection from "@/components/workflow/CommentsSection"
-import RatingComponent from "@/components/workflow/RatingComponent"
+import VoteComponent from "@/components/workflow/VoteComponent"
 import SaveButton from "@/components/workflow/SaveButton"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -127,12 +127,11 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
       _count: {
         select: {
           savedBy: true,
-          ratings: true,
         }
       },
-      ratings: {
+      votes: {
         select: {
-          value: true,
+          type: true,
         }
       }
     },
@@ -142,19 +141,18 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
     notFound()
   }
 
-  // Calculate average rating
-  const avgRating = workflow.ratings.length > 0
-    ? workflow.ratings.reduce((acc, curr) => acc + curr.value, 0) / workflow.ratings.length
-    : 0
+  // Calculate vote counts
+  const upvotes = workflow.votes.filter(v => v.type === "UPVOTE").length;
+  const downvotes = workflow.votes.filter(v => v.type === "DOWNVOTE").length;
 
   // Fetch user specific state
   let isSaved = false
-  let userRating = 0
+  let userVote: "UPVOTE" | "DOWNVOTE" | null = null
 
   if (session?.user?.email) {
     const user = await prisma.user.findUnique({ where: { email: session.user.email } })
     if (user) {
-      const [savedWorkflow, rating] = await Promise.all([
+      const [savedWorkflow, vote] = await Promise.all([
         prisma.savedWorkflow.findUnique({
           where: {
             userId_workflowId: {
@@ -163,7 +161,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
             },
           },
         }),
-        prisma.rating.findUnique({
+        prisma.vote.findUnique({
           where: {
             userId_workflowId: {
               userId: user.id,
@@ -173,7 +171,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         }),
       ])
       isSaved = !!savedWorkflow
-      userRating = rating?.value || 0
+      userVote = vote?.type as "UPVOTE" | "DOWNVOTE" | null
     }
   }
 
@@ -270,6 +268,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
       tag: {
         ...t.tag,
         createdAt: new Date(),
+        updatedAt: new Date(),
       },
     })),
   }))
@@ -306,6 +305,11 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         "@type": "InteractionCounter",
         "interactionType": "https://schema.org/ViewAction",
         "userInteractionCount": workflow.views
+      },
+      {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/LikeAction",
+        "userInteractionCount": upvotes
       }
     ],
     "applicationCategory": "DeveloperApplication",
@@ -558,12 +562,17 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="text-xs uppercase">Rating</span>
+                    <ThumbsUp className="h-4 w-4" />
+                    <span className="text-xs uppercase">Upvotes</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="font-bold">{avgRating.toFixed(1)}</span>
-                    <span className="text-xs text-muted-foreground">({workflow._count.ratings})</span>
+                  <span className="font-bold text-green-600">+{upvotes}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <ThumbsDown className="h-4 w-4" />
+                    <span className="text-xs uppercase">Downvotes</span>
                   </div>
+                  <span className="font-bold text-red-600">-{downvotes}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground text-xs uppercase">
@@ -574,17 +583,19 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
               </CardContent>
             </Card>
 
-            {/* Rate this Workflow */}
+            {/* Vote this Workflow */}
             <Card className="border-2">
               <CardHeader>
                 <CardTitle className="font-mono uppercase tracking-wider">
-                  RATE THIS WORKFLOW
+                  EVALUATION
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex justify-center">
-                <RatingComponent 
+                <VoteComponent 
                   workflowId={workflow.id} 
-                  initialRating={userRating}
+                  initialUserVote={userVote}
+                  initialUpvotes={upvotes}
+                  initialDownvotes={downvotes}
                 />
               </CardContent>
             </Card>

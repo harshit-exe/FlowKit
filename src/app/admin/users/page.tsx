@@ -41,7 +41,7 @@ export default async function AdminUsersPage({
         _count: {
           select: {
             comments: true,
-            ratings: true,
+            votes: true,
             savedWorkflows: true,
           },
         },
@@ -92,7 +92,7 @@ export default async function AdminUsersPage({
                 <TableCell>
                   <div className="flex gap-2 text-xs text-muted-foreground">
                     <span title="Comments">💬 {user._count.comments}</span>
-                    <span title="Ratings">⭐ {user._count.ratings}</span>
+                    <span title="Votes">👍 {user._count.votes}</span>
                     <span title="Saved">❤️ {user._count.savedWorkflows}</span>
                   </div>
                 </TableCell>
