@@ -115,7 +115,7 @@ import { authOptions } from "@/lib/auth"
 export default async function WorkflowDetailPage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions)
   
-  // Fetch workflow with counts
+  // 1. Fetch workflow (Critical Path)
   const workflow = await prisma.workflow.findUnique({
     where: { slug: params.slug, published: true },
     include: {
@@ -142,47 +142,115 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
     notFound()
   }
 
+  // 2. Parallel Fetching of Secondary Data
+  // - User Status (Vote/Save)
+  // - Stats Offsets
+  // - Related Workflows
+  const categoryIds = workflow.categories.map((c) => c.categoryId)
+
+  const [userStatus, statsOffsets, relatedWorkflows] = await Promise.all([
+    // Fetch User Status
+    (async () => {
+      if (!session?.user?.email) return { isSaved: false, userVote: null };
+      const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+      if (!user) return { isSaved: false, userVote: null };
+      
+      const [savedWorkflow, vote] = await Promise.all([
+        prisma.savedWorkflow.findUnique({
+          where: { userId_workflowId: { userId: user.id, workflowId: workflow.id } },
+        }),
+        prisma.vote.findUnique({
+          where: { userId_workflowId: { userId: user.id, workflowId: workflow.id } },
+        }),
+      ]);
+      
+      return { 
+        isSaved: !!savedWorkflow, 
+        userVote: vote?.type as "UPVOTE" | "DOWNVOTE" | null 
+      };
+    })(),
+
+    // Fetch Stats Offsets
+    getWorkflowStatsOffsets([workflow.id]),
+
+    // Fetch Related Workflows
+    prisma.workflow.findMany({
+      where: {
+        AND: [
+          { id: { not: workflow.id } },
+          { published: true },
+          {
+            categories: {
+              some: {
+                categoryId: {
+                  in: categoryIds,
+                },
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        description: true,
+        icon: true,
+        thumbnail: true,
+        difficulty: true,
+        featured: true,
+        indiaBadge: true,
+        nodeCount: true,
+        views: true,
+        downloads: true,
+        createdAt: true,
+        categories: {
+          select: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                icon: true,
+                color: true,
+              },
+            },
+          },
+        },
+        tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+      take: 3,
+      orderBy: { views: "desc" },
+    })
+  ]);
+
+  const { isSaved, userVote } = userStatus;
+
   // Calculate vote counts
   let upvotes = workflow.votes.filter((v: { type: string }) => v.type === "UPVOTE").length;
   let downvotes = workflow.votes.filter((v: { type: string }) => v.type === "DOWNVOTE").length;
 
   // Apply stats offsets
-  const statsOffsets = await getWorkflowStatsOffsets([workflow.id]);
   const workflowOffsets = statsOffsets[workflow.id] || {};
 
   if (workflowOffsets.views) workflow.views += workflowOffsets.views;
   if (workflowOffsets.downloads) workflow.downloads += workflowOffsets.downloads;
   if (workflowOffsets.upvotes) upvotes += workflowOffsets.upvotes;
   if (workflowOffsets.downvotes) downvotes += workflowOffsets.downvotes;
-
-  // Fetch user specific state
-  let isSaved = false
-  let userVote: "UPVOTE" | "DOWNVOTE" | null = null
-
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } })
-    if (user) {
-      const [savedWorkflow, vote] = await Promise.all([
-        prisma.savedWorkflow.findUnique({
-          where: {
-            userId_workflowId: {
-              userId: user.id,
-              workflowId: workflow.id,
-            },
-          },
-        }),
-        prisma.vote.findUnique({
-          where: {
-            userId_workflowId: {
-              userId: user.id,
-              workflowId: workflow.id,
-            },
-          },
-        }),
-      ])
-      isSaved = !!savedWorkflow
-      userVote = vote?.type as "UPVOTE" | "DOWNVOTE" | null
-    }
+  
+  // Apply save offset if applicable
+  if (workflowOffsets.saves && workflow._count) {
+     workflow._count.savedBy += workflowOffsets.saves;
   }
 
   // Increment view count (fire and forget)
@@ -190,68 +258,6 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
     where: { id: workflow.id },
     data: { views: { increment: 1 } },
   }).catch(() => {})
-
-  // Fetch related workflows (optimized query)
-  const categoryIds = workflow.categories.map((c) => c.categoryId)
-  const relatedWorkflows = await prisma.workflow.findMany({
-    where: {
-      AND: [
-        { id: { not: workflow.id } },
-        { published: true },
-        {
-          categories: {
-            some: {
-              categoryId: {
-                in: categoryIds,
-              },
-            },
-          },
-        },
-      ],
-    },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      description: true,
-      icon: true,
-      thumbnail: true,
-      difficulty: true,
-      featured: true,
-      indiaBadge: true,
-      nodeCount: true,
-      views: true,
-      downloads: true,
-      createdAt: true,
-
-      categories: {
-        select: {
-          category: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              icon: true,
-              color: true,
-            },
-          },
-        },
-      },
-      tags: {
-        select: {
-          tag: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
-        },
-      },
-    },
-    take: 3,
-    orderBy: { views: "desc" },
-  })
 
   // Apply stats offsets to related workflows
   const relatedWorkflowsWithOffsets = await applyStatsOffsetsToWorkflows(relatedWorkflows);

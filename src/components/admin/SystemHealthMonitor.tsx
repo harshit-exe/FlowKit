@@ -26,6 +26,7 @@ export function SystemHealthMonitor({ workflows }: SystemHealthMonitorProps) {
   const [isLoading, setIsLoading] = useState(false);
   
   // These hold the "Total Displayed" values (Real + Offset)
+  const [totals, setTotals] = useState({
     views: 0,
     downloads: 0,
     upvotes: 0,
@@ -34,6 +35,7 @@ export function SystemHealthMonitor({ workflows }: SystemHealthMonitorProps) {
   });
 
   // Keep track of real stats to calculate offsets on save
+  const [realStats, setRealStats] = useState({
     views: 0,
     downloads: 0,
     upvotes: 0,
