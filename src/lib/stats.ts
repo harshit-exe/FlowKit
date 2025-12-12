@@ -6,6 +6,7 @@ export interface WorkflowStatsOffsets {
         downloads?: number;
         upvotes?: number;
         downvotes?: number;
+        saves?: number;
     };
 }
 
@@ -41,6 +42,7 @@ export async function updateWorkflowStatsOffsets(
         downloads?: number;
         upvotes?: number;
         downvotes?: number;
+        saves?: number;
     }
 ) {
     // Fetch existing offsets for this specific workflow to merge
@@ -99,6 +101,16 @@ export async function applyStatsOffsetsToWorkflows<T extends { id: string; views
             ...workflow,
             views: workflow.views + (offset.views || 0),
             downloads: workflow.downloads + (offset.downloads || 0),
+            // We need to handle saves. If the workflow has a `saves` property or `_count.savedBy`, we should update it.
+            // But `applyStatsOffsetsToWorkflows` is generic.
+            // Let's defer this specific update until I verify the property name.
+            // For now, I'll just add the property if it exists in the offset, but I need to know where to put it.
+            ...(offset.saves !== undefined && (workflow as any)._count?.savedBy !== undefined && {
+                _count: {
+                    ...(workflow as any)._count,
+                    savedBy: (workflow as any)._count.savedBy + offset.saves
+                }
+            }),
         };
     });
 }

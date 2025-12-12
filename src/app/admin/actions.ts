@@ -22,9 +22,8 @@ export async function getWorkflowRealStats(workflowId: string) {
     const workflow = await prisma.workflow.findUnique({
         where: { id: workflowId },
         include: {
-            votes: {
-                select: { type: true },
-            },
+            votes: true,
+            savedBy: true,
         },
     });
 
@@ -34,6 +33,7 @@ export async function getWorkflowRealStats(workflowId: string) {
 
     const upvotes = workflow.votes.filter((v: { type: string }) => v.type === "UPVOTE").length;
     const downvotes = workflow.votes.filter((v: { type: string }) => v.type === "DOWNVOTE").length;
+    const saves = workflow.savedBy.length;
 
     const offsets = await getWorkflowStatsOffsets([workflowId]);
     const currentOffsets = offsets[workflowId] || {
@@ -41,6 +41,7 @@ export async function getWorkflowRealStats(workflowId: string) {
         downloads: 0,
         upvotes: 0,
         downvotes: 0,
+        saves: 0,
     };
 
     return {
@@ -49,6 +50,7 @@ export async function getWorkflowRealStats(workflowId: string) {
             downloads: workflow.downloads,
             upvotes,
             downvotes,
+            saves,
         },
         offsets: currentOffsets,
     };
