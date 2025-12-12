@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { getWorkflowStatsOffsets } from "@/lib/stats"
+import { getWorkflowStatsOffsets, applyStatsOffsetsToWorkflows } from "@/lib/stats"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -147,7 +147,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
   let downvotes = workflow.votes.filter((v: { type: string }) => v.type === "DOWNVOTE").length;
 
   // Apply stats offsets
-  const statsOffsets = await getWorkflowStatsOffsets();
+  const statsOffsets = await getWorkflowStatsOffsets([workflow.id]);
   const workflowOffsets = statsOffsets[workflow.id] || {};
 
   if (workflowOffsets.views) workflow.views += workflowOffsets.views;
@@ -253,8 +253,11 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
     orderBy: { views: "desc" },
   })
 
+  // Apply stats offsets to related workflows
+  const relatedWorkflowsWithOffsets = await applyStatsOffsetsToWorkflows(relatedWorkflows);
+
   // Transform to match expected type
-  const transformedRelated = relatedWorkflows.map((wf) => ({
+  const transformedRelated = relatedWorkflowsWithOffsets.map((wf) => ({
     ...wf,
     videoUrl: null,
     workflowJson: {},
@@ -718,14 +721,13 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
 
         {/* Related Workflows */}
         {transformedRelated.length > 0 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold font-mono uppercase tracking-wider">
-              RELATED WORKFLOWS
-            </h2>
+          <section>
+            <h2 className="text-2xl font-mono font-bold mb-6">Related Workflows</h2>
             <WorkflowGrid workflows={transformedRelated as any} />
-          </div>
+          </section>
         )}
       </div>
     </div>
   )
 }
+

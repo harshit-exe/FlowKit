@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { prisma } from "@/lib/prisma"
+import { getWorkflowStatsOffsets, applyStatsOffsetsToWorkflows } from "@/lib/stats"
 import { Workflow as WorkflowIcon, Eye, Download, FolderOpen, Package, Clock, Users, ArrowUpRight, Activity } from "lucide-react"
 
 export default async function AdminDashboard() {
@@ -39,6 +40,19 @@ export default async function AdminDashboard() {
     },
   })
 
+  // Fetch and calculate offsets
+  const offsets = await getWorkflowStatsOffsets();
+  let totalViewsOffset = 0;
+  let totalDownloadsOffset = 0;
+
+  Object.values(offsets).forEach(offset => {
+    totalViewsOffset += offset.views || 0;
+    totalDownloadsOffset += offset.downloads || 0;
+  });
+
+  // Apply offsets to recent workflows
+  const recentWorkflowsWithOffsets = await applyStatsOffsetsToWorkflows(recentWorkflows);
+
   const stats = [
     {
       name: "Total Users",
@@ -69,7 +83,7 @@ export default async function AdminDashboard() {
     },
     {
       name: "Total Views",
-      value: totalViews._sum.views || 0,
+      value: (totalViews._sum.views || 0) + totalViewsOffset,
       icon: Eye,
       description: "All time page views",
       gradient: "from-green-500/20 via-green-500/10 to-transparent",
@@ -78,7 +92,7 @@ export default async function AdminDashboard() {
     },
     {
       name: "Total Downloads",
-      value: totalDownloads._sum.downloads || 0,
+      value: (totalDownloads._sum.downloads || 0) + totalDownloadsOffset,
       icon: Download,
       description: "Workflow downloads",
       gradient: "from-purple-500/20 via-purple-500/10 to-transparent",
@@ -152,7 +166,7 @@ export default async function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {recentWorkflows.length === 0 ? (
+            {recentWorkflowsWithOffsets.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/10">
                 <WorkflowIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
                 <p className="text-lg font-medium font-mono">No workflows yet</p>
@@ -172,7 +186,7 @@ export default async function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentWorkflows.map((workflow) => (
+                    {recentWorkflowsWithOffsets.map((workflow) => (
                       <tr key={workflow.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-4 font-medium font-mono">
                           <div className="flex items-center gap-2">

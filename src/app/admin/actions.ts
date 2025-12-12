@@ -35,7 +35,7 @@ export async function getWorkflowRealStats(workflowId: string) {
     const upvotes = workflow.votes.filter((v: { type: string }) => v.type === "UPVOTE").length;
     const downvotes = workflow.votes.filter((v: { type: string }) => v.type === "DOWNVOTE").length;
 
-    const offsets = await getWorkflowStatsOffsets();
+    const offsets = await getWorkflowStatsOffsets([workflowId]);
     const currentOffsets = offsets[workflowId] || {
         views: 0,
         downloads: 0,

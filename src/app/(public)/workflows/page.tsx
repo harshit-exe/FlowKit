@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { applyStatsOffsetsToWorkflows } from "@/lib/stats"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import { Metadata } from "next"
 import { Pagination } from "@/components/ui/pagination"
@@ -108,10 +109,13 @@ export default async function WorkflowsPage({
     }),
   ])
 
+  // Apply stats offsets
+  const workflowsWithOffsets = await applyStatsOffsetsToWorkflows(workflows);
+
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   // Transform to match WorkflowWithRelations type
-  const transformedWorkflows = workflows.map((workflow) => ({
+  const transformedWorkflows = workflowsWithOffsets.map((workflow) => ({
     ...workflow,
     // Add missing fields with default values to match Workflow type
     videoUrl: null,

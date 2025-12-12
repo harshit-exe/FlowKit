@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
+import { applyStatsOffsetsToWorkflows } from "@/lib/stats";
 import { NewHero } from "@/components/ui/new-hero";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import {
@@ -62,6 +63,8 @@ export default async function HomePage() {
     prisma.workflowSubmission.count(),
     prisma.workflowSubmission.count({ where: { status: "REVIEWED" } }),
   ]);
+
+  const featuredWorkflowsWithOffsets = await applyStatsOffsetsToWorkflows(featuredWorkflows);
 
   // Base counts
   const baseTotal = 46;
@@ -138,7 +141,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {featuredWorkflows.map((workflow) => (
+            {featuredWorkflowsWithOffsets.map((workflow) => (
               <Link
                 key={workflow.id}
                 href={`/workflows/${workflow.slug}`}

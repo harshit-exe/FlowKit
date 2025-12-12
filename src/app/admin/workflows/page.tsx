@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { prisma } from "@/lib/prisma"
+import { applyStatsOffsetsToWorkflows } from "@/lib/stats"
 import { Plus } from "lucide-react"
 import { WorkflowsList } from "@/components/admin/WorkflowsList"
 import { Pagination } from "@/components/ui/pagination"
@@ -54,6 +55,8 @@ export default async function AdminWorkflowsPage({
     }),
   ])
 
+  const workflowsWithOffsets = await applyStatsOffsetsToWorkflows(workflows);
+
   const totalPages = Math.ceil(totalWorkflows / ITEMS_PER_PAGE)
 
   return (
@@ -89,7 +92,7 @@ export default async function AdminWorkflowsPage({
             </div>
           ) : (
             <>
-              <WorkflowsList workflows={workflows as any} />
+              <WorkflowsList workflows={workflowsWithOffsets as any} />
               
               {/* Pagination */}
               <Pagination
