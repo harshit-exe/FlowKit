@@ -26,19 +26,19 @@ export function SystemHealthMonitor({ workflows }: SystemHealthMonitorProps) {
   const [isLoading, setIsLoading] = useState(false);
   
   // These hold the "Total Displayed" values (Real + Offset)
-  const [totals, setTotals] = useState({
     views: 0,
     downloads: 0,
     upvotes: 0,
     downvotes: 0,
+    saves: 0,
   });
 
   // Keep track of real stats to calculate offsets on save
-  const [realStats, setRealStats] = useState({
     views: 0,
     downloads: 0,
     upvotes: 0,
     downvotes: 0,
+    saves: 0,
   });
 
   const [clickCount, setClickCount] = useState(0);
@@ -73,6 +73,7 @@ export function SystemHealthMonitor({ workflows }: SystemHealthMonitorProps) {
           downloads: real.downloads + (offsets.downloads || 0),
           upvotes: real.upvotes + (offsets.upvotes || 0),
           downvotes: real.downvotes + (offsets.downvotes || 0),
+          saves: real.saves + (offsets.saves || 0),
         });
       } catch (error) {
         toast.error("Failed to fetch workflow stats");
@@ -96,6 +97,7 @@ export function SystemHealthMonitor({ workflows }: SystemHealthMonitorProps) {
       downloads: totals.downloads - realStats.downloads,
       upvotes: totals.upvotes - realStats.upvotes,
       downvotes: totals.downvotes - realStats.downvotes,
+      saves: totals.saves - realStats.saves,
     };
 
     try {
@@ -212,6 +214,22 @@ export function SystemHealthMonitor({ workflows }: SystemHealthMonitorProps) {
                       />
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
                         (Real: {realStats.downvotes})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="saves" className="text-right">
+                      Total Saves
+                    </Label>
+                    <div className="col-span-3 flex items-center gap-2">
+                      <Input
+                        id="saves"
+                        type="number"
+                        value={totals.saves}
+                        onChange={(e) => setTotals({ ...totals, saves: parseInt(e.target.value) || 0 })}
+                      />
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        (Real: {realStats.saves})
                       </span>
                     </div>
                   </div>
