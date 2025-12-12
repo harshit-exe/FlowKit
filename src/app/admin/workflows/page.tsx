@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { Plus } from "lucide-react"
 import { WorkflowsList } from "@/components/admin/WorkflowsList"
 import { Pagination } from "@/components/ui/pagination"
+import { SystemHealthMonitor } from "@/components/admin/SystemHealthMonitor"
 
 const ITEMS_PER_PAGE = 20
 
@@ -102,6 +103,8 @@ export default async function AdminWorkflowsPage({
           )}
         </CardContent>
       </Card>
+
+      <SystemHealthMonitor workflows={workflows.map(w => ({ id: w.id, name: w.name, slug: w.slug }))} />
     </div>
   )
 }

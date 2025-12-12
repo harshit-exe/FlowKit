@@ -81,32 +81,32 @@ export default function VoteComponent({
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 p-4 bg-muted/30 rounded-xl border border-border/50">
-      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-        Did it work for you?
-      </h3>
-      <div className="flex items-center gap-3">
+    <div className="w-full flex items-center justify-between gap-4 p-2 bg-muted/40 rounded-full border border-border/50 hover:border-primary/20 transition-colors group">
+      <span className="text-xs font-medium text-muted-foreground pl-3 group-hover:text-primary/80 transition-colors">
+        Help the community - rate this workflow
+      </span>
+      
+      <div className="flex items-center gap-1 pr-1">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleVote("UPVOTE")}
           disabled={isSubmitting}
           className={cn(
-            "flex items-center gap-2 h-10 px-4 rounded-full transition-all hover:bg-green-500/10 hover:text-green-500",
-            userVote === "UPVOTE" &&
-              "bg-green-500/20 text-green-500 hover:bg-green-500/30"
+            "h-8 px-3 rounded-full gap-1.5 hover:bg-green-500/10 hover:text-green-600 transition-all",
+            userVote === "UPVOTE" && "bg-green-500/20 text-green-600"
           )}
         >
           <ArrowBigUp
             className={cn(
-              "h-6 w-6 transition-transform",
+              "h-5 w-5 transition-transform",
               userVote === "UPVOTE" && "scale-110 fill-current"
             )}
           />
-          <span className="font-bold text-base">{upvotes}</span>
+          <span className="font-mono font-bold text-sm">{upvotes}</span>
         </Button>
 
-        <div className="h-8 w-[1px] bg-border/50" />
+        <div className="h-4 w-[1px] bg-border" />
 
         <Button
           variant="ghost"
@@ -114,18 +114,17 @@ export default function VoteComponent({
           onClick={() => handleVote("DOWNVOTE")}
           disabled={isSubmitting}
           className={cn(
-            "flex items-center gap-2 h-10 px-4 rounded-full transition-all hover:bg-red-500/10 hover:text-red-500",
-            userVote === "DOWNVOTE" &&
-              "bg-red-500/20 text-red-500 hover:bg-red-500/30"
+            "h-8 px-3 rounded-full gap-1.5 hover:bg-red-500/10 hover:text-red-600 transition-all",
+            userVote === "DOWNVOTE" && "bg-red-500/20 text-red-600"
           )}
         >
           <ArrowBigDown
             className={cn(
-              "h-6 w-6 transition-transform",
+              "h-5 w-5 transition-transform",
               userVote === "DOWNVOTE" && "scale-110 fill-current"
             )}
           />
-          <span className="font-bold text-base">{downvotes}</span>
+          <span className="font-mono font-bold text-sm">{downvotes}</span>
         </Button>
       </div>
     </div>

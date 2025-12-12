@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
+import { getWorkflowStatsOffsets } from "@/lib/stats"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -142,8 +143,17 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
   }
 
   // Calculate vote counts
-  const upvotes = workflow.votes.filter(v => v.type === "UPVOTE").length;
-  const downvotes = workflow.votes.filter(v => v.type === "DOWNVOTE").length;
+  let upvotes = workflow.votes.filter((v: { type: string }) => v.type === "UPVOTE").length;
+  let downvotes = workflow.votes.filter((v: { type: string }) => v.type === "DOWNVOTE").length;
+
+  // Apply stats offsets
+  const statsOffsets = await getWorkflowStatsOffsets();
+  const workflowOffsets = statsOffsets[workflow.id] || {};
+
+  if (workflowOffsets.views) workflow.views += workflowOffsets.views;
+  if (workflowOffsets.downloads) workflow.downloads += workflowOffsets.downloads;
+  if (workflowOffsets.upvotes) upvotes += workflowOffsets.upvotes;
+  if (workflowOffsets.downvotes) downvotes += workflowOffsets.downvotes;
 
   // Fetch user specific state
   let isSaved = false
