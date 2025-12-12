@@ -11,13 +11,13 @@ export interface WorkflowStatsOffsets {
 
 const SETTING_PREFIX = "workflow_stats_";
 
-export async function getWorkflowStatsOffsets(): Promise<WorkflowStatsOffsets> {
+export async function getWorkflowStatsOffsets(workflowIds?: string[]): Promise<WorkflowStatsOffsets> {
+    const whereClause = workflowIds
+        ? { key: { in: workflowIds.map((id) => `${SETTING_PREFIX}${id}`) } }
+        : { key: { startsWith: SETTING_PREFIX } };
+
     const settings = await prisma.systemSetting.findMany({
-        where: {
-            key: {
-                startsWith: SETTING_PREFIX,
-            },
-        },
+        where: whereClause,
     });
 
     const offsets: WorkflowStatsOffsets = {};
@@ -86,7 +86,10 @@ export async function updateWorkflowStatsOffsets(
 export async function applyStatsOffsetsToWorkflows<T extends { id: string; views: number; downloads: number }>(
     workflows: T[]
 ): Promise<T[]> {
-    const offsets = await getWorkflowStatsOffsets();
+    if (workflows.length === 0) return workflows;
+
+    const ids = workflows.map((w) => w.id);
+    const offsets = await getWorkflowStatsOffsets(ids);
 
     return workflows.map((workflow) => {
         const offset = offsets[workflow.id];
