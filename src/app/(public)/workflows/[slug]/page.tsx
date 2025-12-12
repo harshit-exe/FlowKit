@@ -39,8 +39,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     'n8n workflow',
     'n8n template',
     'workflow automation',
-    ...workflow.categories.map(c => c.category.name),
-    ...workflow.tags.map(t => t.tag.name),
+    ...workflow.categories.map((c: any) => c.category.name),
+    ...workflow.tags.map((t: any) => t.tag.name),
     workflow.difficulty,
     'free download',
     'production ready',
@@ -117,7 +117,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
   // - User Status (Vote/Save)
   // - Stats Offsets
   // - Related Workflows
-  const categoryIds = workflow.categories.map((c) => c.categoryId)
+  const categoryIds = workflow.categories.map((c: any) => c.categoryId)
 
   const [userStatus, statsOffsets, relatedWorkflows, workflowJsonData] = await Promise.all([
     // Fetch User Status
@@ -285,8 +285,8 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
     "programmingLanguage": "JSON",
     "codeRepository": "https://github.com/harshit-exe/FlowKit",
     "keywords": [
-      ...workflow.categories.map(c => c.category.name),
-      ...workflow.tags.map(t => t.tag.name),
+      ...workflow.categories.map((c: any) => c.category.name),
+      ...workflow.tags.map((t: any) => t.tag.name),
       "n8n",
       "workflow",
       "automation"
@@ -396,7 +396,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 IN • INDIA
               </Badge>
             )}
-            {workflow.categories.map((cat) => (
+            {workflow.categories.map((cat: any) => (
               <Badge key={cat.category.id} variant="outline" className="font-mono border-2">
                 {cat.category.name.toUpperCase()}
               </Badge>
@@ -674,7 +674,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {workflow.tags.map((tag) => (
+                    {workflow.tags.map((tag: any) => (
                       <Badge
                         key={tag.tag.id}
                         variant="outline"
