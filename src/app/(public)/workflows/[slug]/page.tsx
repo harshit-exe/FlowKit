@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { getWorkflowStatsOffsets, applyStatsOffsetsToWorkflows } from "@/lib/stats"
+import { getCachedWorkflow } from "@/lib/workflow-cache"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,21 +16,7 @@ import VoteComponent from "@/components/workflow/VoteComponent"
 import SaveButton from "@/components/workflow/SaveButton"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const workflow = await prisma.workflow.findUnique({
-    where: { slug: params.slug },
-    select: {
-      name: true,
-      description: true,
-      slug: true,
-      difficulty: true,
-      categories: {
-        include: { category: true },
-      },
-      tags: {
-        include: { tag: true },
-      },
-    },
-  })
+  const workflow = await getCachedWorkflow(params.slug)
 
   if (!workflow) {
     return {
@@ -119,50 +106,8 @@ import { authOptions } from "@/lib/auth"
 export default async function WorkflowDetailPage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions)
   
-  // 1. Fetch workflow (Critical Path)
-  // 1. Fetch workflow (Critical Path) - LIGHTWEIGHT (No workflowJson)
-  const workflow = await prisma.workflow.findUnique({
-    where: { slug: params.slug, published: true },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      icon: true,
-      thumbnail: true,
-      difficulty: true,
-      featured: true,
-      indiaBadge: true,
-      nodeCount: true,
-      views: true,
-      downloads: true,
-      createdAt: true,
-      updatedAt: true,
-      author: true,
-      authorUrl: true,
-      videoUrl: true,
-      documentLink: true,
-      useCases: true,
-      setupSteps: true,
-      credentialsRequired: true,
-      categories: {
-        include: { category: true },
-      },
-      tags: {
-        include: { tag: true },
-      },
-      _count: {
-        select: {
-          savedBy: true,
-        }
-      },
-      votes: {
-        select: {
-          type: true,
-        }
-      }
-    },
-  })
+  // 1. Fetch workflow (Critical Path) - Cached
+  const workflow = await getCachedWorkflow(params.slug)
 
   if (!workflow) {
     notFound()
@@ -185,7 +130,7 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
         prisma.savedWorkflow.findUnique({
           where: { userId_workflowId: { userId: user.id, workflowId: workflow.id } },
         }),
-        prisma.vote.findUnique({
+        (prisma as any).vote.findUnique({
           where: { userId_workflowId: { userId: user.id, workflowId: workflow.id } },
         }),
       ]);
