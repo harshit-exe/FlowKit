@@ -47,6 +47,9 @@ model Workflow {
   comments            Comment[]
   votes               Vote[]
   savedBy             SavedWorkflow[]
+  
+  // Portfolio
+  portfolioEntries    PortfolioWorkflow[]
 
   // Metadata
   published           Boolean    @default(false)
@@ -157,14 +160,39 @@ model User {
   accounts      Account[]
   sessions      Session[]
   
+  // Portfolio fields
+  username          String?   @unique  // Public username for portfolio URL
+  bio               String?   @db.Text // Short bio
+  location          String?            // City, Country
+  websiteUrl        String?            // Personal website
+  linkedinUrl       String?            // LinkedIn profile
+  twitterHandle     String?            // X/Twitter handle
+  githubUrl         String?            // GitHub profile
+  portfolioEnabled  Boolean   @default(false) // Public portfolio visibility
+  portfolioTheme    String    @default("default") // Theme customization
+  
+  // Stats (calculated fields)
+  totalWorkflows    Int       @default(0)
+  totalViews        Int       @default(0)
+  totalDownloads    Int       @default(0)
+  communityRating   Float     @default(0.0)
+  
   // Community relations
   comments      Comment[]
   votes         Vote[]
   savedWorkflows SavedWorkflow[]
+  
+  // Portfolio relations
+  badges            UserBadge[]
+  portfolioWorkflows PortfolioWorkflow[]
+  receivedReviews   ClientReview[] @relation("ReviewReceiver")
+  givenReviews      ClientReview[] @relation("ReviewGiver")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  @@index([username])
+  @@index([portfolioEnabled])
   @@map("users")
 }
 
@@ -381,4 +409,99 @@ enum SubmissionStatus {
   PENDING
   REVIEWED
   REJECTED
+}
+
+// USER PORTFOLIO FEATURE
+
+// Portfolio Workflows - Junction table linking users to workflows they want to showcase
+model PortfolioWorkflow {
+  id          String   @id @default(cuid())
+  userId      String
+  workflowId  String
+  
+  // Customization per portfolio
+  featured    Boolean  @default(false) // Highlight this workflow
+  order       Int      @default(0)     // Custom ordering in portfolio
+  customTitle String?                  // Override workflow title
+  customDesc  String?  @db.Text        // Override description
+  caseStudy   String?  @db.Text        // Add case study/story
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([userId, workflowId])
+  @@index([userId])
+  @@index([workflowId])
+  @@index([featured])
+  @@map("portfolio_workflows")
+}
+
+// User Badges - Community verification and achievement badges
+model UserBadge {
+  id          String     @id @default(cuid())
+  userId      String
+  badgeType   BadgeType
+  title       String               // e.g., "Verified Creator"
+  description String               // Badge criteria
+  icon        String               // Icon identifier
+  color       String               // Badge color
+  earnedAt    DateTime   @default(now())
+  
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([badgeType])
+  @@map("user_badges")
+}
+
+enum BadgeType {
+  VERIFIED_CREATOR      // Manual verification by admin
+  TOP_CONTRIBUTOR       // 10+ workflows published
+  EXPERT_LEVEL          // 50+ workflows published
+  RISING_STAR           // First 100 users with portfolios
+  COMMUNITY_FAVORITE    // 100+ total upvotes
+  DOWNLOAD_CHAMPION     // 1000+ total downloads
+  EARLY_ADOPTER         // Beta tester badge
+}
+
+// Client Reviews - Testimonials and reviews from clients
+model ClientReview {
+  id              String   @id @default(cuid())
+  
+  // Who is being reviewed (portfolio owner)
+  receiverId      String
+  receiver        User     @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  // Who is giving the review (optional - can be anonymous)
+  giverId         String?
+  giver           User?    @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: SetNull)
+  
+  // Review details
+  clientName      String              // If not logged in, manual name
+  clientCompany   String?             // Company name
+  clientRole      String?             // Job title
+  clientAvatar    String?             // Avatar URL
+  
+  rating          Int                 // 1-5 stars
+  reviewText      String   @db.Text   // Testimonial
+  projectType     String?             // What project they worked on
+  
+  // Verification
+  verified        Boolean  @default(false)
+  verifiedEmail   String?             // Email for verification
+  
+  // Visibility
+  featured        Boolean  @default(false) // Show prominently
+  approved        Boolean  @default(false) // Requires approval by receiver
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([receiverId])
+  @@index([giverId])
+  @@index([approved])
+  @@index([featured])
+  @@map("client_reviews")
 }

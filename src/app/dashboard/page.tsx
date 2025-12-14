@@ -2,9 +2,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import WorkflowGrid from "@/components/workflow/WorkflowGrid";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Heart, User, Sparkles, ExternalLink, Plus } from "lucide-react";
 import { StickyNavbar } from "@/components/ui/sticky-navbar";
 
 export default async function DashboardPage() {
@@ -17,6 +20,21 @@ export default async function DashboardPage() {
   if ((session.user as any).role === "ADMIN") {
     redirect("/admin");
   }
+
+  // Get user with portfolio info
+  const user = await prisma.user.findUnique({
+    where: { email: session.user?.email! },
+    select: {
+      id: true,
+      username: true,
+      portfolioEnabled: true,
+      totalWorkflows: true,
+      badges: {
+        take: 3,
+        orderBy: { earnedAt: 'desc' },
+      },
+    },
+  });
 
   const savedWorkflows = await prisma.savedWorkflow.findMany({
     where: {
@@ -52,6 +70,80 @@ export default async function DashboardPage() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="space-y-8">
+          {/* Portfolio Section */}
+          <Card className="border-2 bg-background/50 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold font-mono">MY PORTFOLIO</h2>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {user?.portfolioEnabled 
+                        ? "Showcase your work to clients" 
+                        : "Create your professional n8n portfolio"
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                {user?.portfolioEnabled && user.username ? (
+                  <div className="flex gap-2">
+                    <Link href={`/u/${user.username}`} target="_blank">
+                      <Button variant="outline" size="sm" className="font-mono border-2">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        VIEW
+                      </Button>
+                    </Link>
+                    <Link href="/portfolio/dashboard">
+                      <Button size="sm" className="font-mono">
+                        MANAGE
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <Link href="/portfolio/setup">
+                    <Button size="sm" className="font-mono">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      CREATE PORTFOLIO
+                    </Button>
+                  </Link>
+                )}
+              </div>
+
+              {user?.portfolioEnabled && (
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t-2">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold font-mono text-primary">
+                      {user.totalWorkflows}
+                    </div>
+                    <div className="text-xs font-mono text-muted-foreground">
+                      Workflows
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold font-mono">
+                      {user.badges?.length || 0}
+                    </div>
+                    <div className="text-xs font-mono text-muted-foreground">
+                      Badges
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <Link href="/portfolio/dashboard">
+                      <Button variant="link" className="font-mono text-primary text-xs p-0 h-auto">
+                        View Stats →
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Saved Workflows Section */}
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
               <Heart className="h-6 w-6 text-primary" />

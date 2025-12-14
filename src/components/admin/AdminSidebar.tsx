@@ -19,7 +19,8 @@ import {
   Inbox,
   ChevronLeft,
   ChevronRight,
-  Globe
+  Globe,
+  Sparkles
 } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,8 +47,10 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     { name: "SEO", href: "/admin/seo", icon: Search },
     { name: "Submissions", href: "/admin/submissions", icon: Inbox },
     { name: "Users", href: "/admin/users", icon: User },
+    { name: "Portfolios", href: "/admin/portfolios", icon: Sparkles },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
+
 
   return (
     <div
