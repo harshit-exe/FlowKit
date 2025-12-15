@@ -42,26 +42,30 @@ export default function TutorialStepView({
       case "VALIDATION":
         return <CheckCircle2 className="h-5 w-5" />
       case "CHECKPOINT":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />
+        return <CheckCircle2 className="h-5 w-5" />
       default:
         return <Info className="h-5 w-5" />
     }
   }
 
   const getStepColor = () => {
-    if (isLocked) return "bg-gray-500/10 text-gray-500 border-gray-500/20"
+    if (isLocked) return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30"
     
     switch (step.type) {
       case "INFO":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20"
+        // Blue = Calm, trust, knowledge (passive learning)
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
       case "ACTION":
-        return "bg-orange-500/10 text-orange-500 border-orange-500/20"
+        // Primary Orange = Energy, motivation, action (active doing)
+        return "bg-primary/10 text-primary border-primary/30"
       case "VALIDATION":
-        return "bg-purple-500/10 text-purple-500 border-purple-500/20"
+        // Purple = Mastery, wisdom, checking (validation)
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30"
       case "CHECKPOINT":
-        return "bg-green-500/10 text-green-500 border-green-500/20"
+        // Green = Success, achievement, milestone
+        return "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
       default:
-        return "bg-primary/10 text-primary border-primary/20"
+        return "bg-muted text-muted-foreground border-muted"
     }
   }
 
@@ -99,15 +103,15 @@ export default function TutorialStepView({
         </div>
       </div>
 
-      {/* Locked State Message */}
+      {/* Locked State Message - RED psychology (Stop/Warning) */}
       {isLocked && (
-        <Card className="border-2 border-orange-500/50 bg-orange-500/10">
+        <Card className="border-2 border-red-500/50 bg-red-500/10">
           <CardContent className="py-4">
             <div className="flex items-start gap-3">
-              <Lock className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+              <Lock className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-mono font-bold text-orange-600 dark:text-orange-400">
-                  Complete Previous Steps  First
+                <p className="font-mono font-bold text-red-600 dark:text-red-400">
+                  Complete Previous Steps First
                 </p>
                 <p className="text-sm font-mono text-muted-foreground mt-1">
                   You need to complete step {step.order - 1} before you can access this step.
@@ -188,13 +192,13 @@ export default function TutorialStepView({
         </CardContent>
       </Card>
 
-      {/* Hints Section */}
+      {/* Hints Section - YELLOW psychology (Guidance/Helpful) */}
       {!isLocked && step.hints && step.hints.length > 0 && (
-        <Card className="border-2 border-yellow-500/20 bg-yellow-500/5">
+        <Card className="border-2 border-amber-500/30 bg-amber-500/5">
           <CardHeader>
             <CardTitle className="font-mono uppercase tracking-wider text-sm flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-yellow-500" />
-              Need a hint?
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <span className="text-amber-600 dark:text-amber-400">Need a hint?</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -203,7 +207,7 @@ export default function TutorialStepView({
                 variant="outline"
                 size="sm"
                 onClick={revealNextHint}
-                className="font-mono border-2"
+                className="font-mono border-2 border-amber-500/30 hover:bg-amber-500/10"
               >
                 <HelpCircle className="h-4 w-4 mr-2" />
                 Show Hint ({step.hints.length} available)
@@ -214,9 +218,9 @@ export default function TutorialStepView({
                   {step.hints.slice(0, revealedHints).map((hint, index) => (
                     <div
                       key={index}
-                      className="flex gap-3 p-3 bg-background border-2 rounded-lg"
+                      className="flex gap-3 p-3 bg-background border-2 border-amber-500/20 rounded-lg"
                     >
-                      <span className="flex-shrink-0 font-mono font-bold text-yellow-500">
+                      <span className="flex-shrink-0 font-mono font-bold text-amber-500 text-lg">
                         💡
                       </span>
                       <p className="text-sm font-mono">{hint}</p>
@@ -228,7 +232,7 @@ export default function TutorialStepView({
                     variant="outline"
                     size="sm"
                     onClick={revealNextHint}
-                    className="font-mono border-2"
+                    className="font-mono border-2 border-amber-500/30 hover:bg-amber-500/10"
                   >
                     Show Another Hint ({step.hints.length - revealedHints} remaining)
                   </Button>
@@ -239,22 +243,11 @@ export default function TutorialStepView({
         </Card>
       )}
 
-      {/* Mark Complete Button */}
-      {!isCompleted && !isLocked && step.type !== "CHECKPOINT" && (
-        <Button
-          onClick={onMarkComplete}
-          size="lg"
-          className="w-full font-mono uppercase gap-2"
-        >
-          <CheckCircle2 className="h-5 w-5" />
-          Mark as Complete
-        </Button>
-      )}
-
+      {/* Completion Status - GREEN psychology (Success/Achievement/Reward) */}
       {isCompleted && (
         <Card className="border-2 border-green-500/50 bg-green-500/10">
           <CardContent className="py-4">
-            <div className="flex items-center justify-center gap-2 text-green-600 font-mono font-bold">
+            <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 font-mono font-bold">
               <CheckCircle2 className="h-5 w-5" />
               <span>Step Completed! ✓</span>
             </div>

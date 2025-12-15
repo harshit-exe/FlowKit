@@ -3,7 +3,7 @@
 import { Tutorial, TutorialProgress } from "@/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { X, ChevronLeft, ChevronRight } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import {
@@ -13,7 +13,6 @@ import {
   updateCurrentStep,
 } from "@/lib/tutorial-progress"
 import TutorialStepView from "./TutorialStepView"
-import TutorialProgressIndicator from "./TutorialProgressIndicator"
 import TutorialCompletionCelebration from "./TutorialCompletionCelebration"
 
 interface InteractiveTutorialProps {
@@ -141,47 +140,45 @@ export default function InteractiveTutorial({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 border-2 border-primary/30">
-        {/* Header with FlowKit theme */}
-        <DialogHeader className="sticky top-0 z-10 bg-gradient-to-r from-black via-primary/5 to-black backdrop-blur border-b-2 border-primary/20 p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <DialogTitle className="font-mono uppercase tracking-wider text-xl text-primary">
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden p-0 border-2 border-primary/30">
+        {/* Ultra-Compact Header - Content First! */}
+        <DialogHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-primary/20 px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              {/* Compact title */}
+              <DialogTitle className="font-mono uppercase text-sm tracking-wider text-primary truncate">
                 {tutorial.title}
               </DialogTitle>
-              <p className="text-sm font-mono mt-2 flex items-center gap-2 text-muted-foreground">
-                <span className="px-2 py-1 bg-primary/10 rounded border border-primary/30">
-                  Step {currentStepIndex + 1} of {tutorial.steps.length}
-                </span>
-                <span className="text-muted-foreground/40">•</span>
-                <span className="text-primary">{tutorial.difficulty}</span>
-              </p>
+              {/* Mini inline progress bar */}
+              {progress && (
+                <div className="flex items-center gap-3 mt-1.5">
+                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ 
+                        width: `${Math.min(Math.round((progress.completedSteps.length / tutorial.steps.length) * 100), 100)}%` 
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-mono text-muted-foreground whitespace-nowrap">
+                    {currentStepIndex + 1}/{tutorial.steps.length}
+                  </span>
+                </div>
+              )}
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleClose}
-              className="shrink-0 hover:bg-primary/10"
+              className="shrink-0 h-8 w-8"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
-
-          {/* Progress Indicator */}
-          {progress && (
-            <div className="mt-6">
-              <TutorialProgressIndicator
-                currentStep={currentStepIndex}
-                totalSteps={tutorial.steps.length}
-                progress={progress}
-                onStepClick={handleStepClick}
-              />
-            </div>
-          )}
         </DialogHeader>
 
-        {/* Step Content */}
-        <div className="p-6 pb-8 overflow-y-auto max-h-[calc(90vh-240px)]">
+        {/* Maximized Content Area - 80% of screen! */}
+        <div className="overflow-y-auto max-h-[calc(95vh-140px)] px-6 py-6">
           {currentStep && (
             <TutorialStepView
               step={currentStep}
@@ -192,33 +189,57 @@ export default function InteractiveTutorial({
           )}
         </div>
 
-        {/* Navigation Footer */}
-        <div className="sticky bottom-0 bg-gradient-to-r from-black via-primary/5 to-black backdrop-blur border-t-2 border-primary/20 p-4 flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={isFirstStep}
-            className="font-mono border-primary/30 hover:bg-primary/10 disabled:opacity-30"
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
+        {/* Compact Single-Row Footer - All actions inline */}
+        <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-primary/20 px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Previous */}
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={isFirstStep}
+              size="sm"
+              className="font-mono"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
 
-          <div className="flex gap-2">
+            {/* Center: Action */}
+            <div className="flex-1 flex justify-center">
+              {isStepCompleted ? (
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-mono text-sm font-bold">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Complete</span>
+                </div>
+              ) : currentStep?.type !== "CHECKPOINT" ? (
+                <Button
+                  onClick={handleStepComplete}
+                  size="sm"
+                  className="font-mono bg-primary hover:bg-primary/90"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Mark Complete
+                </Button>
+              ) : null}
+            </div>
+
+            {/* Right: Next/Finish */}
             {isLastStep ? (
               <Button
                 onClick={handleClose}
+                size="sm"
                 className="font-mono"
               >
-                Finish Tutorial
+                Finish
               </Button>
             ) : (
               <Button
                 onClick={handleNext}
+                size="sm"
                 className="font-mono"
               >
-                Next Step
-                <ChevronRight className="h-4 w-4 ml-2" />
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             )}
           </div>
