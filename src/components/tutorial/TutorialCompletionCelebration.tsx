@@ -4,11 +4,12 @@ import { Tutorial, TutorialProgress } from "@/types"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Trophy, Sparkles, Clock, CheckCircle2, X, Share2 } from "lucide-react"
+import { Trophy, Sparkles, Clock, CheckCircle2, Share2, Zap } from "lucide-react"
 import { getTimeElapsed } from "@/lib/tutorial-progress"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import confetti from "canvas-confetti"
+import { toast } from "sonner"
 
 interface TutorialCompletionCelebrationProps {
   tutorial: Tutorial
@@ -27,10 +28,10 @@ export default function TutorialCompletionCelebration({
 
   useEffect(() => {
     if (isOpen) {
-      // Trigger confetti
-      const duration = 3000
+      // Trigger epic confetti with FlowKit colors
+      const duration = 4000
       const animationEnd = Date.now() + duration
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+      const defaults = { startVelocity: 30, spread: 360, ticks: 80, zIndex: 9999 }
 
       const randomInRange = (min: number, max: number) => {
         return Math.random() * (max - min) + min
@@ -43,21 +44,22 @@ export default function TutorialCompletionCelebration({
           return clearInterval(interval)
         }
 
-        const particleCount = 50 * (timeLeft / duration)
+        const particleCount = 60 * (timeLeft / duration)
         confetti({
           ...defaults,
           particleCount,
           origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+          colors: ['#FF6633', '#FFB366', '#FFA500', '#FF8C00'] // FlowKit orange shades
         })
         confetti({
           ...defaults,
           particleCount,
           origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+          colors: ['#FF6633', '#FFB366', '#FFA500', '#FF8C00']
         })
-      }, 250)
+      }, 200)
 
-      // Show content after animation
-      setTimeout(() => setShowContent(true), 500)
+      setTimeout(() => setShowContent(true), 400)
 
       return () => clearInterval(interval)
     }
@@ -74,152 +76,188 @@ export default function TutorialCompletionCelebration({
         text: text,
         url: window.location.href,
       }).catch(() => {
-        // Fallback to clipboard
         navigator.clipboard.writeText(text)
+        toast.success("Copied to clipboard!")
       })
     } else {
       navigator.clipboard.writeText(text)
+      toast.success("Copied to clipboard!")
     }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden border-4 border-primary">
-        <div className="relative bg-gradient-to-br from-primary/20 via-background to-primary/10 p-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-
+      <DialogContent className="max-w-2xl p-0 overflow-hidden border-2 border-primary/50 shadow-2xl shadow-primary/20">
+        {/* FlowKit theme gradient */}
+        <div className="relative bg-gradient-to-br from-black via-primary/5 to-black p-10">
+          {/* Animated glow effect with primary color */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 animate-pulse" />
+          
           {showContent && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-6 text-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, type: "spring" }}
+              className="relative space-y-8 text-center"
             >
-              {/* Trophy Icon */}
+              {/* Epic Trophy Icon */}
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1, rotate: 360 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 150, damping: 12 }}
                 className="flex justify-center"
               >
                 <div className="relative">
-                  <div className="absolute inset-0 bg-primary/30 rounded-full blur-xl animate-pulse" />
-                  <div className="relative bg-primary p-6 rounded-full">
-                    <Trophy className="h-16 w-16 text-primary-foreground" />
-                  </div>
+                  {/* Primary color glow layers */}
+                  <div className="absolute inset-0 bg-primary/40 rounded-full blur-2xl animate-pulse" />
+                  <div className="absolute inset-0 bg-primary/60 rounded-full blur-xl animate-ping" style={{ animationDuration: '2s' }} />
+                  
+                  {/* Trophy container with FlowKit colors */}
+                  <motion.div 
+                    animate={{ 
+                      rotateY: [0, 360],
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity, 
+                      ease: "linear" 
+                    }}
+                    className="relative bg-gradient-to-br from-primary to-orange-600 p-8 rounded-full shadow-2xl shadow-primary/30"
+                  >
+                    <Trophy className="h-20 w-20 text-white drop-shadow-lg" />
+                  </motion.div>
                 </div>
               </motion.div>
 
-              {/* Congratulations Text */}
-              <div className="space-y-2">
+              {/* Epic Title with FlowKit styling */}
+              <div className="space-y-3">
                 <motion.h2
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-4xl font-bold font-mono uppercase tracking-tight flex items-center justify-center gap-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-5xl font-black font-mono uppercase tracking-tight flex items-center justify-center gap-3"
                 >
-                  <Sparkles className="h-8 w-8 text-yellow-500" />
-                  Tutorial Complete!
-                  <Sparkles className="h-8 w-8 text-yellow-500" />
+                  <Sparkles className="h-10 w-10 text-primary animate-pulse" />
+                  <span className="bg-gradient-to-r from-white via-white to-primary bg-clip-text text-transparent">
+                    COMPLETE!
+                  </span>
+                  <Sparkles className="h-10 w-10 text-primary animate-pulse" />
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-xl font-mono text-muted-foreground"
+                  transition={{ delay: 0.4 }}
+                  className="text-lg font-mono text-muted-foreground"
                 >
-                  You've successfully completed
+                  Tutorial Finished Successfully
                 </motion.p>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="text-2xl font-bold font-mono text-primary"
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="inline-block px-6 py-3 bg-primary/10 backdrop-blur rounded-full border-2 border-primary/30"
                 >
-                  {tutorial.title}
-                </motion.p>
+                  <p className="text-xl font-bold font-mono text-primary">
+                    {tutorial.title}
+                  </p>
+                </motion.div>
               </div>
 
-              {/* Stats Cards */}
+              {/* Stats Grid matching FlowKit style */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
+                transition={{ delay: 0.6 }}
                 className="grid grid-cols-3 gap-4"
               >
-                <Card className="border-2">
-                  <CardContent className="p-4 text-center">
-                    <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold font-mono">{tutorial.steps.length}</p>
-                    <p className="text-xs font-mono text-muted-foreground uppercase">
-                      Steps
+                <Card className="border-2 border-green-500/30 bg-green-500/5">
+                  <CardContent className="p-6 text-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <CheckCircle2 className="h-10 w-10 text-green-500 mx-auto mb-3" />
+                    </motion.div>
+                    <p className="text-3xl font-black font-mono text-white">
+                      {tutorial.steps.length}
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mt-1">
+                      Steps Mastered
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card className="border-2">
-                  <CardContent className="p-4 text-center">
-                    <Clock className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold font-mono">{timeElapsed}</p>
-                    <p className="text-xs font-mono text-muted-foreground uppercase">
-                      Time
+                <Card className="border-2 border-blue-500/30 bg-blue-500/5">
+                  <CardContent className="p-6 text-center">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Clock className="h-10 w-10 text-blue-500 mx-auto mb-3" />
+                    </motion.div>
+                    <p className="text-3xl font-black font-mono text-white">
+                      {timeElapsed}
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mt-1">
+                      Time Invested
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card className="border-2">
-                  <CardContent className="p-4 text-center">
-                    <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold font-mono">100%</p>
-                    <p className="text-xs font-mono text-muted-foreground uppercase">
-                      Complete
+                <Card className="border-2 border-primary/50 bg-primary/10">
+                  <CardContent className="p-6 text-center">
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <Zap className="h-10 w-10 text-primary mx-auto mb-3" />
+                    </motion.div>
+                    <p className="text-3xl font-black font-mono text-primary">
+                      100%
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mt-1">
+                      Achievement
                     </p>
                   </CardContent>
                 </Card>
               </motion.div>
 
-              {/* Motivational Message */}
+              {/* Motivational message */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.2 }}
-                className="bg-primary/10 border-2 border-primary/20 rounded-lg p-4"
+                transition={{ delay: 0.8 }}
+                className="bg-primary/10 border-2 border-primary/20 rounded-lg p-5"
               >
-                <p className="font-mono text-sm">
-                  🚀 You're now ready to implement this workflow in production!
-                  Feel free to customize it to fit your specific needs.
+                <p className="font-mono text-base leading-relaxed">
+                  🚀 <span className="font-bold text-primary">Congratulations!</span> You've mastered this workflow.
+                  You're now ready to build amazing automations in production!
                 </p>
               </motion.div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons matching FlowKit style */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.4 }}
-                className="flex gap-3 justify-center pt-4"
+                transition={{ delay: 1 }}
+                className="flex gap-4 justify-center pt-2"
               >
                 <Button
                   onClick={handleShare}
                   variant="outline"
-                  className="font-mono gap-2"
+                  className="font-mono gap-2 border-2 border-primary/30 hover:bg-primary/10"
+                  size="lg"
                 >
-                  <Share2 className="h-4 w-4" />
-                  Share Achievement
+                  <Share2 className="h-5 w-5" />
+                  Share Victory
                 </Button>
                 <Button
                   onClick={onClose}
-                  className="font-mono gap-2"
+                  className="font-mono gap-2 bg-gradient-to-r from-primary to-orange-600 hover:from-orange-500 hover:to-primary shadow-lg shadow-primary/25"
                   size="lg"
                 >
-                  <Sparkles className="h-4 w-4" />
-                  Explore More Workflows
+                  <Sparkles className="h-5 w-5" />
+                  Continue Exploring
                 </Button>
               </motion.div>
             </motion.div>

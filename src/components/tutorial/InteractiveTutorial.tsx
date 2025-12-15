@@ -141,23 +141,27 @@ export default function InteractiveTutorial({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-        {/* Header */}
-        <DialogHeader className="sticky top-0 z-10 bg-background border-b-2 p-6">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 border-2 border-primary/30">
+        {/* Header with FlowKit theme */}
+        <DialogHeader className="sticky top-0 z-10 bg-gradient-to-r from-black via-primary/5 to-black backdrop-blur border-b-2 border-primary/20 p-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <DialogTitle className="font-mono uppercase tracking-wider text-xl">
+              <DialogTitle className="font-mono uppercase tracking-wider text-xl text-primary">
                 {tutorial.title}
               </DialogTitle>
-              <p className="text-sm text-muted-foreground font-mono mt-1">
-                Step {currentStepIndex + 1} of {tutorial.steps.length}
+              <p className="text-sm font-mono mt-2 flex items-center gap-2 text-muted-foreground">
+                <span className="px-2 py-1 bg-primary/10 rounded border border-primary/30">
+                  Step {currentStepIndex + 1} of {tutorial.steps.length}
+                </span>
+                <span className="text-muted-foreground/40">•</span>
+                <span className="text-primary">{tutorial.difficulty}</span>
               </p>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleClose}
-              className="shrink-0"
+              className="shrink-0 hover:bg-primary/10"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -165,7 +169,7 @@ export default function InteractiveTutorial({
 
           {/* Progress Indicator */}
           {progress && (
-            <div className="mt-4">
+            <div className="mt-6">
               <TutorialProgressIndicator
                 currentStep={currentStepIndex}
                 totalSteps={tutorial.steps.length}
@@ -177,7 +181,7 @@ export default function InteractiveTutorial({
         </DialogHeader>
 
         {/* Step Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-220px)]">
           {currentStep && (
             <TutorialStepView
               step={currentStep}
@@ -189,12 +193,12 @@ export default function InteractiveTutorial({
         </div>
 
         {/* Navigation Footer */}
-        <div className="sticky bottom-0 bg-background border-t-2 p-4 flex items-center justify-between">
+        <div className="sticky bottom-0 bg-gradient-to-r from-black via-primary/5 to-black backdrop-blur border-t-2 border-primary/20 p-4 flex items-center justify-between">
           <Button
             variant="outline"
             onClick={handlePrevious}
             disabled={isFirstStep}
-            className="font-mono"
+            className="font-mono border-primary/30 hover:bg-primary/10 disabled:opacity-30"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Previous
