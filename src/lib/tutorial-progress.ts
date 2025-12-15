@@ -54,16 +54,38 @@ export function initializeTutorialProgress(tutorialId: string): TutorialProgress
 
 /**
  * Update progress when completing a step
+ * Now with sequential validation
  */
 export function completeStep(
     tutorialId: string,
     stepId: string,
+    stepOrder: number, // Added step order parameter
     totalSteps: number
 ): TutorialProgress {
     let progress = getTutorialProgress(tutorialId)
 
     if (!progress) {
         progress = initializeTutorialProgress(tutorialId)
+    }
+
+    // Sequential validation: Check if all previous steps are completed
+    if (stepOrder > 1) {
+        const previousStepsCompleted = progress.completedSteps.filter(id => {
+            // Extract step number from step ID (assumes format "step-1", "step-2", etc.)
+            const match = id.match(/step-(\d+)/)
+            if (match) {
+                const stepNum = parseInt(match[1])
+                return stepNum < stepOrder
+            }
+            return false
+        })
+
+        const expectedPreviousSteps = stepOrder - 1
+        if (previousStepsCompleted.length < expectedPreviousSteps) {
+            // Return progress without marking step complete - user must complete previous steps first
+            console.warn(`[TUTORIAL] Cannot complete step ${stepOrder} - previous steps not completed`)
+            return progress
+        }
     }
 
     // Add step to completed if not already there
@@ -150,7 +172,10 @@ export function getAllTutorialProgress(): TutorialProgress[] {
  */
 export function calculateProgress(progress: TutorialProgress, totalSteps: number): number {
     if (totalSteps === 0) return 0
-    return Math.round((progress.completedSteps.length / totalSteps) * 100)
+    const percentage = (progress.completedSteps.length / totalSteps) * 100
+    // Use Math.round to ensure 100% shows when all steps complete
+    // Cap at 100% to prevent showing values over 100%
+    return Math.min(Math.round(percentage), 100)
 }
 
 /**
@@ -170,4 +195,40 @@ export function getTimeElapsed(progress: TutorialProgress): string {
     }
 
     return `${minutes}m`
+}
+
+/**
+ * Check if a step can be completed (sequential validation)
+ */
+export function canCompleteStep(
+    progress: TutorialProgress | null,
+    stepOrder: number
+): boolean {
+    if (!progress) return stepOrder === 1 // First step is always unlocked
+
+    if (stepOrder === 1) return true // First step is always unlocked
+
+    // Check if all previous steps are completed
+    const previousStepsCompleted = progress.completedSteps.filter(id => {
+        const match = id.match(/step-(\d+)/)
+        if (match) {
+            const stepNum = parseInt(match[1])
+            return stepNum < stepOrder
+        }
+        return false
+    })
+
+    const expectedPreviousSteps = stepOrder - 1
+    return previousStepsCompleted.length >= expectedPreviousSteps
+}
+
+/**
+ * Check if a step is already completed
+ */
+export function isStepCompleted(
+    progress: TutorialProgress | null,
+    stepId: string
+): boolean {
+    if (!progress) return false
+    return progress.completedSteps.includes(stepId)
 }

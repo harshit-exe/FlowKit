@@ -87,6 +87,21 @@ export interface BundleFormData {
 // Tutorial types for file-based system
 export type TutorialStepType = "INFO" | "ACTION" | "VALIDATION" | "CHECKPOINT"
 
+export interface CredentialLink {
+  name: string                    // e.g., "LinkedIn API Key"
+  provider: string                // e.g., "LinkedIn", "Google"
+  setupUrl: string                // Direct link to get credentials
+  documentationUrl?: string       // Official docs
+  requiredPermissions?: string[]  // List of permissions needed
+  setupInstructions?: string      // Brief setup guide
+}
+
+export interface ExternalResource {
+  title: string                   // e.g., "n8n LinkedIn Node Docs"
+  url: string
+  type: "documentation" | "video" | "tutorial" | "community"
+}
+
 export interface TutorialStep {
   id: string
   order: number
@@ -98,6 +113,10 @@ export interface TutorialStep {
   videoUrl?: string
   codeSnippet?: string
   validation?: Record<string, any>
+  // NEW: Credential setup links
+  credentialLinks?: CredentialLink[]
+  // NEW: External resources
+  externalResources?: ExternalResource[]
 }
 
 export interface Tutorial {

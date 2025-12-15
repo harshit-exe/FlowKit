@@ -24,8 +24,13 @@ export default function TutorialSection({ workflowSlug }: TutorialSectionProps) 
 
         if (response.ok) {
           const data = await response.json()
-          setTutorial(data)
-          setProgress(getTutorialProgress(data.id))
+          // Handle new database API response format
+          if (data.success && data.tutorial) {
+            setTutorial(data.tutorial)
+            setProgress(getTutorialProgress(data.tutorial.id))
+          } else {
+            setTutorial(null)
+          }
         } else {
           setTutorial(null)
         }

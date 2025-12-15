@@ -173,65 +173,71 @@ export default function TutorialsAdminPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {workflows.map((workflow) => (
-                <Card
-                  key={workflow.id}
-                  className={`cursor-pointer transition-all border-2 ${
-                    selectedWorkflow?.id === workflow.id
-                      ? "border-primary bg-primary/5"
-                      : "hover:border-primary/50"
-                  }`}
-                  onClick={() => setSelectedWorkflow(workflow)}
-                >
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      <p className="font-bold font-mono text-sm line-clamp-2">
-                        {workflow.name}
-                      </p>
-                      <div className="flex gap-2">
-                        <Badge variant="secondary" className="font-mono text-xs">
-                          {workflow.difficulty}
-                        </Badge>
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {workflow.nodeCount} nodes
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="space-y-3">
+              <Label className="font-mono uppercase text-xs">Select Workflow</Label>
+              <select
+                value={selectedWorkflow?.id || ""}
+                onChange={(e) => {
+                  const workflow = workflows.find(w => w.id === e.target.value)
+                  setSelectedWorkflow(workflow || null)
+                }}
+                className="w-full p-3 bg-background border-2 rounded-lg font-mono text-sm focus:border-primary focus:outline-none"
+              >
+                <option value="">-- Choose a workflow --</option>
+                {workflows.map((workflow) => (
+                  <option key={workflow.id} value={workflow.id}>
+                    {workflow.name} ({workflow.difficulty}) - {workflow.nodeCount} nodes
+                  </option>
+                ))}
+              </select>
             </div>
 
             {selectedWorkflow && (
-              <div className="pt-4 border-t">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="font-bold font-mono mb-2">Selected Workflow:</p>
-                    <p className="text-sm font-mono text-primary">{selectedWorkflow.name}</p>
-                    <p className="text-xs font-mono text-muted-foreground mt-1">
-                      {selectedWorkflow.slug}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={handleGenerateTutorial}
-                    disabled={isGenerating}
-                    size="lg"
-                    className="font-mono gap-2"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        Generate Tutorial with AI
-                      </>
-                    )}
-                  </Button>
+              <div className="pt-4 border-t space-y-3">
+                <div>
+                  <p className="font-bold font-mono text-sm mb-1">Selected Workflow:</p>
+                  <p className="text-sm font-mono text-primary">{selectedWorkflow.name}</p>
+                  <p className="text-xs font-mono text-muted-foreground mt-1">
+                    Slug: {selectedWorkflow.slug}
+                  </p>
+                  <p className="text-xs font-mono text-muted-foreground">
+                    Difficulty: {selectedWorkflow.difficulty} | Nodes: {selectedWorkflow.nodeCount}
+                  </p>
                 </div>
+                
+                {selectedWorkflow.credentialsRequired && selectedWorkflow.credentialsRequired.length > 0 && (
+                  <div>
+                    <p className="font-mono text-xs text-muted-foreground uppercase mb-2">
+                      Required Credentials:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedWorkflow.credentialsRequired.map((cred: string, idx: number) => (
+                        <Badge key={idx} variant="outline" className="font-mono text-xs">
+                          {cred}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleGenerateTutorial}
+                  disabled={isGenerating}
+                  size="lg"
+                  className="w-full font-mono gap-2"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating Tutorial...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Generate Tutorial with AI
+                    </>
+                  )}
+                </Button>
               </div>
             )}
           </CardContent>
@@ -342,6 +348,84 @@ export default function TutorialsAdminPage() {
                       />
                     </div>
                   )}
+                  
+                  {/* Credential Links Display */}
+                  {step.credentialLinks && step.credentialLinks.length > 0 && (
+                    <div className="border-2 border-blue-500/20 bg-blue-500/5 rounded-lg p-4 space-y-3">
+                      <Label className="font-mono uppercase text-xs text-blue-600 dark:text-blue-400">
+                        🔐 Credential Setup Links ({step.credentialLinks.length})
+                      </Label>
+                      {step.credentialLinks.map((credLink: any, credIdx: number) => (
+                        <div key={credIdx} className="bg-background border-2 rounded-lg p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="font-mono font-bold text-sm">{credLink.name}</p>
+                            <Badge variant="outline" className="font-mono text-xs">
+                              {credLink.provider}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs font-mono text-muted-foreground">Setup URL:</p>
+                            <a 
+                              href={credLink.setupUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs font-mono text-blue-600 dark:text-blue-400 hover:underline break-all"
+                            >
+                              {credLink.setupUrl}
+                            </a>
+                          </div>
+                          {credLink.requiredPermissions && credLink.requiredPermissions.length > 0 && (
+                            <div className="space-y-1">
+                              <p className="text-xs font-mono text-muted-foreground">Permissions:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {credLink.requiredPermissions.map((perm: string, permIdx: number) => (
+                                  <Badge key={permIdx} variant="secondary" className="font-mono text-xs">
+                                    {perm}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {credLink.setupInstructions && (
+                            <div className="space-y-1">
+                              <p className="text-xs font-mono text-muted-foreground">Setup Instructions:</p>
+                              <div className="text-xs font-mono bg-muted/50 p-2 rounded max-h-32 overflow-y-auto whitespace-pre-wrap">
+                                {credLink.setupInstructions}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* External Resources Display */}
+                  {step.externalResources && step.externalResources.length > 0 && (
+                    <div className="border-2 border-purple-500/20 bg-purple-500/5 rounded-lg p-4 space-y-3">
+                      <Label className="font-mono uppercase text-xs text-purple-600 dark:text-purple-400">
+                        📚 External Resources ({step.externalResources.length})
+                      </Label>
+                      {step.externalResources.map((resource: any, resIdx: number) => (
+                        <div key={resIdx} className="bg-background border-2 rounded-lg p-3 flex items-start justify-between gap-3">
+                          <div className="flex-1 space-y-1">
+                            <p className="font-mono font-bold text-sm">{resource.title}</p>
+                            <a 
+                              href={resource.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline break-all block"
+                            >
+                              {resource.url}
+                            </a>
+                          </div>
+                          <Badge variant="outline" className="font-mono text-xs flex-shrink-0">
+                            {resource.type}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div>
                     <Label className="font-mono uppercase text-xs mb-2 block">
                       Hints ({step.hints?.length || 0})

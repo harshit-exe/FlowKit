@@ -28,7 +28,7 @@ export async function POST(request: Request) {
             )
         }
 
-        // Build AI prompt to generate tutorial
+        // Build AI prompt with credential provider database
         const prompt = `You are an expert n8n workflow tutorial creator. Generate a comprehensive, interactive tutorial for the following n8n workflow.
 
 **Workflow Details:**
@@ -39,59 +39,155 @@ export async function POST(request: Request) {
 - Required Credentials: ${JSON.stringify(credentialsRequired || [], null, 2)}
 - Nodes Used: ${JSON.stringify(nodes || [], null, 2)}
 
-**Instructions:**
-Create a tutorial with 5-10 steps that guides users through implementing this workflow. Each step should be detailed, actionable, and include helpful hints.
+**CREDENTIAL PROVIDER DATABASE:**
 
-**Step Type Guidelines:**
-- **INFO**: Introductory information, welcome messages, explanations
-- **ACTION**: Steps requiring user action (downloading, configuring, connecting accounts)
-- **VALIDATION**: Steps where users test or verify their setup
-- **CHECKPOINT**: Completion milestone or major achievement
+Use this database to generate credentialLinks for steps that require API credentials. Match the workflow's credentialsRequired to these providers:
 
-**Return a JSON object with this exact structure:**
+Google/Gmail/Google Sheets:
+- name: "Google OAuth2"
+- provider: "Google"
+- setupUrl: "https://console.cloud.google.com/apis/credentials"
+- documentationUrl: "https://developers.google.com/identity/protocols/oauth2"
+- requiredPermissions: ["Google Sheets API", "Gmail API", "Google Drive API"] (pick relevant ones)
+
+LinkedIn:
+- name: "LinkedIn API"
+- provider: "LinkedIn"
+- setupUrl: "https://www.linkedin.com/developers/apps"
+- documentationUrl: "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication"
+- requiredPermissions: ["r_liteprofile", "w_member_social", "r_organization_social"]
+
+Facebook/Instagram:
+- name: "Facebook App Credentials"
+- provider: "Facebook"
+- setupUrl: "https://developers.facebook.com/apps"
+- documentationUrl: "https://developers.facebook.com/docs/facebook-login"
+- requiredPermissions: ["pages_messaging", "instagram_manage_messages", "pages_manage_metadata"]
+
+Slack:
+- name: "Slack OAuth"
+- provider: "Slack"
+- setupUrl: "https://api.slack.com/apps"
+- documentationUrl: "https://api.slack.com/authentication"
+- requiredPermissions: ["chat:write", "channels:read", "users:read"]
+
+GitHub:
+- name: "GitHub Personal Access Token"
+- provider: "GitHub"
+- setupUrl: "https://github.com/settings/tokens"
+- documentationUrl: "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
+- requiredPermissions: ["repo", "workflow", "admin:org"]
+
+OpenAI/ChatGPT:
+- name: "OpenAI API Key"
+- provider: "OpenAI"
+- setupUrl: "https://platform.openai.com/api-keys"
+- documentationUrl: "https://platform.openai.com/docs/api-reference/authentication"
+
+Twitter:
+- name: "Twitter API"
+- provider: "Twitter"
+- setupUrl: "https://developer.twitter.com/en/portal/projects-and-apps"
+- documentationUrl: "https://developer.twitter.com/en/docs/authentication"
+- requiredPermissions: ["tweet.read", "tweet.write", "users.read"]
+
+Airtable:
+- name: "Airtable Personal Access Token"
+- provider: "Airtable"
+- setupUrl: "https://airtable.com/create/tokens"
+- documentationUrl: "https://airtable.com/developers/web/api/authentication"
+
+Notion:
+- name: "Notion Integration"
+- provider: "Notion"
+- setupUrl: "https://www.notion.so/my-integrations"
+- documentationUrl: "https://developers.notion.com/docs/authorization"
+
+**EXTERNAL RESOURCES DATABASE:**
+
+Always include these for relevant nodes:
+
+For ANY workflow:
+- title: "n8n [NodeName] Documentation"
+- url: "https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.[nodename]/"
+- type: "documentation"
+
+For OAuth/API setups:
+- title: "[Provider] API Documentation"
+- url: [from provider database above]
+- type: "documentation"
+
+For complex setups:
+- title: "n8n Community Forum"
+- url: "https://community.n8n.io/"
+- type: "community"
+
+**INSTRUCTIONS:**
+
+Create a tutorial with 5-10 steps. For EVERY step that involves setting up credentials:
+
+1. **MUST include credentialLinks array** with provider details from database above
+2. **MUST include setupInstructions** in credentialLinks (5-10 clear steps)
+3. **MUST include externalResources** with n8n docs + provider docs
+
+**JSON Structure (COPY THIS EXACTLY):**
+
 {
   "id": "tutorial-${workflowSlug}",
   "workflowSlug": "${workflowSlug}",
-  "title": "Complete Setup Guide for [workflow name]",
-  "description": "Brief overview of what users will learn (2-3 sentences)",
+  "title": "Complete Setup Guide: [workflow name]",
+  "description": "Brief overview (2-3 sentences)",
   "difficulty": "${difficulty || "BEGINNER"}",
-  "estimatedTime": "X minutes (estimate based on complexity)",
+  "estimatedTime": "X minutes",
   "isAIGenerated": true,
   "steps": [
     {
       "id": "step-1",
       "order": 1,
-      "title": "Clear, action-oriented title",
-      "description": "Detailed description explaining what to do and why (2-4 sentences)",
-      "type": "INFO|ACTION|VALIDATION|CHECKPOINT",
-      "hints": [
-        "Helpful hint 1 (troubleshooting or best practice)",
-        "Helpful hint 2 (alternative approach or common mistake to avoid)",
-        "Helpful hint 3 (optional - advanced tip or resource link)"
+      "title": "Welcome! 👋",
+      "description": "Introduction...",
+      "type": "INFO",
+      "hints": ["hint1", "hint2", "hint3"]
+    },
+    {
+      "id": "step-2",
+      "order": 2,
+      "title": "🔐 Set Up [Provider] Credentials",
+      "description": "Connect your account...",
+      "type": "ACTION",
+      "codeSnippet": "1. Click node\\n2. Select credential\\n3. Follow setup link below",
+      "credentialLinks": [
+        {
+          "name": "Provider Name",
+          "provider": "Provider",
+          "setupUrl": "https://...",
+          "documentationUrl": "https://...",
+          "requiredPermissions": ["perm1", "perm2"],
+          "setupInstructions": "**Title:**\\n\\n1. Step one\\n2. Step two\\n3. Step three"
+        }
       ],
-      "codeSnippet": "Optional: Step-by-step instructions in plain text format\\nUse \\\\n for line breaks\\n1. First step\\n2. Second step"
+      "externalResources": [
+        {
+          "title": "n8n Node Docs",
+          "url": "https://docs.n8n.io/...",
+          "type": "documentation"
+        }
+      ],
+      "hints": ["hint1", "hint2", "hint3"]
     }
   ]
 }
 
-**Guidelines:**
-1. Start with an INFO step as welcome/introduction
-2. Include ACTION steps for each credential setup and configuration
-3. Add a VALIDATION step for testing the workflow
-4. End with a CHECKPOINT step celebrating completion
-5. Each step should have 2-4 helpful hints
-6. Include code snippets for technical steps (authentication, configuration)
-7. Make hints progressively more helpful (general → specific → detailed solution)
-8. Use emojis sparingly in titles for visual appeal
-9. Ensure descriptions are beginner-friendly but technically accurate
-10. Estimate realistic time (1-2 min per simple step, 3-5 min for complex ones)
+**CRITICAL RULES:**
+1. If workflow uses Google/Gmail → MUST include Google OAuth credentialLink
+2. If workflow uses LinkedIn → MUST include LinkedIn API credentialLink
+3. If workflow uses Facebook/Instagram → MUST include Facebook App credentialLink
+4. setupInstructions must be detailed (5-10 numbered steps)
+5. Always include 2-3 externalResources per credential step
+6. Use emojis in step titles (🔐 for credentials, ✉️ for email, etc.)
+7. Match requiredPermissions to what the workflow actually needs
 
-**Example Good Hints:**
-- "Make sure you have admin access to your account before starting"
-- "If you see an error, try refreshing and allowing pop-ups for OAuth"
-- "For testing, use a dedicated test account rather than production data"
-
-**Return ONLY valid JSON, no markdown formatting or explanations.**`
+**Return ONLY valid JSON with credentialLinks and externalResources included. No markdown formatting.**`
 
         console.log("[AI_TUTORIAL_GEN] Generating tutorial for:", workflowSlug)
 
@@ -127,7 +223,7 @@ Create a tutorial with 5-10 steps that guides users through implementing this wo
             )
         }
 
-        // Ensure all steps have required fields
+        // Ensure all steps have required fields (preserve credentialLinks and externalResources if present)
         tutorial.steps = tutorial.steps.map((step: any, index: number) => ({
             id: step.id || `step-${index + 1}`,
             order: step.order || index + 1,
@@ -136,6 +232,8 @@ Create a tutorial with 5-10 steps that guides users through implementing this wo
             type: step.type || "INFO",
             hints: step.hints || [],
             codeSnippet: step.codeSnippet || undefined,
+            credentialLinks: step.credentialLinks || undefined, // NEW: Preserve AI-generated credential links
+            externalResources: step.externalResources || undefined, // NEW: Preserve AI-generated resources
         }))
 
         console.log("[AI_TUTORIAL_GEN] Tutorial generated successfully with", tutorial.steps.length, "steps")

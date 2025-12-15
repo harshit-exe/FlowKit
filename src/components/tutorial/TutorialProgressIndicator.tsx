@@ -18,8 +18,10 @@ export default function TutorialProgressIndicator({
   progress,
   onStepClick,
 }: TutorialProgressIndicatorProps) {
-  const progressPercentage = Math.round(
-    (progress.completedSteps.length / totalSteps) * 100
+  // Cap at 100% to prevent display issues
+  const progressPercentage = Math.min(
+    Math.round((progress.completedSteps.length / totalSteps) * 100),
+    100
   )
 
   return (

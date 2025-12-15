@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import * as fs from "fs"
-import * as path from "path"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(request: Request) {
     try {
@@ -24,32 +23,103 @@ export async function POST(request: Request) {
 
         if (!tutorial || !tutorial.workflowSlug) {
             return NextResponse.json(
-                { error: "Tutorial data and workflow slug are required" },
+                { error: "Tutorial data and workflowSlug are required" },
                 { status: 400 }
             )
         }
 
-        // Construct file path
-        const tutorialsDir = path.join(process.cwd(), "public", "tutorials")
-        const filePath = path.join(tutorialsDir, `${tutorial.workflowSlug}.json`)
+        console.log("[TUTORIAL_SAVE] Saving tutorial for workflow:", tutorial.workflowSlug)
 
-        // Ensure tutorials directory exists
-        if (!fs.existsSync(tutorialsDir)) {
-            fs.mkdirSync(tutorialsDir, { recursive: true })
-        }
+        // Upsert tutorial to database
+        const savedTutorial = await prisma.tutorial.upsert({
+            where: {
+                workflowSlug: tutorial.workflowSlug
+            },
+            update: {
+                title: tutorial.title,
+                description: tutorial.description,
+                difficulty: tutorial.difficulty,
+                estimatedTime: tutorial.estimatedTime,
+                isAIGenerated: tutorial.isAIGenerated || false,
+                isPublished: true,
+                // Delete existing steps and recreate (simpler than complex update logic)
+                steps: {
+                    deleteMany: {},
+                    create: tutorial.steps.map((step: any) => ({
+                        order: step.order,
+                        title: step.title,
+                        description: step.description,
+                        type: step.type,
+                        codeSnippet: step.codeSnippet,
+                        imageUrl: step.imageUrl,
+                        videoUrl: step.videoUrl,
+                        hints: step.hints || [],
+                        credentialLinks: step.credentialLinks ? {
+                            create: step.credentialLinks.map((cred: any) => ({
+                                name: cred.name,
+                                provider: cred.provider,
+                                setupUrl: cred.setupUrl,
+                                documentationUrl: cred.documentationUrl,
+                                requiredPermissions: cred.requiredPermissions || [],
+                                setupInstructions: cred.setupInstructions
+                            }))
+                        } : undefined,
+                        externalResources: step.externalResources ? {
+                            create: step.externalResources.map((resource: any) => ({
+                                title: resource.title,
+                                url: resource.url,
+                                type: resource.type
+                            }))
+                        } : undefined
+                    }))
+                }
+            },
+            create: {
+                workflowSlug: tutorial.workflowSlug,
+                title: tutorial.title,
+                description: tutorial.description,
+                difficulty: tutorial.difficulty,
+                estimatedTime: tutorial.estimatedTime,
+                isAIGenerated: tutorial.isAIGenerated || false,
+                isPublished: true,
+                steps: {
+                    create: tutorial.steps.map((step: any) => ({
+                        order: step.order,
+                        title: step.title,
+                        description: step.description,
+                        type: step.type,
+                        codeSnippet: step.codeSnippet,
+                        imageUrl: step.imageUrl,
+                        videoUrl: step.videoUrl,
+                        hints: step.hints || [],
+                        credentialLinks: step.credentialLinks ? {
+                            create: step.credentialLinks.map((cred: any) => ({
+                                name: cred.name,
+                                provider: cred.provider,
+                                setupUrl: cred.setupUrl,
+                                documentationUrl: cred.documentationUrl,
+                                requiredPermissions: cred.requiredPermissions || [],
+                                setupInstructions: cred.setupInstructions
+                            }))
+                        } : undefined,
+                        externalResources: step.externalResources ? {
+                            create: step.externalResources.map((resource: any) => ({
+                                title: resource.title,
+                                url: resource.url,
+                                type: resource.type
+                            }))
+                        } : undefined
+                    }))
+                }
+            }
+        })
 
-        // Check if file already exists
-        const fileExists = fs.existsSync(filePath)
-
-        // Write tutorial to file
-        fs.writeFileSync(filePath, JSON.stringify(tutorial, null, 2), "utf-8")
-
-        console.log(`[TUTORIAL_SAVE] Saved tutorial to: ${filePath}`)
+        console.log("[TUTORIAL_SAVE] Tutorial saved to database:", savedTutorial.id)
 
         return NextResponse.json({
             success: true,
-            message: fileExists ? "Tutorial updated successfully" : "Tutorial created successfully",
-            filePath: `/tutorials/${tutorial.workflowSlug}.json`,
+            message: "Tutorial saved to database successfully",
+            tutorialId: savedTutorial.id
         })
     } catch (error) {
         console.error("[TUTORIAL_SAVE] Error:", error)
@@ -85,21 +155,14 @@ export async function DELETE(request: Request) {
             )
         }
 
-        // Construct file path
-        const filePath = path.join(process.cwd(), "public", "tutorials", `${slug}.json`)
+        // Delete tutorial from database (cascade will delete steps, credentials, resources)
+        const deletedTutorial = await prisma.tutorial.delete({
+            where: {
+                workflowSlug: slug
+            }
+        })
 
-        // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            return NextResponse.json(
-                { error: "Tutorial not found" },
-                { status: 404 }
-            )
-        }
-
-        // Delete file
-        fs.unlinkSync(filePath)
-
-        console.log(`[TUTORIAL_DELETE] Deleted tutorial: ${filePath}`)
+        console.log(`[TUTORIAL_DELETE] Deleted tutorial: ${deletedTutorial.id}`)
 
         return NextResponse.json({
             success: true,
@@ -107,6 +170,15 @@ export async function DELETE(request: Request) {
         })
     } catch (error) {
         console.error("[TUTORIAL_DELETE] Error:", error)
+
+        // Handle not found case
+        if (error instanceof Error && error.message.includes("Record to delete does not exist")) {
+            return NextResponse.json(
+                { error: "Tutorial not found" },
+                { status: 404 }
+            )
+        }
+
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "Failed to delete tutorial" },
             { status: 500 }

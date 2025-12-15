@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
 import {
   getTutorialProgress,
   initializeTutorialProgress,
@@ -48,6 +49,39 @@ export default function InteractiveTutorial({
     }
   }, [isOpen, tutorial.id])
 
+  // Navigation handlers (defined before use)
+  const handleNext = useCallback(() => {
+    if (isLastStep) return
+
+    // Check if current step is completed before allowing navigation
+    const currentStepCompleted = progress?.completedSteps.includes(currentStep?.id || "")
+    
+    if (!currentStepCompleted && currentStep?.type !== "INFO") {
+      // Show toast notification
+      toast.error("Please complete this step before moving forward", {
+        description: "Mark the current step as complete to continue"
+      })
+      return
+    }
+
+    setCurrentStepIndex((prev) => Math.min(prev + 1, tutorial.steps.length - 1))
+    updateCurrentStep(tutorial.id, currentStepIndex + 1)
+  }, [currentStepIndex, tutorial, isLastStep, currentStep, progress])
+
+  const handlePrevious = useCallback(() => {
+    if (currentStepIndex === 0) return
+    setCurrentStepIndex((prev) => Math.max(prev - 1, 0))
+    updateCurrentStep(tutorial.id, currentStepIndex - 1)
+  }, [currentStepIndex, tutorial])
+
+  const handleClose = useCallback(() => {
+    // Save current position before closing
+    if (progress) {
+      updateCurrentStep(tutorial.id, currentStepIndex)
+    }
+    onClose()
+  }, [progress, tutorial.id, currentStepIndex, onClose])
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -64,7 +98,7 @@ export default function InteractiveTutorial({
 
     window.addEventListener("keydown", handleKeyPress)
     return () => window.removeEventListener("keydown", handleKeyPress)
-  }, [isOpen, currentStepIndex])
+  }, [isOpen, isLastStep, isFirstStep, handleNext, handlePrevious, handleClose])
 
   const handleStepComplete = useCallback(() => {
     if (!currentStep || !progress) return
@@ -72,6 +106,7 @@ export default function InteractiveTutorial({
     const updatedProgress = completeStep(
       tutorial.id,
       currentStep.id,
+      currentStep.order, // Pass step order for sequential validation
       tutorial.steps.length
     )
 
@@ -84,35 +119,11 @@ export default function InteractiveTutorial({
       // Auto-advance to next step
       setTimeout(() => handleNext(), 500)
     }
-  }, [currentStep, progress, tutorial, isLastStep])
-
-  const handleNext = () => {
-    if (isLastStep) return
-
-    const nextIndex = currentStepIndex + 1
-    setCurrentStepIndex(nextIndex)
-    updateCurrentStep(tutorial.id, nextIndex)
-  }
-
-  const handlePrevious = () => {
-    if (isFirstStep) return
-
-    const prevIndex = currentStepIndex - 1
-    setCurrentStepIndex(prevIndex)
-    updateCurrentStep(tutorial.id, prevIndex)
-  }
+  }, [currentStep, progress, tutorial, isLastStep, handleNext])
 
   const handleStepClick = (stepIndex: number) => {
     setCurrentStepIndex(stepIndex)
     updateCurrentStep(tutorial.id, stepIndex)
-  }
-
-  const handleClose = () => {
-    // Save current position before closing
-    if (progress) {
-      updateCurrentStep(tutorial.id, currentStepIndex)
-    }
-    onClose()
   }
 
   const isStepCompleted = progress?.completedSteps.includes(currentStep?.id) || false
@@ -171,6 +182,7 @@ export default function InteractiveTutorial({
             <TutorialStepView
               step={currentStep}
               isCompleted={isStepCompleted}
+              progress={progress}
               onMarkComplete={handleStepComplete}
             />
           )}
