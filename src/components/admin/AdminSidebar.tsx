@@ -19,7 +19,8 @@ import {
   Inbox,
   ChevronLeft,
   ChevronRight,
-  Globe
+  Globe,
+  GraduationCap
 } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +41,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Workflows", href: "/admin/workflows", icon: Workflow },
     { name: "Bundles", href: "/admin/bundles", icon: Package },
+    { name: "Tutorials", href: "/admin/tutorials", icon: GraduationCap },
     { name: "Categories", href: "/admin/categories", icon: FolderOpen },
     { name: "Nodes", href: "/admin/nodes", icon: Box },
     { name: "Emails", href: "/admin/emails", icon: Mail },
