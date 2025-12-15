@@ -1,0 +1,124 @@
+{
+  "id": "tutorial-facebook-instagram-chatbot",
+  "workflowSlug": "facebook-instagram-chatbot-automation",
+  "title": "Complete Setup Guide: Automated Emails from Google Sheets",
+  "description": "Learn how to automatically send emails whenever a new row is added to your Google Sheet. Perfect for notifications, alerts, and automated responses.",
+  "difficulty": "BEGINNER",
+  "estimatedTime": "10 minutes",
+  "isAIGenerated": false,
+  "steps": [
+    {
+      "id": "step-1",
+      "order": 1,
+      "title": "Welcome to Your First n8n Workflow! 👋",
+      "description": "This tutorial will guide you through setting up automated emails triggered by new Google Sheets rows. By the end, you'll have a working automation that sends an email every time someone adds a row to your spreadsheet.",
+      "type": "INFO",
+      "hints": [
+        "This workflow is perfect for form responses, lead tracking, or customer notifications",
+        "You'll need a Google account and an email service (Gmail works great!)",
+        "The whole setup takes about 10 minutes"
+      ]
+    },
+    {
+      "id": "step-2",
+      "order": 2,
+      "title": "Download and Import the Workflow",
+      "description": "First, let's get this workflow into your n8n instance. Click the 'Download JSON' button on the workflow page, then in your n8n editor, click the menu (three dots) and select 'Import from File'.",
+      "type": "ACTION",
+      "codeSnippet": "1. Click 'Download JSON' on the workflow page\n2. Open your n8n instance\n3. Click the menu icon (⋮) in the top right\n4. Select 'Import from File'\n5. Choose the downloaded JSON file",
+      "hints": [
+        "Make sure you're logged into your n8n instance first",
+        "If you don't have n8n installed, visit n8n.io to get started",
+        "The workflow will appear in your canvas after import"
+      ]
+    },
+    {
+      "id": "step-3",
+      "order": 3,
+      "title": "Connect Your Google Sheets Account 🔗",
+      "description": "Now let's connect your Google account so n8n can monitor your spreadsheet for new rows. This is a one-time setup - you'll be able to reuse this credential for all Google Sheets workflows!",
+      "type": "ACTION",
+      "codeSnippet": "1. Click on the 'Google Sheets' node in your workflow\n2. Click on 'Credential to connect with'\n3. Click 'Create New'\n4. Select 'Google Sheets OAuth2 API'\n5. Click 'Sign in with Google'\n6. Choose your Google account\n7. Click 'Allow' to grant n8n access\n8. Click 'Save' in n8n",
+      "hints": [
+        "You'll need to allow n8n to view and manage your spreadsheets",
+        "Make sure pop-ups are enabled in your browser for the OAuth flow",
+        "If you see an error, try using an incognito/private window",
+        "The credential is saved securely and can be reused in other workflows"
+      ],
+      "validation": {
+        "type": "credential",
+        "credentialType": "googleSheetsOAuth2Api"
+      }
+    },
+    {
+      "id": "step-4",
+      "order": 4,
+      "title": "Select Your Spreadsheet 📊",
+      "description": "Choose which Google Sheet you want to monitor. The workflow will trigger every time a new row is added to this sheet.",
+      "type": "ACTION",
+      "codeSnippet": "1. In the Google Sheets node parameters:\n   - Resource: Select 'Sheet'\n   - Operation: Select 'Get Rows'\n2. Click 'Spreadsheet' dropdown\n3. Select your spreadsheet from the list\n4. Choose the specific sheet tab (e.g., 'Sheet1')\n5. Set 'Range' to 'A:Z' to capture all columns",
+      "hints": [
+        "Don't have a sheet? Create a test one with columns like: Name, Email, Message",
+        "Make sure the sheet has at least one row with headers",
+        "You can always change which sheet you're monitoring later",
+        "The trigger will only fire for NEW rows added after activation"
+      ]
+    },
+    {
+      "id": "step-5",
+      "order": 5,
+      "title": "Configure Email Settings ✉️",
+      "description": "Set up your email service to send notifications. You can use Gmail, Outlook, SendGrid, or any SMTP server. For this tutorial, we'll use Gmail with an App Password for security.",
+      "type": "ACTION",
+      "codeSnippet": "For Gmail (Recommended):\n1. Enable 2-Factor Authentication on your Google account\n2. Go to Google Account > Security > 2-Step Verification\n3. Scroll down to 'App passwords'\n4. Generate a new app password for 'Mail'\n5. Copy the 16-character password\n\nIn n8n:\n1. Click the 'Send Email' node\n2. Select 'Gmail' as the email service\n3. Create new credential\n4. Enter your Gmail address\n5. Paste the app password (NOT your regular password)\n6. Click 'Save'",
+      "hints": [
+        "NEVER use your regular Gmail password - always use an App Password",
+        "For other services, check their SMTP settings documentation",
+        "SendGrid and Mailgun offer generous free tiers for higher volume",
+        "Test with a free email service before using production credentials"
+      ]
+    },
+    {
+      "id": "step-6",
+      "order": 6,
+      "title": "Customize Your Email Template 📝",
+      "description": "Now let's personalize the email that gets sent. You can use data from the Google Sheets row to create dynamic, personalized messages.",
+      "type": "ACTION",
+      "codeSnippet": "In the Send Email node:\n\n1. To Email: {{ $json.Email }}\n2. Subject: New submission from {{ $json.Name }}\n3. Text: \n   Hello {{ $json.Name }},\n   \n   Thank you for your submission!\n   Message: {{ $json.Message }}\n   \n   Best regards,\n   Your Automated Assistant\n\nNote: Replace 'Email', 'Name', 'Message' with your actual column names",
+      "hints": [
+        "The {{ }} syntax pulls data from the previous node",
+        "Make sure your column names match what you put in the template",
+        "You can also set a fixed 'To' email if you want all notifications to go to you",
+        "Test with your own email first before sending to others"
+      ]
+    },
+    {
+      "id": "step-7",
+      "order": 7,
+      "title": "Activate and Test Your Workflow 🚀",
+      "description": "Time to bring your automation to life! Let's activate the workflow and test it by adding a new row to your Google Sheet.",
+      "type": "VALIDATION",
+      "codeSnippet": "1. Click the 'Active' toggle in the top right (it should turn green)\n2. Open your Google Sheet\n3. Add a new row with test data:\n   - Name: Test User\n   - Email: your-email@example.com\n   - Message: Testing my first n8n workflow!\n4. Wait 30-60 seconds for the trigger to run\n5. Check your email inbox (and spam folder)\n6. Check n8n's 'Executions' tab to see the workflow run",
+      "hints": [
+        "Polling triggers check every 60 seconds by default",
+        "If using Gmail, check your Spam folder first",
+        "Look at the execution log in n8n to debug any errors",
+        "Green checkmarks mean success! Red X's mean something needs fixing",
+        "You can manually test individual nodes by clicking 'Test step'"
+      ]
+    },
+    {
+      "id": "step-8",
+      "order": 8,
+      "title": "Tutorial Complete! 🎉",
+      "description": "Congratulations! You've successfully set up your first automated workflow. Every time a new row is added to your Google Sheet, an email will be sent automatically. This is just the beginning - you can now customize this workflow or explore 150+ other templates!",
+      "type": "CHECKPOINT",
+      "hints": [
+        "Try adding more nodes to send Slack messages, update a database, or create calendar events",
+        "Explore other workflows in the FlowKit library",
+        "Join the n8n community on Discord to share your creations",
+        "Remember to deactivate test workflows to avoid unexpected charges"
+      ]
+    }
+  ]
+}

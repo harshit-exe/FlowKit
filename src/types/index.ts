@@ -1,5 +1,9 @@
 import { Workflow, Category, Tag, Difficulty, Bundle } from "@prisma/client"
 
+// Re-export Difficulty for use in other files
+export type { Difficulty }
+
+
 // Workflow with relations
 export type WorkflowWithRelations = Workflow & {
   categories: {
@@ -78,4 +82,41 @@ export interface BundleFormData {
   estimatedTime?: string
   workflowIds: string[]
   published: boolean
+}
+
+// Tutorial types for file-based system
+export type TutorialStepType = "INFO" | "ACTION" | "VALIDATION" | "CHECKPOINT"
+
+export interface TutorialStep {
+  id: string
+  order: number
+  title: string
+  description: string
+  type: TutorialStepType
+  hints?: string[]
+  imageUrl?: string
+  videoUrl?: string
+  codeSnippet?: string
+  validation?: Record<string, any>
+}
+
+export interface Tutorial {
+  id: string
+  workflowSlug: string
+  title: string
+  description: string
+  difficulty: Difficulty
+  estimatedTime: string
+  isAIGenerated: boolean
+  steps: TutorialStep[]
+}
+
+export interface TutorialProgress {
+  tutorialId: string
+  currentStep: number
+  completedSteps: string[] // Step IDs
+  isCompleted: boolean
+  startedAt: string // ISO date
+  lastAccessedAt: string // ISO date
+  completedAt?: string // ISO date
 }

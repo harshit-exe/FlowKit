@@ -5,7 +5,7 @@ import { getCachedWorkflow } from "@/lib/workflow-cache"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, DownloadCloud, Youtube, FileText, User, ThumbsUp, ThumbsDown } from "lucide-react"
+import { Eye, DownloadCloud, Youtube, FileText, User, ThumbsUp, ThumbsDown, GraduationCap } from "lucide-react"
 import { Metadata } from "next"
 import WorkflowGrid from "@/components/workflow/WorkflowGrid"
 import WorkflowActions from "@/components/workflow/WorkflowActions"
@@ -14,6 +14,8 @@ import WorkflowJsonViewer from "@/components/workflow/WorkflowJsonViewer"
 import CommentsSection from "@/components/workflow/CommentsSection"
 import VoteComponent from "@/components/workflow/VoteComponent"
 import SaveButton from "@/components/workflow/SaveButton"
+
+import TutorialSection from "@/components/tutorial/TutorialSection"
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const workflow = await getCachedWorkflow(params.slug)
@@ -475,6 +477,19 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                     </li>
                   ))}
                 </ol>
+              </CardContent>
+            </Card>
+
+            {/* Interactive Tutorial */}
+            <Card className="border-2">
+              <CardHeader>
+                <CardTitle className="font-mono uppercase tracking-wider flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  INTERACTIVE TUTORIAL
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TutorialSection workflowSlug={workflow.slug} />
               </CardContent>
             </Card>
 
