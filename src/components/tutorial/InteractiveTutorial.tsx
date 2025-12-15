@@ -181,7 +181,7 @@ export default function InteractiveTutorial({
         </DialogHeader>
 
         {/* Step Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-220px)]">
+        <div className="p-6 pb-8 overflow-y-auto max-h-[calc(90vh-240px)]">
           {currentStep && (
             <TutorialStepView
               step={currentStep}
