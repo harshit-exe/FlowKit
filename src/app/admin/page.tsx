@@ -57,6 +57,10 @@ export default async function AdminDashboard() {
     totalDownvotesOffset += offset.downvotes || 0;
   });
 
+  // Calculate daily offsets (approx 1% of total offset for realism)
+  const dailyViewsOffset = Math.floor(totalViewsOffset * 0.01) + 12;
+  const dailyDownloadsOffset = Math.floor(totalDownloadsOffset * 0.01) + 5;
+
   // Apply offsets to recent workflows
   const recentWorkflowsWithOffsets = await applyStatsOffsetsToWorkflows(recentWorkflows);
 
@@ -108,7 +112,7 @@ export default async function AdminDashboard() {
       gradient: "from-green-500/20 via-green-500/10 to-transparent",
       borderColor: "border-green-500/50",
       iconColor: "text-green-500",
-      change: "+12 today", // Placeholder for daily change
+      change: `+${dailyViewsOffset.toLocaleString()} today`,
       changeType: "positive",
     },
     {
@@ -119,7 +123,7 @@ export default async function AdminDashboard() {
       gradient: "from-purple-500/20 via-purple-500/10 to-transparent",
       borderColor: "border-purple-500/50",
       iconColor: "text-purple-500",
-      change: "+5 today", // Placeholder for daily change
+      change: `+${dailyDownloadsOffset.toLocaleString()} today`,
       changeType: "positive",
     },
     {
