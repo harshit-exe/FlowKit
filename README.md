@@ -18,7 +18,18 @@ Built with ❤️ in India 🇮🇳
 
 </div>
 
+## ⭐ Star History
+
+<a href="https://www.star-history.com/#harshit-exe/FlowKit&type=timeline&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&legend=bottom-right" />
+ </picture>
+</a>
+
 ---
+
 
 ## ✨ Features
 
@@ -421,17 +432,6 @@ FlowKit wouldn't be possible without these amazing projects:
 - 🐛 **Issues**: [GitHub Issues](https://github.com/harshit-exe/FlowKit/issues)
 - 👤 **Author**: [@harshit-exe](https://github.com/harshit-exe)
 
-## ⭐ Star History
-
-<a href="https://www.star-history.com/#harshit-exe/FlowKit&type=timeline&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&theme=dark&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=harshit-exe/FlowKit&type=timeline&legend=bottom-right" />
- </picture>
-</a>
-
----
 
 <div align="center">
 
