@@ -153,58 +153,33 @@ export function BundleForm({ bundle }: BundleFormProps) {
       // Get selected workflows data
       const selectedWorkflows = workflows.filter((w) => formData.workflowIds.includes(w.id))
 
-      // Auto-generate name if empty
-      const autoName = formData.name ||
-        `${selectedWorkflows.length}-Workflow ${selectedWorkflows[0]?.categories?.[0]?.category?.name || 'Automation'} Bundle`
+      const response = await fetch("/api/bundles/autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workflows: selectedWorkflows }),
+      })
 
-      // Auto-generate description based on workflows
-      const workflowDescriptions = selectedWorkflows
-        .map((w) => `<strong>${w.name}</strong>: ${w.description.substring(0, 100)}`)
-        .join("<br><br>")
-      const autoDescription = formData.description ||
-        `This comprehensive bundle includes ${selectedWorkflows.length} powerful workflows:<br><br>${workflowDescriptions.substring(0, 500)}${workflowDescriptions.length > 500 ? '...' : ''}`
+      if (!response.ok) {
+        throw new Error("Failed to generate bundle details")
+      }
 
-      // Auto-generate objective
-      const workflowNames = selectedWorkflows.map((w) => w.name).join(", ")
-      const autoObjective = formData.objective ||
-        `Streamline your automation with ${selectedWorkflows.length} essential workflows designed to work together seamlessly`
-
-      // Auto-generate benefits
-      const autoBenefits = formData.benefits.length === 0 ? [
-        `${selectedWorkflows.length} pre-configured workflows ready to use`,
-        "Save hours of manual setup and configuration",
-        "Proven automation patterns from the community",
-        "Complete end-to-end solution",
-        "Easy integration with your existing tools",
-      ] : formData.benefits
-
-      // Auto-generate target audience based on categories
-      const categories = selectedWorkflows
-        .flatMap((w) => w.categories?.map((c: any) => c.category.name) || [])
-        .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
-      const autoAudience = formData.targetAudience || (
-        categories.length > 0
-          ? `Perfect for ${categories.slice(0, 2).join(" & ")} professionals`
-          : "Automation enthusiasts and professionals"
-      )
-
-      // Auto-generate icon based on first workflow
-      const autoIcon = formData.icon || selectedWorkflows[0]?.icon || "📦"
+      const { data } = await response.json()
 
       setFormData((prev) => ({
         ...prev,
-        name: autoName,
-        description: autoDescription,
-        objective: autoObjective,
-        benefits: autoBenefits,
-        targetAudience: autoAudience,
-        estimatedTime: prev.estimatedTime || "30 minutes",
-        icon: autoIcon,
+        name: data.name || prev.name,
+        description: data.description || prev.description,
+        objective: data.objective || prev.objective,
+        benefits: data.benefits || prev.benefits,
+        targetAudience: data.targetAudience || prev.targetAudience,
+        estimatedTime: data.estimatedTime || prev.estimatedTime,
+        icon: data.icon || prev.icon,
       }))
 
-      toast.success("✨ Auto-filled bundle details! Review and adjust as needed.")
+      toast.success("✨ AI Auto-filled bundle details! Review and adjust as needed.")
     } catch (error) {
-      toast.error("Failed to auto-fill")
+      console.error("Auto-fill error:", error)
+      toast.error("Failed to auto-fill details. Please try again.")
     } finally {
       setIsAutoFilling(false)
     }
