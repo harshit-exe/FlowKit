@@ -5,7 +5,7 @@ import { Workflow as WorkflowIcon, Eye, Download, FolderOpen, Package, Clock, Us
 
 export default async function AdminDashboard() {
   // Fetch statistics
-  const [totalWorkflows, totalDownloads, totalViews, totalCategories, totalBundles, pendingUsers, totalUsers] = await Promise.all([
+  const [totalWorkflows, totalDownloads, totalViews, totalCategories, totalBundles, pendingUsers, waitlistCount, totalUpvotes, totalDownvotes, registeredUsers] = await Promise.all([
     prisma.workflow.count(),
     prisma.workflow.aggregate({
       _sum: {
@@ -23,6 +23,9 @@ export default async function AdminDashboard() {
       where: { hasAccessed: false },
     }),
     prisma.waitlist.count(),
+    prisma.vote.count({ where: { type: "UPVOTE" } }),
+    prisma.vote.count({ where: { type: "DOWNVOTE" } }),
+    prisma.user.count(),
   ])
 
   // Fetch recent workflows
@@ -44,10 +47,14 @@ export default async function AdminDashboard() {
   const offsets = await getWorkflowStatsOffsets();
   let totalViewsOffset = 0;
   let totalDownloadsOffset = 0;
+  let totalUpvotesOffset = 0;
+  let totalDownvotesOffset = 0;
 
   Object.values(offsets).forEach(offset => {
     totalViewsOffset += offset.views || 0;
     totalDownloadsOffset += offset.downloads || 0;
+    totalUpvotesOffset += offset.upvotes || 0;
+    totalDownvotesOffset += offset.downvotes || 0;
   });
 
   // Apply offsets to recent workflows
@@ -56,21 +63,33 @@ export default async function AdminDashboard() {
   const stats = [
     {
       name: "Total Users",
-      value: totalUsers,
+      value: waitlistCount + registeredUsers,
       icon: Users,
-      description: "Total waitlist signups",
+      description: "Total Waitlist + Registered Users",
       gradient: "from-blue-500/20 via-blue-500/10 to-transparent",
       borderColor: "border-blue-500/50",
       iconColor: "text-blue-500",
     },
     {
-      name: "Pending Access",
-      value: pendingUsers,
-      icon: Clock,
-      description: "Users waiting for access",
-      gradient: "from-yellow-500/20 via-yellow-500/10 to-transparent",
-      borderColor: "border-yellow-500/50",
-      iconColor: "text-yellow-500",
+      name: "Engagement",
+      value: "Votes", // Placeholder, will use custom render
+      customValue: (
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 text-green-500">
+            <ArrowUpRight className="h-4 w-4" />
+            <span className="text-2xl font-bold">{(totalUpvotes + totalUpvotesOffset).toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1 text-red-500">
+            <ArrowUpRight className="h-4 w-4 rotate-180" />
+            <span className="text-2xl font-bold">{(totalDownvotes + totalDownvotesOffset).toLocaleString()}</span>
+          </div>
+        </div>
+      ),
+      icon: Activity,
+      description: "Total Upvotes & Downvotes",
+      gradient: "from-orange-500/20 via-orange-500/10 to-transparent",
+      borderColor: "border-orange-500/50",
+      iconColor: "text-orange-500",
     },
     {
       name: "Total Workflows",
@@ -89,6 +108,8 @@ export default async function AdminDashboard() {
       gradient: "from-green-500/20 via-green-500/10 to-transparent",
       borderColor: "border-green-500/50",
       iconColor: "text-green-500",
+      change: "+12 today", // Placeholder for daily change
+      changeType: "positive",
     },
     {
       name: "Total Downloads",
@@ -98,6 +119,8 @@ export default async function AdminDashboard() {
       gradient: "from-purple-500/20 via-purple-500/10 to-transparent",
       borderColor: "border-purple-500/50",
       iconColor: "text-purple-500",
+      change: "+5 today", // Placeholder for daily change
+      changeType: "positive",
     },
     {
       name: "Bundles",
@@ -140,12 +163,21 @@ export default async function AdminDashboard() {
               </CardHeader>
               <CardContent className="relative z-10">
                 <div className="flex items-baseline gap-2">
-                  <div className="text-4xl font-bold font-mono tracking-tighter">
-                    {stat.value.toLocaleString()}
-                  </div>
+                  {(stat as any).customValue ? (
+                    (stat as any).customValue
+                  ) : (
+                    <div className="text-4xl font-bold font-mono tracking-tighter">
+                      {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                    </div>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground font-mono mt-2 flex items-center gap-1">
                   {stat.description}
+                  {(stat as any).change && (
+                    <span className={`ml-2 font-bold ${(stat as any).changeType === 'positive' ? 'text-green-500' : 'text-red-500'}`}>
+                      {(stat as any).change}
+                    </span>
+                  )}
                 </p>
               </CardContent>
             </Card>

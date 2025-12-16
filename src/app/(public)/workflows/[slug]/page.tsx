@@ -523,15 +523,36 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                     </div>
                     <div className="flex flex-col">
                       {workflow.authorUrl ? (
-                        <a
-                          href={workflow.authorUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-bold font-mono hover:text-primary transition-colors flex items-center gap-1 group"
-                        >
-                          {workflow.author}
-                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">↗</span>
-                        </a>
+                        (() => {
+                          const rawUrl = workflow.authorUrl?.trim() || "";
+                          const isMailto = rawUrl.toLowerCase().startsWith("mailto:");
+                          const isEmailLike = rawUrl.includes("@") && !rawUrl.includes("://");
+                          
+                          if (isMailto || isEmailLike) {
+                            const href = isMailto ? rawUrl : `mailto:${rawUrl}`;
+                            return (
+                              <a
+                                href={href}
+                                className="font-bold font-mono hover:text-primary transition-colors flex items-center gap-1 group"
+                              >
+                                {workflow.author}
+                                <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">✉️</span>
+                              </a>
+                            );
+                          }
+
+                          return (
+                            <a
+                              href={rawUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-bold font-mono hover:text-primary transition-colors flex items-center gap-1 group"
+                            >
+                              {workflow.author}
+                              <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">↗</span>
+                            </a>
+                          );
+                        })()
                       ) : (
                         <span className="font-bold font-mono">{workflow.author}</span>
                       )}
