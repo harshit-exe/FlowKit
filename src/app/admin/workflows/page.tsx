@@ -8,7 +8,7 @@ import { WorkflowsList } from "@/components/admin/WorkflowsList"
 import { Pagination } from "@/components/ui/pagination"
 
 
-const ITEMS_PER_PAGE = 20
+const ITEMS_PER_PAGE = 12
 
 export default async function AdminWorkflowsPage({
   searchParams,
