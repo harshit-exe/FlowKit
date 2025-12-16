@@ -541,9 +541,19 @@ export default async function WorkflowDetailPage({ params }: { params: { slug: s
                             );
                           }
 
+                          // Add UTM parameters for external links
+                          let externalUrl = rawUrl;
+                          try {
+                            const urlObj = new URL(rawUrl);
+                            urlObj.searchParams.set("utm_source", "flowkit");
+                            externalUrl = urlObj.toString();
+                          } catch (e) {
+                            // Invalid URL, keep as is
+                          }
+
                           return (
                             <a
-                              href={rawUrl}
+                              href={externalUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="font-bold font-mono hover:text-primary transition-colors flex items-center gap-1 group"
