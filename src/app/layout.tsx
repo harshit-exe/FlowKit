@@ -45,6 +45,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         {/* Structured Data - Website */}
+        <meta name="breachme-verify" content="breachme-verify=3de6d456bb2fadd894b77c0b2ab23a3e" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
