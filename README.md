@@ -58,6 +58,14 @@ Built with ❤️ in India 🇮🇳
 </tr>
 </table>
 
+## 📦 Community Workflow Files
+
+Tested workflow JSON contributions are available in [`workflows/`](workflows/).
+They can be imported directly into n8n without running the FlowKit application.
+
+- [Resilient REST API Sync](workflows/development/resilient-rest-api-sync.json)
+  — bounded retries, record validation, and sanitized failure handling.
+
 ## 🚀 Quick Start
 
 Get FlowKit running locally in under 5 minutes!
